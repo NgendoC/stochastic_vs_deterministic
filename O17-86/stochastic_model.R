@@ -3,12 +3,6 @@
 
 library("adaptivetau") # package for stochastic processes
 
-## Set up initial values in each compartment
-init.values = c(
-  S = 999,
-  I = 1
-)
-
 ## Set up transitions in and out of each compartment
 SI_transitions <- list(
   c(S = -1, I = +1), # infection
@@ -17,9 +11,9 @@ SI_transitions <- list(
 
 SI_rateFunc <- function(x, parameters, t) {
   
-  # define model parameters
-  beta <- 0.5 
-  gamma <- 0.2
+  # define model parameters in term of the natural parameters
+  beta <- parameters["R0"]/parameters["D_inf"] 
+  gamma <- 1/parameters["D_inf"]
   
   # create temporary variables for states to simplify the writing of the rates below
   S <- x["S"] 
@@ -33,16 +27,34 @@ SI_rateFunc <- function(x, parameters, t) {
   )) 
 }
 
-parameters <- c(beta = 0.5, gamma = 0.2)
-run <- ssa.adaptivetau(init.values = c(S = 999, I = 1), transitions = SI_transitions, 
-                       rateFunc = SI_rateFunc, params = parameters, tf = 100)
+#############################
+### THINGS YOU CAN CHANGE ###
+#############################
+
+## Initial values in each compartment
+init.values = c(
+  S = 10e3-1,
+  I = 1
+)
+
+## R0 = basic reproduction number, D_inf = duration of infection
+parameters <- c(
+  R0 = 5, 
+  D_inf = 5
+)
+
+## Timeframe
+tf = 100
+
+run <- ssa.adaptivetau(init.values = init.values, transitions = SI_transitions, 
+                       rateFunc = SI_rateFunc, params = parameters, tf = tf)
 
 run_df <- data.frame(run)
 
-plot(x = run_df$time, y = run_df$I, type = "line", col = "red", ylim = c(0,1000),
+plot(x = run_df$time, y = run_df$I, type = "line", col = "red", ylim = c(0,10e3),
   xlab = "Time", ylab = "Number susceptible or infected", main = "Stochastic SIS Model")
   par(new=T)
-  plot(x = run_df$time, y = run_df$S, type = "line", ylim = c(0,1000), ylab = "") # add susceptible line
+  plot(x = run_df$time, y = run_df$S, type = "line", ylim = c(0,10e3), ylab = "") # add susceptible line
 
 ## Add legend
 legend(80, 1000, c("Susceptible", "Infected"), pch = 1, col = c("black", "red"), bty = "n")

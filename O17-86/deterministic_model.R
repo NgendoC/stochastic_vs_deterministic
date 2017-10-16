@@ -6,6 +6,10 @@ library("deSolve") #package for solving differential equations
 ## Make an SIS function
 si <- function(time, state, parameters) {
   
+  # define model parameters in term of the natural parameters
+  beta <- parameters["R0"]/parameters["D_inf"] 
+  gamma <- 1/parameters["D_inf"]
+  
   with(as.list(c(state, parameters)), {
     
     dS <- -beta * S * I + gamma * I
@@ -15,13 +19,21 @@ si <- function(time, state, parameters) {
   })
 }
 
-## Set parameters for SI function
+#############################
+### THINGS YOU CAN CHANGE ###
+#############################
 
 # Proportion in each compartment at the start
-init  <- c(S = 1-1e-6, I = 1e-6) # N = 1
+init  <- c(
+  S = 1-1e-6, 
+  I = 1e-6
+) # N = 1
 
-## beta: infection parameter; gamma: recovery parameter
-parameters <- c(beta = 0.5, gamma = 0.2)
+## R0 = basic reproduction number, D_inf = duration of infection
+parameters <- c(
+  R0 = 10, 
+  D_inf = 2
+)
 
 ## Timeframe
 times <- seq(0, 100, by = 1)
@@ -37,5 +49,4 @@ matplot(x = times, y = out, type = "l",
   lwd = 1, lty = 1, bty = "l", col = c("black","red"))
 
 ## Add legend
-legend(60, 1.0, c("Susceptible", "Infected"), pch = 1, col = c("black","red"), bty = "n")
-
+legend(80, 1.0, c("Susceptible", "Infected"), pch = 1, col = c("black","red"), bty = "n")
