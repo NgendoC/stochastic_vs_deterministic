@@ -25,27 +25,29 @@ si <- function(time, state, parameters) {
 
 # Proportion in each compartment at the start
 init  <- c(
-  S = 1-1e-6, 
-  I = 1e-6
+  S = 1-1e-4, 
+  I = 1e-4
 ) # N = 1
 
 ## R0 = basic reproduction number, D_inf = duration of infection
 parameters <- c(
-  R0 = 10, 
-  D_inf = 2
+  R0 = 2, 
+  D_inf = 5
 )
 
 ## Timeframe
 times <- seq(0, 100, by = 1)
 
 ## Solve using General Solver for Ordinary Differential Equations (ode)
-out <- ode(y = init, times = times, func = si, parms = parameters)
-out <- as.data.frame(out) # change to data frame
-out$time <- NULL # Delete time variable
+run <- ode(y = init, times = times, func = si, parms = parameters)
+run_det <- as.data.frame(run) # change to data frame
+run_det$time <- NULL # Delete time variable
 
 ## Plot model
-matplot(x = times, y = out, type = "l",
-  xlab = "Time", ylab = "Proportion susceptible or infected", main = "Deterministic SIS Model",
+par(mfrow=c(1,1))
+
+matplot(x = times, y = run_det, type = "l",
+  xlab = "Time", ylab = "Proportion susceptible or infected",  main = "Deterministic SIS Model",
   lwd = 1, lty = 1, bty = "l", col = c("black","red"))
 
 ## Add legend
