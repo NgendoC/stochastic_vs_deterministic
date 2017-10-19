@@ -39,7 +39,6 @@ plot(x, mean_prior, type="l", col="red", ylim=c(0,0.6))
 
 # Apply the Metropolis algorithm
 
-
 # https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/
 # proposalfunction <- function(param){
 #   return(rnorm(3,mean = param, sd= c(0.1,0.5,0.3)))
