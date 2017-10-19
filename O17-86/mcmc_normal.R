@@ -4,12 +4,13 @@
 # Prior distiribution of theta has a mean of 0 and variance of 1
 # Observation of data has an unknown mean and a variance of 1
 
+# Packages needed
+library("MCMCpack")
+
 ####################################################### 
 ## Use MCMCpack as a comparison for my manual method ##
 #######################################################
 
-# Test my manual method against this
-library("MCMCpack")
 # The data, known variance of data, prior mean of mu, prior variance of mu, number of MC draws
 # don't know mean of data!
 x <- seq(-2, 6, 0.01)
@@ -26,7 +27,10 @@ mean(mcmc_package)
 # Use the same test data as for MCMCpack
 plot(x, D, type='l', ylab="p(X)", xlab="x")
 
+# Define the prior distribution
+mean_prior <- dnorm(x, 0, 1)
 
-
-
+# Define the posterior distribution
+mean_posterior <- (D + mean_prior)
+plot(x, mean_posterior, type="l")
 
