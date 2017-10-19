@@ -23,18 +23,10 @@ mean(mcmc_package)
 ## My manual method ##
 ######################
 
-# Make prior distribution of theta have a mean = 0 and variance = 1
-set.seed(1)
-xseq <- seq(-4, 4, .01)
-prior <- dnorm(xseq, 0, 1)
-plot(xseq, prior, xlim=c(-4, 4), type='l', ylab="p(X)", xlab="x")
+# Use the same test data as for MCMCpack
+plot(x, D, type='l', ylab="p(X)", xlab="x")
 
-# Make observation mean = 2 and variance = 1 - in real life I wouldn't know the mean but I need to make data
-D <-  dnorm(xseq, 2, 1)
-plot(xseq, D, xlim=c(-4, 4), type='l', ylab="p(X)", xlab="x")
 
-# Plot both the prior and the observation
-plot(xseq, prior, xlim=c(-4, 4), type='l', ylab="p(X)", xlab="x")
-par(new=T)
-plot(xseq, D, xlim=c(-4, 4), type='l', ylab="", xlab="", col = "red")
+
+
 
