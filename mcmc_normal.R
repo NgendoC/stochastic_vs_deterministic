@@ -43,9 +43,9 @@ mean(mcmc_package)
 # Use the same test data as for MCMCpack
 # This may be wrong
 plot(x, D, type='l', ylab="p(X)", xlab="x")
+
 likelihood <- function(param){
-  mean = param[1]
-  var = param[2]
+  a = param[1] # mean
   
   pred = dnorm(x, obs_mean, obs_var, log=T)
   singlelikelihoods = dnorm(D, mean = pred, obs_var, log = T)
@@ -54,14 +54,21 @@ likelihood <- function(param){
 }
 
 # Define the prior distribution (mean=0, variance=1)
-mean_prior <- dnorm(x, 0, 1)
+# mean_prior <- dnorm(x, 0, 1)
+prior <- function(param){
+  a = param[1] # mean
+  aprior = dnorm(x, 0, 1, log = T)
+  return(aprior)
+}
 
 # Define the posterior distribution
-mean_posterior <- (likelihood * mean_prior)
+posterior <- function(param){
+  return (likelihood(param) + prior(param))
+}
 
-plot(x, mean_posterior, type="l", ylim=c(0,45))
+plot(x, posterior, type="l")
 par(new=TRUE)
-plot(x, mean_prior, type="l", col="red", ylim=c(0,45))
+plot(x, prior, type="l", col="red")
 
 # Apply the Metropolis algorithm
 # Start at random parameter value
