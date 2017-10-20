@@ -25,19 +25,25 @@ mean(mcmc_package)
 ######################
 
 # Use the same test data as for MCMCpack
+# This may be wrong
 plot(x, D, type='l', ylab="p(X)", xlab="x")
+likelihood <- sum(D)
 
 # Define the prior distribution (mean=0, variance=1)
 mean_prior <- dnorm(x, 0, 1)
 
 # Define the posterior distribution
-mean_posterior <- (D * mean_prior)
+mean_posterior <- (likelihood * mean_prior)
 
-plot(x, mean_posterior, type="l", ylim=c(0,0.6))
+plot(x, mean_posterior, type="l", ylim=c(0,45))
 par(new=TRUE)
-plot(x, mean_prior, type="l", col="red", ylim=c(0,0.6))
+plot(x, mean_prior, type="l", col="red", ylim=c(0,45))
 
 # Apply the Metropolis algorithm
+# Start at random parameter value
+# Choose new parameter close to old value based on prob. density ratio
+# Jump to new probability if P(old)/P(new) >1
+
 
 # https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/
 # proposalfunction <- function(param){
@@ -57,6 +63,23 @@ plot(x, mean_prior, type="l", col="red", ylim=c(0,0.6))
 #     }
 #   }
 #   return(chain)
+# }
+
+# metropolis=function(n=1000,eps=5) 
+# {
+#   vec=vector("numeric", n)
+#   x=0
+#   vec[1]=x
+#   for (i in 2:n) {
+#     innov=runif(1,-eps,eps)
+#     can=x+innov
+#     aprob=min(1,dnorm(can)/dnorm(x))
+#     u=runif(1)
+#     if (u < aprob) 
+#       x=can
+#     vec[i]=x
+#   }
+#   vec
 # }
 
 
