@@ -11,17 +11,19 @@ library("MCMCpack")
 ## Create data ##
 #################
 
+# Mean and variance for the new data
 obs_var <- 1
 obs_sd <- obs_var^(1/2)
 obs_mean <- 2
 
+# Mean and variance for the prior distribution of the unknown mean
 prior_var <- 1
 prior_sd <- prior_var^(1/2)
 prior_mean <- 0
 
-# create independent x-values 
+# Create independent x-values 
 x <- seq(-2, 6, 0.01)
-# create dependent values according to Normal distribution
+# Create dependent values according to Normal distribution
 D <- dnorm(x, obs_mean, obs_var)
 
 plot(x,D, main="Test Data")
@@ -46,7 +48,6 @@ mean(mcmc_package)
 likelihood <- function(param){
   dnorm(x, obs_mean, obs_sd, log= T)  
 } 
-
 
 # Define the prior distribution (mean=0, variance=1)
 # mean_prior <- dnorm(x, prior_mean, prior_sd, log=T)
