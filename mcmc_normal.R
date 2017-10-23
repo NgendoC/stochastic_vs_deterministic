@@ -66,6 +66,7 @@ mean_posterior <- function(param){
 # Probability density distribution for proposing new values
 # Proposal function has a Normal distribution 
 # The distribution is centered around the current value in the Markov chain
+set.seed(4)
 proposalfunction <- function(param){
   return(rnorm(1, param, prior_sd))
 }
@@ -99,6 +100,7 @@ metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain
 # Takes a random number from the (Normal) prior distribution
+set.seed(4)
 startvalue <- rnorm(1, prior_mean, prior_sd)
 
 # Number of runs
