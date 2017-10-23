@@ -43,18 +43,15 @@ mean(mcmc_package)
 ## My manual method ##
 ######################
 
-# Use the same test data as for MCMCpack
-# This may be wrong
+# Likelihood function for the observation
 likelihood <- function(param){
   dnorm(x, obs_mean, obs_sd, log= T)  
 } 
 
 # Define the prior distribution (mean=0, variance=1)
-# mean_prior <- dnorm(x, prior_mean, prior_sd, log=T)
 mean_prior <- function(param){
-  a = param[1]
-  aprior = dnorm(x, prior_mean, prior_sd, log = T)
-  return(aprior)
+  prior = dnorm(x, prior_mean, prior_sd, log = T)
+  return(prior)
 }
 
 # Define the posterior distribution
@@ -64,30 +61,34 @@ mean_posterior <- function(param){
   return (likelihood(param) + mean_prior(param))
 }
 
-# plot(x, mean_posterior, type="l", col = "red", ylim = c(-30, 0), ylab = "log(mean)")
-# par(new=TRUE)
-# plot(x, mean_prior, type="l", col="black", ylim = c(-30, 0), ylab = " ")
-
 # Apply the Metropolis algorithm
-# Probability density distribution for proposing new values
-#proposalfunction <- (rnorm(1, mean_prior, prior_sd))
 
+# Probability density distribution for proposing new values
+# Proposal function has a Normal distribution 
+# The distribution is centered around the current value in the Markov chain
 proposalfunction <- function(param){
-  return(rnorm(1,mean = param, prior_sd))
+  return(rnorm(1, param, prior_sd))
 }
 
 # Start at random parameter value
 # Choose new parameter close to old value based on prob. density ratio
-# Jump to new probability if P(old)/P(new) >1
 
 metropolis_MCMC <- function(startvalue, iterations){
   chain = array(dim = c(iterations+1))
+  
+  # Give a starting point to the chain
   chain[1] = startvalue
+  
+  # For the other iterations, use the proposal function to suggest the next value
   for (i in 1:iterations){
     proposal = proposalfunction(chain[i])
-
+    
+    # P(new)/P(old) NOTE: LOGARITHMIC
     probab = exp(mean_posterior(proposal) - mean_posterior(chain[i]))
-    if (runif(1) < probab){
+    
+    # Jump to new probability if P(old)/P(new) >1
+    # if r < than P, accept, else reject
+    if (runif(1) < probab){ 
       chain[i+1] = proposal
     }else{
       chain[i+1] = chain[i]
@@ -96,38 +97,22 @@ metropolis_MCMC <- function(startvalue, iterations){
   return(chain)
 }
 
-startvalue = prior_mean
-chain = metropolis_MCMC(startvalue, 10000)
+# Where to start searching
+# Takes a random number from the (Normal) prior distribution
+startvalue <- rnorm(1, prior_mean, prior_sd)
 
+# Number of runs
+chain <- metropolis_MCMC(startvalue, 10000)
+
+# The beginning of the chain is biased towards the starting point, so take them out
 burnIn = 5000
-acceptance = 1-mean(duplicated(chain[-(1:burnIn),]))
+acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
+# Plot the MCMC
 par(mfrow = c(1,2))
-hist(chain[-(1:burnIn),1],nclass=30, main="Posterior of mean", xlab="True value = red line" )
-abline(v = mean(chain[-(1:burnIn),1]))
-#abline(v = trueA, col="red" )
-plot(chain[-(1:burnIn),1], type = "l", xlab="True value = red line" , main = "Chain values of mean")
-#abline(h = trueA, col="red" )
+hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean")
+abline(v = mean(chain[-(1:burnIn)]))
+plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
+# Helpful resource for MCMC in R:
 # https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/
-# This example works in logs!
-# proposalfunction <- function(param){
-#   return(rnorm(3,mean = param, sd= c(0.1,0.5,0.3)))
-# }
-# run_metropolis_MCMC <- function(startvalue, iterations){
-#   chain = array(dim = c(iterations+1,3))
-#   chain[1,] = startvalue
-#   for (i in 1:iterations){
-#     proposal = proposalfunction(chain[i,])
-#     
-#     probab = exp(posterior(proposal) - posterior(chain[i,]))
-#     if (runif(1) < probab){
-#       chain[i+1,] = proposal
-#     }else{
-#       chain[i+1,] = chain[i,]
-#     }
-#   }
-#   return(chain)
-# }
-
-
