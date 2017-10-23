@@ -42,53 +42,23 @@ mean(mcmc_package)
 
 # Use the same test data as for MCMCpack
 # This may be wrong
-plot(x, D, type='l', ylab="p(X)", xlab="x")
-
-likelihood <- function(param){
-  a = param[1] # mean
-  
-  pred = dnorm(x, obs_mean, obs_var, log=T)
-  singlelikelihoods = dnorm(D, mean = pred, obs_var, log = T)
-  sumll = sum(singlelikelihoods)
-  return(sumll)   
-}
+likelihood <- dnorm(x, obs_mean, obs_var, log= T)
 
 # Define the prior distribution (mean=0, variance=1)
-# mean_prior <- dnorm(x, 0, 1)
-prior <- function(param){
-  a = param[1] # mean
-  aprior = dnorm(x, 0, 1, log = T)
-  return(aprior)
-}
+mean_prior <- dnorm(x, prior_mean, prior_var, log=T)
 
 # Define the posterior distribution
-posterior <- function(param){
-  return (likelihood(param) + prior(param))
-}
+mean_posterior <- likelihood + mean_prior
 
-plot(x, posterior, type="l")
+plot(x, mean_posterior, type="l")
 par(new=TRUE)
-plot(x, prior, type="l", col="red")
+plot(x, mean_prior, type="l", col="red")
 
 # Apply the Metropolis algorithm
 # Start at random parameter value
 # Choose new parameter close to old value based on prob. density ratio
 # Jump to new probability if P(old)/P(new) >1
-metropolis=function(n=1000,var=1){
-  vec=vector("numeric", n)
-  x=set.seed[1]
-  vec[1]=x
-  for (i in 2:n) {
-    innov=runif(1,-eps,eps)
-    can=x+innov
-    aprob=min(1,dnorm(can)/dnorm(x))
-    u=runif(1)
-    if (u < aprob)
-      x=can
-    vec[i]=x
-  }
-  vec
-}
+
 
 # https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/
 # This example works in logs!
