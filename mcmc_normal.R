@@ -45,7 +45,8 @@ mean(mcmc_package)
 
 # Likelihood function for the observation
 likelihood <- function(param){
-  dnorm(x, obs_mean, obs_sd, log= T)  
+  obs_likelihood = dnorm(x, obs_mean, obs_sd, log= T)
+  return(obs_likelihood)
 } 
 
 # Define the prior distribution (mean=0, variance=1)
@@ -56,7 +57,6 @@ mean_prior <- function(param){
 
 # Define the posterior distribution
 # Note: is on a logarithmic scale
-#mean_posterior <- likelihood + mean_prior
 mean_posterior <- function(param){
   return (likelihood(param) + mean_prior(param))
 }
@@ -86,7 +86,7 @@ metropolis_MCMC <- function(startvalue, iterations){
     # P(new)/P(old) NOTE: LOGARITHMIC
     probab = exp(mean_posterior(proposal) - mean_posterior(chain[i]))
     
-    # Jump to new probability if P(old)/P(new) >1
+    # Jump to new probability if P(new)/P(old) >1
     # if r < than P, accept, else reject
     if (runif(1) < probab){ 
       chain[i+1] = proposal
@@ -97,15 +97,16 @@ metropolis_MCMC <- function(startvalue, iterations){
   return(chain)
 }
 
-# Where to start searching
+# Where to start the chain
 # Takes a random number from the (Normal) prior distribution
 startvalue <- rnorm(1, prior_mean, prior_sd)
 
 # Number of runs
-chain <- metropolis_MCMC(startvalue, 10000)
+iterations = 10000
+chain <- metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
-burnIn = 5000
+burnIn = 1000
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
 # Plot the MCMC
