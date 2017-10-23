@@ -16,6 +16,7 @@ obs_sd <- obs_var^(1/2)
 obs_mean <- 2
 
 prior_var <- 1
+prior_sd <- prior_var^(1/2)
 prior_mean <- 0
 
 # create independent x-values 
@@ -42,17 +43,18 @@ mean(mcmc_package)
 
 # Use the same test data as for MCMCpack
 # This may be wrong
-likelihood <- dnorm(x, obs_mean, obs_var, log= T)
+likelihood <- dnorm(x, obs_mean, obs_sd, log= T)
 
 # Define the prior distribution (mean=0, variance=1)
-mean_prior <- dnorm(x, prior_mean, prior_var, log=T)
+mean_prior <- dnorm(x, prior_mean, prior_sd, log=T)
 
 # Define the posterior distribution
+# Note: is on a logarithmic scale
 mean_posterior <- likelihood + mean_prior
 
-plot(x, mean_posterior, type="l")
+plot(x, mean_posterior, type="l", col = "red", ylim = c(-30, 0), ylab = "log(mean)")
 par(new=TRUE)
-plot(x, mean_prior, type="l", col="red")
+plot(x, mean_prior, type="l", col="black", ylim = c(-30, 0), ylab = " ")
 
 # Apply the Metropolis algorithm
 # Start at random parameter value
