@@ -26,7 +26,7 @@ x <- seq(-2, 6, 0.01)
 # Create dependent values according to Normal distribution
 D <- dnorm(x, obs_mean, obs_var)
 
-plot(x,D, main="Test Data")
+plot(x,D, main="Test Data", type="l")
 
 ####################################################### 
 ## Use MCMCpack as a comparison for my manual method ##
@@ -34,10 +34,11 @@ plot(x,D, main="Test Data")
 
 # The data, known variance of data, prior mean of mu, prior variance of mu, number of MC draws
 # don't know mean of data!
-mcmc_package <- MCnormalnormal(D, obs_var, prior_mean, prior_var, mc = 1000)
-plot(mcmc_package)
-var(mcmc_package)
-mean(mcmc_package)
+# set.seed(4)
+# mcmc_package <- MCnormalnormal(D, obs_var, prior_mean, prior_var, mc = 1000)
+# plot(mcmc_package)
+# var(mcmc_package)
+# mean(mcmc_package)
 
 ######################
 ## My manual method ##
@@ -45,13 +46,13 @@ mean(mcmc_package)
 
 # Likelihood function for the observation
 likelihood <- function(param){
-  obs_likelihood = dnorm(x, obs_mean, obs_sd, log= T)
+  obs_likelihood = dnorm(2, param, obs_sd, log= T)
   return(obs_likelihood)
 } 
 
 # Define the prior distribution (mean=0, variance=1)
 mean_prior <- function(param){
-  prior = dnorm(x, prior_mean, prior_sd, log = T)
+  prior = dnorm(param, prior_mean, prior_sd, log = T)
   return(prior)
 }
 
@@ -119,6 +120,7 @@ par(mfrow = c(1,2))
 hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean")
 abline(v = mean(chain[-(1:burnIn)]))
 plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
+
 
 # Mean and variance of posterior distribution
 notLog_posterior <- exp(mean_posterior(param))
