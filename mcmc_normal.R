@@ -110,6 +110,10 @@ chain <- metropolis_MCMC(startvalue, iterations)
 burnIn = 1000
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
+#####################################
+## Outcomes from the manual method ##
+#####################################
+
 # Plot the MCMC
 par(mfrow = c(1,2))
 hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean")
@@ -117,7 +121,7 @@ abline(v = mean(chain[-(1:burnIn)]))
 plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
 # Mean and variance of posterior distribution
-notLog_posterior <- exp((likelihood(param) + mean_prior(param)))
+notLog_posterior <- exp(mean_posterior(param))
 mean(notLog_posterior)
 var(notLog_posterior)
 
