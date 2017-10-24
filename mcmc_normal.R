@@ -116,5 +116,10 @@ hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean")
 abline(v = mean(chain[-(1:burnIn)]))
 plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
+# Mean and variance of posterior distribution
+notLog_posterior <- exp((likelihood(param) + mean_prior(param)))
+mean(notLog_posterior)
+var(notLog_posterior)
+
 # Helpful resource for MCMC in R:
 # https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/
