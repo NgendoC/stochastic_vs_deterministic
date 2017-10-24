@@ -53,4 +53,4 @@ matplot(x = times, y = run_det, type = "l",
   lwd = 1, lty = 1, bty = "l", col = c("black","red","orange"))
 
 ## Add legend
-legend(80, 1.0, c("Susceptible", "Infected"), pch = 1, col = c("black","red","orange"), bty = "n")
+legend(80, 1.0, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black","red","orange"), bty = "n")
