@@ -1,4 +1,4 @@
-## Making a stochastic SIS model from scratch
+## Making a stochastic SIR model from scratch
 ## 11/10/17
 
 library("adaptivetau") # package for stochastic processes
