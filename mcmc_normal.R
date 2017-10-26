@@ -11,26 +11,28 @@ library("MCMCpack")
 ## Create data ##
 #################
 
+# Data observation and variance
+# Note: mean is not known!
+D <- 2
 # Mean and variance for the new data
 obs_var <- 1
 obs_sd <- obs_var^(1/2)
-obs_mean <- 2
 
 # Mean and variance for the prior distribution of the unknown mean
 prior_var <- 1
 prior_sd <- prior_var^(1/2)
 prior_mean <- 0
 
-# Create independent x-values 
-x <- seq(-2, 6, 0.01)
-# Create dependent values according to Normal distribution
-D <- dnorm(x, obs_mean, obs_var)
-
-plot(x,D, main="Test Data", type="l")
-
 ####################################################### 
 ## Use MCMCpack as a comparison for my manual method ##
 #######################################################
+
+# # Create independent x-values 
+# x <- seq(-2, 6, 0.01)
+# # Create dependent values according to Normal distribution
+# D <- dnorm(x, obs_mean, obs_var)
+# 
+# plot(x,D, main="Test Data", type="l")
 
 # The data, known variance of data, prior mean of mu, prior variance of mu, number of MC draws
 # don't know mean of data!
@@ -46,7 +48,7 @@ plot(x,D, main="Test Data", type="l")
 
 # Likelihood function for the observation
 likelihood <- function(param){
-  obs_likelihood = dnorm(2, param, obs_sd, log= T)
+  obs_likelihood = dnorm(D, param, obs_sd, log= T)
   return(obs_likelihood)
 } 
 
@@ -85,11 +87,11 @@ metropolis_MCMC <- function(startvalue, iterations){
     proposal = proposalfunction(chain[i])
     
     # P(new)/P(old) NOTE: LOGARITHMIC
-    probab = exp(mean_posterior(proposal) - mean_posterior(chain[i]))
+    prob = exp(mean_posterior(proposal) - mean_posterior(chain[i]))
     
     # Jump to new probability if P(new)/P(old) >1
     # if r < than P, accept, else reject
-    if (runif(1) < probab){ 
+    if (runif(1) < prob){ 
       chain[i+1] = proposal
     }else{
       chain[i+1] = chain[i]
@@ -108,6 +110,7 @@ set.seed(4)
 chain <- metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
+# normally burnin is 10%-50% of the runs
 burnIn = 1000
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
@@ -117,15 +120,14 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
 # Plot the MCMC
 par(mfrow = c(1,2))
-hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean")
+hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean", freq=FALSE, xlim=c(-2,4), ylim=c(0,0.6))
 abline(v = mean(chain[-(1:burnIn)]))
+par(new=T)
+xdata = seq(-2, 4, 0.1)
+plot(xdata, dnorm(xdata, 1, sqrt(0.5)), type = "l", xlab = " ", ylab = " ", 
+     xlim=c(-2,4), ylim=c(0,0.6), col="red", lty=2, lwd=2)
 plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
-
-# Mean and variance of posterior distribution
-notLog_posterior <- exp(mean_posterior(param))
-mean(notLog_posterior)
-var(notLog_posterior)
 
 # Helpful resource for MCMC in R:
 # https://theoreticalecology.wordpress.com/2010/09/17/metropolis-hastings-mcmc-in-r/
