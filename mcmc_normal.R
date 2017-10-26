@@ -8,20 +8,30 @@
 library("MCMCpack")
 
 ################# 
-## Create data ##
+## Known data ##
 #################
 
 # Data observation and variance
 # Note: mean is not known!
 D <- 2
-# Mean and variance for the new data
+
+# Number of observations
+num_obs <- length(D)
+
+# Mean and variance for the observed data
 obs_var <- 1
-obs_sd <- obs_var^(1/2)
+obs_sd <- sqrt(obs_var)
 
 # Mean and variance for the prior distribution of the unknown mean
 prior_var <- 1
-prior_sd <- prior_var^(1/2)
+prior_sd <- sqrt(prior_var)
 prior_mean <- 0
+
+# Calculation for true posterior mean distribution
+# mean
+true_mean <- (((obs_var/num_obs)*prior_mean) + (prior_var*D)) / ((obs_var/num_obs) + prior_var)
+true_var <- ((num_obs/obs_var) + (1/prior_var))^-1
+true_sd <- sqrt(true_var)
 
 ####################################################### 
 ## Use MCMCpack as a comparison for my manual method ##
@@ -124,7 +134,7 @@ hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean", freq=FALSE, xlim=c(
 abline(v = mean(chain[-(1:burnIn)]))
 par(new=T)
 xdata = seq(-2, 4, 0.1)
-plot(xdata, dnorm(xdata, 1, sqrt(0.5)), type = "l", xlab = " ", ylab = " ", 
+plot(xdata, dnorm(xdata, true_mean, true_sd), type = "l", xlab = " ", ylab = " ", 
      xlim=c(-2,4), ylim=c(0,0.6), col="red", lty=2, lwd=2)
 plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
