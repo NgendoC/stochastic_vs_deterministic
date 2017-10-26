@@ -7,9 +7,9 @@
 # Packages needed
 library("MCMCpack")
 
-################# 
+################ 
 ## Known data ##
-#################
+################
 
 # Data observation and variance
 # Note: mean is not known!
@@ -32,6 +32,10 @@ prior_mean <- 0
 true_mean <- (((obs_var/num_obs)*prior_mean) + (prior_var*D)) / ((obs_var/num_obs) + prior_var)
 true_var <- ((num_obs/obs_var) + (1/prior_var))^-1
 true_sd <- sqrt(true_var)
+
+# Proposal variance
+proposal_var <- 1
+proposal_sd <- sqrt(proposal_var)
 
 ####################################################### 
 ## Use MCMCpack as a comparison for my manual method ##
@@ -80,7 +84,7 @@ mean_posterior <- function(param){
 # Proposal function has a Normal distribution 
 # The distribution is centered around the current value in the Markov chain
 proposalfunction <- function(param){
-  return(rnorm(1, param, prior_sd))
+  return(rnorm(1, param, proposal_sd))
 }
 
 # Start at random parameter value
@@ -121,7 +125,7 @@ chain <- metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
-burnIn = 1000
+burnIn = 0.1*iterations
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
 #####################################
@@ -129,14 +133,14 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 #####################################
 
 # Plot the MCMC
-par(mfrow = c(1,2))
-hist(chain[-(1:burnIn)],nclass=30, main="Posterior of mean", freq=FALSE, xlim=c(-2,4), ylim=c(0,0.6))
+#par(mfrow = c(1,4))
+hist(chain[-(1:burnIn)],nclass=30, main="Posterior mean", freq=FALSE, xlim=c(-2,4), ylim=c(0,0.6), col = "grey")
 abline(v = mean(chain[-(1:burnIn)]))
 par(new=T)
 xdata = seq(-2, 4, 0.1)
-plot(xdata, dnorm(xdata, true_mean, true_sd), type = "l", xlab = " ", ylab = " ", 
+plot(xdata, dnorm(xdata, true_mean, true_sd), type = "l", xlab = " ", ylab = " ",
      xlim=c(-2,4), ylim=c(0,0.6), col="red", lty=2, lwd=2)
-plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
+#plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
 
 # Helpful resource for MCMC in R:
