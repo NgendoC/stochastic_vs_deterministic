@@ -1,67 +1,39 @@
-## Stochastic SIR model from scratch
+## Individual-based stochastic SIR model from scratch
 ## 26/10/17
 
-library("deSolve") #package for solving differential equations
+# Input values
 
-## Make an SIR function
-sir <- function(time, state, parameters) {
-  
-  # define model parameters in term of the natural parameters
-  beta <- parameters["R0"]/parameters["D_inf"] 
-  gamma <- 1/parameters["D_inf"]
-  
-  with(as.list(c(state, parameters)), {
-    
-    dS <- -beta * S * I 
-    dI <-  beta * S * I - gamma * I
-    dR <-  gamma * I
-    
-    return(list(c(dS, dI, dR)))
-  })
-}
-
-#############################
-### THINGS YOU CAN CHANGE ###
-#############################
-
-# Proportion in each compartment at the start
-init  <- c(
-  S = 1000-1, 
+# Initial population: N-1 susceptible, 1 infectious, 0 recovered
+init.values = c(
+  S = 10e3-1,
   I = 1,
   R = 0
-) # N = 1
-
-# Make a function for drawing new parameters every time
-random_R0 <- function(time){ 
-  R0 = rnorm(1, 2, 0.5) # R0
-  return(as.numeric(R0))
-} 
-
-random_dinf <- function(time){
-  dinf = rnorm(1, 5, 0.5) # Duration of infectiousness
-  return(as.numeric(dinf))
-}
-
-## R0 = basic reproduction number, D_inf = duration of infection
-parameters <- c(
-  R0 = random_R0,
-  D_inf = random_dinf
 )
+N = sum(init.values)
 
-## Timeframe
-times <- seq(0, 100, by = 1)
+# R0 & duration of infectiousness
+R0 <- 5
+D_inf <- 2
 
-## Solve using General Solver for Ordinary Differential Equations (ode)
-run <- ode(y = init, times = times, func = sir, parms = parameters)
-run_det <- as.data.frame(run) # change to data frame
-run_det$time <- NULL # Delete time variable
+# Time
+timestep <- 1
+times <- seq(0, 100, by = timestep)
 
-## Plot model
-par(mfrow=c(1,1))
+# Array for holding people's disease statuses
+status <- array(0, dim = c(N,1))
 
-matplot(x = times, y = run_det, type = "l",
-        xlab = "Time", ylab = "Number susceptible or infected",  main = "Stochastic SIR Model",
-        lwd = 1, lty = 1, bty = "l", col = c("black","red","orange"))
+for time in times{
+  for ind in 1:N{
+    # Force of infection at time t
+    p <- R0 * (timestep/(D_inf*init.values["N"])) # probability of effective contact
+    foi_t <- 1 - (1 - p)^dI
+     # risk of individual becoming infected in next time interval
+    x <- runif(1, 0.0, 1.0) # choose a random number between 0 and 1
+    # if x < foi_t, individual becomes infected
+    # else individual remains susceptible
 
-## Add legend
-legend(80, 800, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black","red","orange"), bty = "n")
+    # Recovery 
+    r_t <- (1/D_inf)*timestep
+    rbinom(1, N, r_t)
+  
+}}
