@@ -26,7 +26,7 @@ D_inf <- 2
 status <- array(0, dim = c(N,1))
 
 # Array for holding collective disease status information for whole period of time
-data <- array(0, dim =c(length(times), length(init.values)))
+data <- array(0, dim =c(length(times[[1]]), length(init.values)))
 
 # For loops for calculating each individual's disease status at each timepoint
 for (time in times){
@@ -35,7 +35,6 @@ for (time in times){
     status[init.values["I"]+1:N] <- "S"
   } else{
     for (ind in 1:N){
-    # Set up number of infectious individuals at time 0
 
     # If individual's status at ind is R, they stay R
     if (status[ind] == "R"){ 
@@ -65,7 +64,7 @@ for (time in times){
       }
   }}
   # Sum up  S/I/R from the status array and add them on into the data array
-  data[time, 1] <- 1
-  data[time, 2] <- 2
-  data[time, 3] <- 3
+  data[time, 1] <- length(status[status=="S"])
+  data[time, 2] <- length(status[status=="I"])
+  data[time, 3] <- length(status[status=="R"])
 }
