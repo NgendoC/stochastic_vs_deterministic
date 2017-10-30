@@ -4,23 +4,23 @@
 # Prior distiribution of theta has a mean of 0 and variance of 1
 # Observation of data has an unknown mean and a variance of 1
 
-# Packages needed
-library("MCMCpack")
-
 ################ 
 ## Known data ##
 ################
 
 # Data observation and variance
 # Note: mean is not known!
-D <- 2
+#D <- 2 # 1 observation
+D <- rnorm(4, mean = 2, obs_sd)  # many observations, random numbers from a normal distribution
 
 # Number of observations
 num_obs <- length(D)
+mean_D <- mean(D)
 
 # Mean and variance for the observed data
 obs_var <- 1
 obs_sd <- sqrt(obs_var)
+num_obs_sd <- sqrt((num_obs/obs_var)^-1)
 
 # Mean and variance for the prior distribution of the unknown mean
 prior_var <- 1
@@ -29,7 +29,7 @@ prior_mean <- 0
 
 # Calculation for true posterior mean distribution
 # mean
-true_mean <- (((obs_var/num_obs)*prior_mean) + (prior_var*D)) / ((obs_var/num_obs) + prior_var)
+true_mean <- (((obs_var/num_obs)*prior_mean) + (prior_var*mean_D)) / ((obs_var/num_obs) + prior_var)
 true_var <- ((num_obs/obs_var) + (1/prior_var))^-1
 true_sd <- sqrt(true_var)
 
@@ -40,6 +40,8 @@ proposal_sd <- sqrt(proposal_var)
 ####################################################### 
 ## Use MCMCpack as a comparison for my manual method ##
 #######################################################
+# Packages needed
+#library("MCMCpack")
 
 # # Create independent x-values 
 # x <- seq(-2, 6, 0.01)
@@ -62,7 +64,7 @@ proposal_sd <- sqrt(proposal_var)
 
 # Likelihood function for the observation
 likelihood <- function(param){
-  obs_likelihood = dnorm(D, param, obs_sd, log= T)
+  obs_likelihood = dnorm(D, param, num_obs_sd, log= T)
   return(obs_likelihood)
 } 
 
@@ -133,14 +135,14 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 #####################################
 
 # Plot the MCMC
-#par(mfrow = c(1,4))
-hist(chain[-(1:burnIn)],nclass=30, main="Posterior mean", freq=FALSE, xlim=c(-2,4), ylim=c(0,0.6), col = "grey")
+par(mfrow = c(1,2))
+hist(chain[-(1:burnIn)],nclass=30, main="Posterior mean", freq=FALSE, xlim=c(-2,4), ylim=c(0,1.0), col = "grey")
 abline(v = mean(chain[-(1:burnIn)]))
 par(new=T)
 xdata = seq(-2, 4, 0.1)
 plot(xdata, dnorm(xdata, true_mean, true_sd), type = "l", xlab = " ", ylab = " ",
-     xlim=c(-2,4), ylim=c(0,0.6), col="red", lty=2, lwd=2)
-#plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
+     xlim=c(-2,4), ylim=c(0,1.0), col="red", lty=2, lwd=2)
+plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
 
 # Helpful resource for MCMC in R:
