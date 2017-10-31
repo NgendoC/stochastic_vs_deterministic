@@ -1,36 +1,46 @@
 ## MCMC with two unknowns
 ## 31/10/2017
 
-trueA <- 5
+##################
+## Known values ##
+##################
+
+trueMean <- 5
 trueSd <- 10
 sampleSize <- 31
 
 # create values according to a + N(0,sd)
-y <- rnorm(n=sampleSize,mean=trueA,sd=trueSd)
+y <- rnorm(n=sampleSize,mean=trueMean,sd=trueSd)
+
+##################################
+## Likelihood, prior, posterior ##
+##################################
 
 likelihood <- function(param){
-  a = param[1]
+  mean = param[1]
   sd = param[2]
   
-  singlelikelihoods = dnorm(y, mean = a, sd = sd, log = T)
+  singlelikelihoods = dnorm(y, mean = mean, sd = sd, log = T)
   sumll = sum(singlelikelihoods)
   return(sumll)   
 }
 
 # Prior distribution
 prior <- function(param){
-  a = param[1]
+  mean = param[1]
   sd = param[2]
-  aprior = dnorm(a, mean = 0, sd = 1, log = T)
+  meanprior = dnorm(mean, mean = 0, sd = 1, log = T)
   sdprior = dnorm(sd, mean = 0, sd = 1, log = T)
-  return(aprior+sdprior)
+  return(meanprior+sdprior)
 }
 
 posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
 
-######## Metropolis algorithm ################
+##########
+## MCMC ##
+##########
 
 proposalfunction <- function(param){
   return(rnorm(2,mean = param, sd= c(0.1,0.3)))
@@ -58,20 +68,21 @@ chain = run_metropolis_MCMC(startvalue, 10000)
 burnIn = 5000
 acceptance = 1-mean(duplicated(chain[-(1:burnIn),]))
 
+###########
+## Plots ##
+###########
+
 par(mfrow = c(2,2))
-hist(chain[-(1:burnIn),1],nclass=30, , main="Posterior of a", xlab="True value = red line" )
-abline(v = mean(chain[-(1:burnIn),1]))
-abline(v = trueA, col="red" )
 
-hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of sd", xlab="True value = red line")
-abline(v = mean(chain[-(1:burnIn),2]))
-abline(v = trueSd, col="red" )
+hist(chain[-(1:burnIn),1],nclass=30, main="Posterior of mean")
+abline(v = mean(chain[-(1:burnIn),1]), col = "red")
 
-plot(chain[-(1:burnIn),1], type = "l", xlab="True value = red line" , main = "Chain values of a", )
-abline(h = trueA, col="red" )
+hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of sd")
+abline(v = mean(chain[-(1:burnIn),2]), col = "red")
 
-plot(chain[-(1:burnIn),2], type = "l", xlab="True value = red line" , main = "Chain values of sd", )
-abline(h = trueSd, col="red" )
+plot(chain[-(1:burnIn),1], type = "l", main = "Chain values of a")
+
+plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of sd")
 
 ###################################################################################################################
 ## Previous attempt
