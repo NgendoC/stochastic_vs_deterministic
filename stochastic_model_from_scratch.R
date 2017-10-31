@@ -39,16 +39,18 @@ for (time in times){
     
   } else{
     foi_t <- 1 - (1 - p)^data[time, 3] # take data on the number infectious from previous timestep!
+    inf <- rbinom(1, size = data[time,2], prob = foi_t) # number who become infected in this timestep
+    rec <- rbinom(1, size = data[time,3], prob = r_t)# number who become recovered in this timestep
     
-    data[time+1,2] <- data[time, 2] - rbinom(1, size = data[time,2], prob = foi_t) # number of susceptibles at other times
+    data[time+1,2] <- data[time, 2] - inf # number of susceptibles at other times
     
-    data[time+1,3] <- data[time, 3]  + rbinom(1, size = data[time,2], prob = foi_t) - rbinom(1, size = data[time,3], prob = r_t) # number of infecteds at other times
+    data[time+1,3] <- data[time, 3]  + inf - rec # number of infecteds at other times
     
-    data[time+1,4] <- data[time,4] + rbinom(1, size = data[time,3], prob = r_t) # number of recovereds at other times
+    data[time+1,4] <- data[time,4] + rec # number of recovereds at other times
   }
 }
 
-run_stoch <- data.frame(data)
+run_stoch <- data.frame(data) # make array into a dataframe
 
 plot(x = run_stoch$X1, y = run_stoch$X3, type = "line", col = "red", ylim = c(0,10e3),
      xlab = "Time", ylab = "Number susceptible/infected/recovered", main = "Stochastic SIR Model")
