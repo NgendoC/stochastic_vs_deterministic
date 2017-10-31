@@ -5,30 +5,18 @@
 ## Known data ##
 ################
 
-# Data observation and variance for the mean
-# Note: mean is not known!
-D <- 2 # 1 observation
-#D <- rnorm(4, mean = 2, obs_sd)  # many observations, random numbers from a normal distribution
+# Data observation
+# Note: mean and vriance are not known!
+#D <- 2 # 1 observation
+D <- rnorm(4, mean = 2, 1)  # many observations, random numbers from a normal distribution
 
 # Number of observations
 num_obs <- length(D)
-mean_D <- mean(D)
-
-# Mean and variance for the observed data
-obs_var <- 1
-obs_sd <- sqrt(obs_var)
-num_obs_sd <- sqrt((num_obs/obs_var)^-1)
 
 # Mean and variance for the prior distribution of the unknown mean
 prior_var <- 1
 prior_sd <- sqrt(prior_var)
 prior_mean <- 0
-
-# Calculation for true posterior mean distribution
-# mean
-true_mean <- (((obs_var/num_obs)*prior_mean) + (prior_var*mean_D)) / ((obs_var/num_obs) + prior_var)
-true_var <- ((num_obs/obs_var) + (1/prior_var))^-1
-true_sd <- sqrt(true_var)
 
 # Proposal variance
 proposal_var <- 1
@@ -114,10 +102,6 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 par(mfrow = c(1,2))
 hist(chain[-(1:burnIn)],nclass=30, main="Posterior mean", freq=FALSE, xlim=c(-2,4), ylim=c(0,1.0), col = "grey")
 abline(v = mean(chain[-(1:burnIn)]))
-par(new=T)
-xdata = seq(-2, 4, 0.1)
-plot(xdata, dnorm(xdata, true_mean, true_sd), type = "l", xlab = " ", ylab = " ",
-     xlim=c(-2,4), ylim=c(0,1.0), col="red", lty=2, lwd=2)
 plot(chain[-(1:burnIn)], type = "l", main = "Chain values of mean")
 
 
