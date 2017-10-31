@@ -8,10 +8,10 @@
 ## Known data ##
 ################
 
-# Data observation and variance
+# Data observation and variance for the mean
 # Note: mean is not known!
-#D <- 2 # 1 observation
-D <- rnorm(4, mean = 2, obs_sd)  # many observations, random numbers from a normal distribution
+D <- 2 # 1 observation
+#D <- rnorm(4, mean = 2, obs_sd)  # many observations, random numbers from a normal distribution
 
 # Number of observations
 num_obs <- length(D)
@@ -37,30 +37,9 @@ true_sd <- sqrt(true_var)
 proposal_var <- 1
 proposal_sd <- sqrt(proposal_var)
 
-####################################################### 
-## Use MCMCpack as a comparison for my manual method ##
-#######################################################
-# Packages needed
-#library("MCMCpack")
-
-# # Create independent x-values 
-# x <- seq(-2, 6, 0.01)
-# # Create dependent values according to Normal distribution
-# D <- dnorm(x, obs_mean, obs_var)
-# 
-# plot(x,D, main="Test Data", type="l")
-
-# The data, known variance of data, prior mean of mu, prior variance of mu, number of MC draws
-# don't know mean of data!
-# set.seed(4)
-# mcmc_package <- MCnormalnormal(D, obs_var, prior_mean, prior_var, mc = 1000)
-# plot(mcmc_package)
-# var(mcmc_package)
-# mean(mcmc_package)
-
-######################
-## My manual method ##
-######################
+#################
+## Manual MCMC ##
+#################
 
 # Likelihood function for the observation
 likelihood <- function(param){
@@ -130,9 +109,9 @@ chain <- metropolis_MCMC(startvalue, iterations)
 burnIn = 0.1*iterations
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn)]))
 
-#####################################
-## Outcomes from the manual method ##
-#####################################
+###########
+## Plots ##
+###########
 
 # Plot the MCMC
 par(mfrow = c(1,2))
