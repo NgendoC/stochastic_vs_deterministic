@@ -6,14 +6,13 @@
 ################
 
 # Data observation
-# Note: mean and vriance are not known!
 #D <- 2 # 1 observation
 D <- rnorm(4, mean = 2, 1)  # many observations, random numbers from a normal distribution
 
 # Number of observations
 num_obs <- length(D)
 
-# Mean and variance for the prior distribution of the unknown mean
+# Mean and variance for the prior distribution 
 prior_var <- 1
 prior_sd <- sqrt(prior_var)
 prior_mean <- 0
@@ -28,14 +27,21 @@ proposal_sd <- sqrt(proposal_var)
 
 # Likelihood function for the observation
 likelihood <- function(param){
-  obs_likelihood = dnorm(D, param, num_obs_sd, log= T)
-  return(obs_likelihood)
+  mean = param[1]
+  var = param [2]
+  
+  obs_likelihood = dnorm(D, mean, sqrt(var), log = T)
+  return(sum(obs_likelihood))
 } 
 
-# Define the prior distribution (mean=0, variance=1)
+# Define the prior distribution
 mean_prior <- function(param){
-  prior = dnorm(param, prior_mean, prior_sd, log = T)
-  return(prior)
+  mean = param[1]
+  var = param[2]
+  
+  mean_prior = dnorm(mean, mean = 0, sd = 1, log = T)
+  var_prior = dnorm(var, mean = 0, sd = 1, log = T)
+  return(mean_prior + var_prior)
 }
 
 # Define the posterior distribution
@@ -50,31 +56,31 @@ mean_posterior <- function(param){
 # Proposal function has a Normal distribution 
 # The distribution is centered around the current value in the Markov chain
 proposalfunction <- function(param){
-  return(rnorm(1, param, proposal_sd))
+  return(rnorm(2, param, sd = c(1,1)))
 }
 
 # Start at random parameter value
 # Choose new parameter close to old value based on prob. density ratio
 
 metropolis_MCMC <- function(startvalue, iterations){
-  chain = array(dim = c(iterations+1))
+  chain = array(dim = c(iterations+1,2))
   
   # Give a starting point to the chain
-  chain[1] = startvalue
+  chain[1,] = startvalue
   
   # For the other iterations, use the proposal function to suggest the next value
   for (i in 1:iterations){
-    proposal = proposalfunction(chain[i])
+    proposal = proposalfunction(chain[i,])
     
     # P(new)/P(old) NOTE: LOGARITHMIC
-    prob = exp(mean_posterior(proposal) - mean_posterior(chain[i]))
+    prob = exp(mean_posterior(proposal) - mean_posterior(chain[i,]))
     
     # Jump to new probability if P(new)/P(old) >1
     # if r < than P, accept, else reject
     if (runif(1) < prob){ 
-      chain[i+1] = proposal
+      chain[i+1,] = proposal
     }else{
-      chain[i+1] = chain[i]
+      chain[i+1,] = chain[i,]
     }
   }
   return(chain)
@@ -82,7 +88,7 @@ metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain
 # Takes a random number from the (Normal) prior distribution
-startvalue <- rnorm(1, prior_mean, prior_sd)
+startvalue <- c(1,1) #rnorm(2, prior_mean, prior_sd)
 
 # Number of runs
 iterations = 10000
