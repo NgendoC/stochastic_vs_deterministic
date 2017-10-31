@@ -8,11 +8,10 @@
 # Time
 timestep <- 1
 times <- seq(0, 100, by = timestep)
-#times <- list(0:100)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
 init.values = c(
-  S = 10e3-1,
+  S = 100-1,
   I = 1,
   R = 0
 )
@@ -38,28 +37,30 @@ for (time in times){
     data[1,4] <- init.values["R"] # number of recovereds at time 0
     
   } else{
-    foi_t <- 1 - (1 - p)^data[time, 3] # take data on the number infectious from previous timestep!
-    inf <- rbinom(1, size = data[time,2], prob = foi_t) # number who become infected in this timestep
-    rec <- rbinom(1, size = data[time,3], prob = r_t)# number who become recovered in this timestep
+    whole_time <- 1/timestep * time # makes time into the whole number that it corresponds to in the array rows
+    foi_t <- 1 - (1 - p)^data[whole_time, 3] # take data on the number infectious from previous timestep!
+    inf <- rbinom(1, size = data[whole_time,2], prob = foi_t) # number who become infected in this timestep
+    rec <- rbinom(1, size = data[whole_time,3], prob = r_t)# number who become recovered in this timestep
     
-    data[time+1,2] <- data[time, 2] - inf # number of susceptibles at other times
+    data[whole_time+1,2] <- data[whole_time, 2] - inf # number of susceptibles at other times
     
-    data[time+1,3] <- data[time, 3]  + inf - rec # number of infecteds at other times
+    data[whole_time+1,3] <- data[whole_time, 3]  + inf - rec # number of infecteds at other times
     
-    data[time+1,4] <- data[time,4] + rec # number of recovereds at other times
+    data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at other times
   }
 }
 
 run_stoch <- data.frame(data) # make array into a dataframe
+colnames(run_stoch) <- c("time","S", "I", "R")
 
-plot(x = run_stoch$X1, y = run_stoch$X3, type = "line", col = "red", ylim = c(0,10e3),
+plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N),
      xlab = "Time", ylab = "Number susceptible/infected/recovered", main = "Stochastic SIR Model")
 par(new=T)
-plot(x = run_stoch$X1, y = run_stoch$X2, type = "line", ylim = c(0,10e3), ylab = "", xlab = "") # add susceptible line
+plot(x = run_stoch$time, y = run_stoch$S, type = "line", ylim = c(0,N), ylab = "", xlab = "") # add susceptible line
 par(new=T)
-plot(x = run_stoch$X1, y = run_stoch$X4, type = "line", col = "orange", ylim = c(0,10e3), ylab = "", xlab = "") # recovered
+plot(x = run_stoch$time, y = run_stoch$R, type = "line", col = "orange", ylim = c(0,N), ylab = "", xlab = "") # recovered
 
 ## Add legend
-legend(80, 8000, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
+legend(80, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
 ######################################################################################################################
