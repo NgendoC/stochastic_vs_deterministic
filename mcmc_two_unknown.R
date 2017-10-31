@@ -7,7 +7,7 @@
 
 # Data observation
 #D <- 2 # 1 observation
-D <- rnorm(4, mean = 2, 1)  # many observations, random numbers from a normal distribution
+D <- rnorm(30, mean = 2, sd = 1)  # many observations, random numbers from a normal distribution
 
 # Number of observations
 num_obs <- length(D)
@@ -28,14 +28,15 @@ proposal_sd <- sqrt(proposal_var)
 # Likelihood function for the observation
 likelihood <- function(param){
   mean = param[1]
-  var = param [2]
+  var = param[2]
   
   obs_likelihood = dnorm(D, mean, sqrt(var), log = T)
-  return(sum(obs_likelihood))
+  sum_likelihood = sum(obs_likelihood)
+  return(sum_likelihood)
 } 
 
 # Define the prior distribution
-mean_prior <- function(param){
+prior <- function(param){
   mean = param[1]
   var = param[2]
   
@@ -46,8 +47,8 @@ mean_prior <- function(param){
 
 # Define the posterior distribution
 # Note: is on a logarithmic scale
-mean_posterior <- function(param){
-  return (likelihood(param) + mean_prior(param))
+posterior <- function(param){
+  return (likelihood(param) + prior(param))
 }
 
 # Apply the Metropolis algorithm
@@ -73,7 +74,7 @@ metropolis_MCMC <- function(startvalue, iterations){
     proposal = proposalfunction(chain[i,])
     
     # P(new)/P(old) NOTE: LOGARITHMIC
-    prob = exp(mean_posterior(proposal) - mean_posterior(chain[i,]))
+    prob = exp(posterior(proposal) - posterior(chain[i,]))
     
     # Jump to new probability if P(new)/P(old) >1
     # if r < than P, accept, else reject
