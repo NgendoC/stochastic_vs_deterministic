@@ -62,11 +62,15 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   return(chain)
 }
 
-startvalue = c(4,10)
-chain = run_metropolis_MCMC(startvalue, 10000)
-
-burnIn = 5000
-acceptance = 1-mean(duplicated(chain[-(1:burnIn),]))
+# Number of runs
+iterations = 10000
+set.seed(4)
+chain <- metropolis_MCMC(startvalue, iterations)
+# 
+# # The beginning of the chain is biased towards the starting point, so take them out
+# # normally burnin is 10%-50% of the runs
+burnIn = 0.1*iterations
+acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
 
 ###########
 ## Plots ##
