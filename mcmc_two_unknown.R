@@ -60,16 +60,21 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       chain[i+1,] = chain[i,]
     }
   }
+  
   return(chain)
 }
+
+# Where to start the chain
+# Takes a random number from the (Normal) prior distribution
+startvalue <- c(1,1) #rnorm(2, prior_mean, prior_sd)
 
 # Number of runs
 iterations = 10000
 set.seed(4)
 chain <- metropolis_MCMC(startvalue, iterations)
-# 
-# # The beginning of the chain is biased towards the starting point, so take them out
-# # normally burnin is 10%-50% of the runs
+
+# The beginning of the chain is biased towards the starting point, so take them out
+# normally burnin is 10%-50% of the runs
 burnIn = 0.1*iterations
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
 
