@@ -61,6 +61,8 @@ for (time in times){
 run_stoch <- data.frame(data) # make array into a dataframe
 colnames(run_stoch) <- c("time","S", "I", "R")
 
+par(mfrow = c(1,1))
+
 plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N),
      xlab = "Time", ylab = "Number susceptible/infected/recovered", main = "Stochastic SIR Model")
 par(new=T)
