@@ -5,12 +5,13 @@
 ## Known values ##
 ##################
 
-trueMean <- 5
-trueSd <- 10
-sampleSize <- 31
+true_mean <- 5
+true_var <- 20
+true_sd <- sqrt(true_var)
+n_obs <- 31
 
 # create values according to a + N(0,sd)
-y <- rnorm(n=sampleSize,mean=trueMean,sd=trueSd)
+D <- rnorm(n=n_obs,mean=true_mean,sd=true_sd)
 
 ##################################
 ## Likelihood, prior, posterior ##
@@ -18,9 +19,9 @@ y <- rnorm(n=sampleSize,mean=trueMean,sd=trueSd)
 
 likelihood <- function(param){
   mean = param[1]
-  sd = param[2]
+  var = param[2]
   
-  singlelikelihoods = dnorm(y, mean = mean, sd = sd, log = T)
+  singlelikelihoods = dnorm(D, mean = mean, sd = sqrt(var), log = T)
   sumll = sum(singlelikelihoods)
   return(sumll)   
 }
@@ -28,10 +29,10 @@ likelihood <- function(param){
 # Prior distribution
 prior <- function(param){
   mean = param[1]
-  sd = param[2]
+  var = param[2]
   meanprior = dnorm(mean, mean = 0, sd = 1, log = T)
-  sdprior = dnorm(sd, mean = 0, sd = 1, log = T)
-  return(meanprior+sdprior)
+  varprior = dnorm(var, mean = 0, sd = 1, log = T)
+  return(meanprior+varprior)
 }
 
 posterior <- function(param){
@@ -81,12 +82,12 @@ par(mfrow = c(2,2))
 hist(chain[-(1:burnIn),1],nclass=30, main="Posterior of mean")
 abline(v = mean(chain[-(1:burnIn),1]), col = "red")
 
-hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of sd")
+hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of var")
 abline(v = mean(chain[-(1:burnIn),2]), col = "red")
 
-plot(chain[-(1:burnIn),1], type = "l", main = "Chain values of a")
+plot(chain[-(1:burnIn),1], type = "l", main = "Chain values of mean")
 
-plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of sd")
+plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of var")
 
 ###################################################################################################################
 ## Previous attempt
