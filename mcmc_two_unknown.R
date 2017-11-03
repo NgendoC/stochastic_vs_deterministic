@@ -10,7 +10,7 @@ true_var <- 20
 true_sd <- sqrt(true_var)
 n_obs <- 31
 
-# create values according to a + N(0,sd)
+# create values
 D <- rnorm(n=n_obs,mean=true_mean,sd=true_sd)
 
 ##################################
