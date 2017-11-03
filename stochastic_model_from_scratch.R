@@ -25,6 +25,18 @@ D_inf <- 2
 true_infectious <- (dnorm(times, 20, 4))*N
 plot(true_infectious)
 
+#####################
+## Values for MCMC ##
+#####################
+
+true_mean <- 5
+true_var <- 20
+true_sd <- sqrt(true_var)
+n_obs <- 31
+
+# create values
+D <- rnorm(n=n_obs,mean=true_mean,sd=true_sd)
+
 ###############
 ## The model ##
 ###############
@@ -63,10 +75,10 @@ for (time in times){
 ##################################
 
 likelihood <- function(param){
-  foi = param[1]
-  recovery = param[2]
+  mean = param[1]
+  var = param[2]
   
-  singlelikelihoods = dnorm(true_infectious, mean = mean, sd = 1, log = T)
+  singlelikelihoods = dnorm(D, mean = mean, sd = sqrt(var), log = T)
   sumll = sum(singlelikelihoods)
   return(sumll)   
 }
@@ -116,14 +128,12 @@ startvalue <- c(1,1) #rnorm(2, prior_mean, prior_sd)
 # Number of runs
 iterations = 10000
 set.seed(4)
-chain <- metropolis_MCMC(startvalue, iterations)
+chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
 burnIn = 0.1*iterations
 acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
-
-
 
 ###############
 ## SIR plots ##
@@ -131,8 +141,6 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
 
 run_stoch <- data.frame(data) # make array into a dataframe
 colnames(run_stoch) <- c("time","S", "I", "R")
-
-
 
 par(mfrow = c(1,2))
 
