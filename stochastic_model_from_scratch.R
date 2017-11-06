@@ -1,9 +1,9 @@
 ## Population-based stochastic SIR model from scratch
 ## 26/10/17
 
-##################
-## Input values ##
-##################
+##########################
+## Input values for SIR ##
+##########################
 
 # Time
 timestep <- 0.1
@@ -17,13 +17,11 @@ init.values = c(
 )
 N = sum(init.values)
 
-# R0 & duration of infectiousness
-R0 <- 5
-D_inf <- 2
+
 
 # Invent some epidemic data to fit my model to
 true_infectious <- (dnorm(times, 20, 4))*N
-plot(true_infectious)
+#plot(true_infectious)
 
 #####################
 ## Values for MCMC ##
@@ -41,9 +39,14 @@ D <- rnorm(n=n_obs,mean=true_mean,sd=true_sd)
 ## The model ##
 ###############
 
+sir <- function(param){
 # Array for holding collective disease status information for whole period of time
 data <- array(0, dim =c(length(times), length(init.values)+1))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
+
+# R0 & duration of infectiousness
+R0 <- param[1]
+D_inf <- param[2]
 
 # Calculating probabilities that do not change with time
 p <- R0 * (timestep/(D_inf*N)) # probability of effective contact
@@ -68,6 +71,7 @@ for (time in times){
     
     data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at other times
   }
+}
 }
 
 ##################################
