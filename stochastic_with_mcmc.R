@@ -98,8 +98,8 @@ plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", yli
 #   beta = param[1]
 #   gamma = param[2]
 #   
-#   betalikelihood = dbinom(data, #susceptibles, 1-(exp(-beta*#infectious*timestep), log = T)
-#   gammalikelihood = dbinom(data, #infectious, gamma, log = T)
+#   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, 1-(exp(-beta*run_stoch$I*timestep), log = T)
+#   gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, gamma, log = T)
 #   sumll = sum(betalikelihood + gammalikelihood)
 #   return(sumll)   
 # }
@@ -167,6 +167,8 @@ plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", yli
 # plot(chain[-(1:burnIn),1], type = "l", main = "Chain values of beta")
 # 
 # plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
+
+########################################################################################################################
 
 ########################################################################################################################
 
