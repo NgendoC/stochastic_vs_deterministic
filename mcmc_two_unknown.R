@@ -71,7 +71,7 @@ startvalue <- c(1,1) #rnorm(2, prior_mean, prior_sd)
 # Number of runs
 iterations = 10000
 set.seed(4)
-chain <- metropolis_MCMC(startvalue, iterations)
+chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
