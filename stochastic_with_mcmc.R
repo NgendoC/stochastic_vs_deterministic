@@ -87,11 +87,6 @@ likelihood <- function(param){
   return(sumll)   
 }
 
-# inf_likelihood <- function(inf_param){
-#   dbinom(inf_data, size=S(t-1), prob = foi_t)
-#   
-#}
-
 # Prior distribution
 prior <- function(param){
   mean = param[1]
@@ -104,6 +99,44 @@ prior <- function(param){
 posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
+
+########################
+## Rate of infection  ##
+########################
+
+# inf_likelihood <- function(inf_param){
+#   inf_singlell = dbinom(inf_data, size=S(t-1), prob = foi_t, log = T) # inf_param is in the foi_t
+#   inf_sumll = sum(singlell)
+#   return(inf_sumll)
+#}
+
+# inf_prior <- function(inf_param){
+#   infprior = dbeta(inf_param, shape1, shape2, ncp = 0, log = T)
+#   return(infprior)
+#}
+
+# inf_posterior <- function(inf_param){
+#   return(inf_likelihood + inf_prior)
+#}
+
+####################
+## Recovery rate  ##
+####################
+
+#  rec_likelihood <- function(rec_param){
+#   rec_singlell = dbinom(rec_data, size=I(t-1), prob = r_t, log = T) # rec_param is in the r_t
+#   rec_sumll = sum(rec_singlell)
+#   return(rec_sumll)
+#}
+
+# rec_prior <- function(rec_param){
+#   recprior = dbeta(rec_param, shape1, shape2, ncp = 0, log = T)
+#   return(recprior)
+#}
+
+# rec_posterior <- function(rec_param){
+#   return(rec_likelihood + rec_prior)
+#}
 
 ##########
 ## MCMC ##
