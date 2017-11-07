@@ -33,8 +33,8 @@ init  <- c(
 
 ## R0 = basic reproduction number, D_inf = duration of infection
 parameters <- c(
-  R0 = 2, 
-  D_inf = 5
+  R0 = 3, 
+  D_inf = 2
 )
 
 ## Timeframe
@@ -53,4 +53,4 @@ matplot(x = times, y = run_det, type = "l",
   lwd = 1, lty = 1, bty = "l", col = c("black","red","orange"))
 
 ## Add legend
-legend(80, 1.0, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black","red","orange"), bty = "n")
+legend(80, 0.8, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black","red","orange"), bty = "n")
