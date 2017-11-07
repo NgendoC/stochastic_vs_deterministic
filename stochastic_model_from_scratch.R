@@ -18,7 +18,7 @@ init.values = c(
 N = sum(init.values)
 
 # R0 & duration of infectiousness
-R0 <- 5
+R0 <- 3
 D_inf <- 2
 
 ###############
@@ -61,7 +61,7 @@ for (time in times){
 run_stoch <- data.frame(data) # make array into a dataframe
 colnames(run_stoch) <- c("time","S", "I", "R")
 
-par(mfrow = c(1,1))
+#par(mfrow = c(2,2))
 
 # Plot for SIR model
 plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N),
@@ -72,5 +72,5 @@ par(new=T)
 plot(x = run_stoch$time, y = run_stoch$R, type = "line", col = "orange", ylim = c(0,N), ylab = "", xlab = "") # recovered
 
 ## Add legend
-legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
+legend(40, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
