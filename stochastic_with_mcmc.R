@@ -94,63 +94,73 @@ plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", yli
 ## Likelihood, prior, posterior ##
 ##################################
 
-# likelihood <- function(param){
-#   beta = param[1]
-#   gamma = param[2]
-#   
-#   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, 1-(exp(-beta*run_stoch$I*timestep), log = T)
-#   gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, gamma, log = T)
-#   sumll = sum(betalikelihood + gammalikelihood)
-#   return(sumll)   
-# }
-# 
-# # Prior distribution
-# prior <- function(param){
-#   beta = param[1]
-#   gamma = param[2]
-#   betaprior = dunif(beta, min = 0, max = Inf, log = T)
-#   gammaprior = dunif(gamma, min = 0, max = Inf, log = T)
-#   return(betaprior + gammaprior)
-# }
-# 
-# posterior <- function(param){
-#   return (likelihood(param) + prior(param))
-# }
+likelihood <- function(param){
+  beta = as.numeric(param[1])
+  gamma = as.numeric(param[2])
+  sumll = 0 #sum of likelihoods is zero before you start counting
+  
+  for (time in times){
+  betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I*timestep))), log = T)
+  gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (gamma*timestep), log = T)
+  #sumll = sum(betalikelihood + gammalikelihood)
+  sumll = sumll + (betalikelihood + gammalikelihood)
+  }
+  #print(betalikelihood)
+  #print(gammalikelihood)
+  print(sumll)
+  return(sumll)
+}
 
-# proposalfunction <- function(param){
-#   return(rnorm(2, mean = param, sd = 1))
-# }
-# 
-# run_metropolis_MCMC <- function(startvalue, iterations){
-#   chain = array(dim = c(iterations+1,2))
-#   chain[1,] = startvalue
-#   for (i in 1:iterations){
-#     proposal = proposalfunction(chain[i,])
-#     
-#     probab = exp(posterior(proposal) - posterior(chain[i,]))
-#     if (runif(1) < probab){
-#       chain[i+1,] = proposal
-#     }else{
-#       chain[i+1,] = chain[i,]
-#     }
-#   }
-#   
-#   return(chain)
-# }
+# Prior distribution
+prior <- function(param){
+  beta = as.numeric(param[1])
+  gamma = as.numeric(param[2])
+  
+  betaprior = dunif(beta, min = 0, max = Inf, log = T)
+  gammaprior = dunif(gamma, min = 0, max = Inf, log = T)
+  # print(betaprior)
+  # print(gammaprior)
+  return(betaprior + gammaprior)
+}
 
-# # Where to start the chain
-# # Takes a random number from the (Normal) prior distribution
-# startvalue <- c(1,1) #rnorm(2, prior_mean, prior_sd)
-# 
-# # Number of runs
-# iterations = 10000
-# set.seed(4)
-# chain <- run_metropolis_MCMC(startvalue, iterations)
-# 
-# # The beginning of the chain is biased towards the starting point, so take them out
-# # normally burnin is 10%-50% of the runs
-# burnIn = 0.1*iterations
-# acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
+# Posterior distribution
+posterior <- function(param){
+  return (likelihood(param) + prior(param))
+}
+
+proposalfunction <- function(param){
+  return(rnorm(2, mean = param, sd = 1))
+}
+
+run_metropolis_MCMC <- function(startvalue, iterations){
+  chain = array(dim = c(iterations+1,2))
+  chain[1,] = startvalue
+  for (i in 1:iterations){
+    proposal = proposalfunction(chain[i,])
+
+    probab = exp(posterior(proposal) - posterior(chain[i,]))
+    if (runif(1) < probab){
+      chain[i+1,] = proposal
+    }else{
+      chain[i+1,] = chain[i,]
+    }
+  }
+
+  return(chain)
+}
+
+# Where to start the chain
+startvalue <- c(0,0)
+
+# Number of runs
+iterations = 10000
+set.seed(4)
+chain <- run_metropolis_MCMC(startvalue, iterations)
+
+# The beginning of the chain is biased towards the starting point, so take them out
+# normally burnin is 10%-50% of the runs
+burnIn = 0.1*iterations
+acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
 
 ################
 ## MCMC Plots ##
