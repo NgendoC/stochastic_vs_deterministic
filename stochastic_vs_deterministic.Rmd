@@ -8,22 +8,82 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Introduction
+
+* Using stochastic models (especially individual-based models) is currently trendy
+* Stochastic models can be more difficult to deal with than deterministic models
+* For some questions, it may not matter whether you use a stochastic or deterministic model.
+* When is using a stochastic model a waste of your time?
+
+## Modelling
+
+Simple SIR models with individuals moving from susceptible to infected and from infected to recovered (no births or deaths) were constructed.
 
 ## Deterministic model
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+A deterministic SIR model was constructed:
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r deterministic_model, echo = FALSE, cache = TRUE}
+library("deSolve") #package for solving differential equations
 
-```{r deterministic_model}
-summary(cars)
+## Make an SIS function
+sir <- function(time, state, parameters) {
+  
+  # define model parameters in term of the natural parameters
+  beta <- parameters["R0"]/parameters["D_inf"] 
+  gamma <- 1/parameters["D_inf"]
+  
+  with(as.list(c(state, parameters)), {
+    
+    dS <- -beta * S * I 
+    dI <-  beta * S * I - gamma * I
+    dR <-  gamma * I
+    
+    return(list(c(dS, dI, dR)))
+  })
+}
+
+#############################
+### THINGS YOU CAN CHANGE ###
+#############################
+
+# Proportion in each compartment at the start
+init  <- c(
+  S = 1-1e-4, 
+  I = 1e-4,
+  R = 0
+) # N = 1
+
+## R0 = basic reproduction number, D_inf = duration of infection
+parameters <- c(
+  R0 = 3, 
+  D_inf = 2
+)
+
+## Timeframe
+times <- seq(0, 100, by = 1)
+
+## Solve using General Solver for Ordinary Differential Equations (ode)
+run <- ode(y = init, times = times, func = sir, parms = parameters)
+run_det <- as.data.frame(run) # change to data frame
+run_det$time <- NULL # Delete time variable
+
+## Plot model
+par(mfrow=c(1,1))
+
+matplot(x = times, y = run_det, type = "l",
+  xlab = "Time", ylab = "Proportion susceptible or infected",  main = "Deterministic SIR Model",
+  lwd = 1, lty = 1, bty = "l", col = c("black","red","orange"))
+
+## Add legend
+legend(80, 0.8, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black","red","orange"), bty = "n")
 ```
 
 ## Stochastic model
 
-You can also embed plots, for example:
+A stochastic model was constructed: 
 
-```{r stochastic_model, echo = FALSE}
+```{r stochastic_model, echo = FALSE, warning = FALSE, cache = TRUE}
 ##########################
 ## Input values for SIR ##
 ##########################
@@ -94,7 +154,7 @@ for (time in times){
 run_stoch <- data.frame(data) # make array into a dataframe
 colnames(run_stoch) <- c("time","S", "I", "R", "new_I", "new_R")
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,1))
 
 # Plot for SIR model
 plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N),
@@ -108,11 +168,13 @@ plot(x = run_stoch$time, y = run_stoch$R, type = "line", col = "orange", ylim = 
 legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
 # Plot for newly infected and newly recovered
-plot(x = run_stoch$time, y = run_stoch$new_I, type = "line", col = "red", ylim = c(0,max(run_stoch$new_I)),
-     xlab = "Time", ylab = "Number newly infected/recovered", main = "New infections/recoveries")
-par(new=T)
-plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", ylim = c(0,max(run_stoch$new_I)), ylab = "", xlab = "") # add susceptible line
+#plot(x = run_stoch$time, y = run_stoch$new_I, type = "line", col = "red", ylim = c(0,max(run_stoch$new_I)),
+#     xlab = "Time", ylab = "Number newly infected/recovered", main = "New infections/recoveries")
+#par(new=T)
+#plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", ylim = c(0,max(run_stoch$new_I)), ylab = "", xlab = "") # add susceptible line
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Markov Chain Monte Carlo
+
+A Metropolis-Hastings algorithm was developed to infer the values of beta, the rate at which susceptibles become infectious, and gamma, the rate at which infectious individuals recover, in the stochastic SIR model.
