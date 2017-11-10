@@ -101,10 +101,10 @@ likelihood <- function(param){
   
   for (i in 1:nrow(run_stoch)){
   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I*timestep))), log = T)
-  gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (gamma*timestep), log = T)
+  gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, gamma, log = T)
   sumll = sumll + (betalikelihood + gammalikelihood)
   }
-  print(sumll)
+  #rint(gammalikelihood)
   return(sumll)
 }
 
@@ -113,10 +113,8 @@ prior <- function(param){
   beta = as.numeric(param[1])
   gamma = as.numeric(param[2])
   
-  betaprior = dunif(beta, min = 0, max = Inf, log = T)
-  gammaprior = dunif(gamma, min = 0, max = Inf, log = T)
-  # print(betaprior)
-  # print(gammaprior)
+  betaprior = dunif(beta, min = 0, max = 100, log = T)
+  gammaprior = dunif(gamma, min = 0, max = 100, log = T)
   return(betaprior + gammaprior)
 }
 
@@ -136,6 +134,8 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     proposal = proposalfunction(chain[i,])
 
     probab = exp(posterior(proposal) - posterior(chain[i,]))
+    print(posterior(chain[i,]))
+    
     if (runif(1) < probab){
       chain[i+1,] = proposal
     }else{
@@ -147,7 +147,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 }
 
 # Where to start the chain
-startvalue <- c(0,0)
+startvalue <- c(0.001,0.001)
 
 # Number of runs
 iterations = 10000
