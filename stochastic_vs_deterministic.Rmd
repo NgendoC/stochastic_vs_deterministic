@@ -177,4 +177,4 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 
 ## Markov Chain Monte Carlo
 
-A Metropolis-Hastings algorithm was developed to infer the values of beta, the rate at which susceptibles become infectious, and gamma, the rate at which infectious individuals recover, in the stochastic SIR model.
+A Metropolis-Hastings algorithm was used to infer the values of beta, the rate at which susceptibles become infectious, and gamma, the rate at which infectious individuals recover, in the stochastic SIR model.
