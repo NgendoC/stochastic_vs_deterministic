@@ -99,14 +99,11 @@ likelihood <- function(param){
   gamma = as.numeric(param[2])
   sumll = 0 #sum of likelihoods is zero before you start counting
   
-  for (time in times){
+  for (i in 1:nrow(run_stoch)){
   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I*timestep))), log = T)
   gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (gamma*timestep), log = T)
-  #sumll = sum(betalikelihood + gammalikelihood)
   sumll = sumll + (betalikelihood + gammalikelihood)
   }
-  #print(betalikelihood)
-  #print(gammalikelihood)
   print(sumll)
   return(sumll)
 }
@@ -181,123 +178,3 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
 ########################################################################################################################
 
 ########################################################################################################################
-
-## The original MCMC
-
-# likelihood <- function(param){
-#   mean = param[1]
-#   var = param[2]
-#   
-#   singlelikelihoods = dnorm(D, mean = mean, sd = sqrt(var), log = T)
-#   sumll = sum(singlelikelihoods)
-#   return(sumll)   
-# }
-# 
-# # Prior distribution
-# prior <- function(param){
-#   mean = param[1]
-#   var = param[2]
-#   meanprior = dnorm(mean, mean = 0, sd = 1, log = T)
-#   varprior = dnorm(var, mean = 0, sd = 1, log = T)
-#   return(meanprior+varprior)
-# }
-# 
-# posterior <- function(param){
-#   return (likelihood(param) + prior(param))
-# }
-
-# proposalfunction <- function(param){
-#   return(rnorm(2,mean = param, sd= c(0.1,0.3)))
-# }
-# 
-# run_metropolis_MCMC <- function(startvalue, iterations){
-#   chain = array(dim = c(iterations+1,2))
-#   chain[1,] = startvalue
-#   for (i in 1:iterations){
-#     proposal = proposalfunction(chain[i,])
-#     
-#     probab = exp(posterior(proposal) - posterior(chain[i,]))
-#     if (runif(1) < probab){
-#       chain[i+1,] = proposal
-#     }else{
-#       chain[i+1,] = chain[i,]
-#     }
-#   }
-#   
-#   return(chain)
-# }
-
-
-########################
-## Rate of infection  ##
-########################
-
-# inf_likelihood <- function(inf_param){
-#   inf_param = foi_t # force of infection at time t
-#   inf_singlell = dbinom(inf_data, size=S(t-1), prob = foi_t, log = T) # inf_param is in the foi_t
-#   inf_sumll = sum(singlell)
-#   return(inf_sumll)
-#}
-
-# inf_prior <- function(inf_param){
-#   infprior = dbeta(inf_param, shape1, shape2, ncp = 0, log = T)
-#   return(infprior)
-#}
-
-# inf_posterior <- function(inf_param){
-#   return(inf_likelihood + inf_prior)
-#}
-
-####################
-## Recovery rate  ##
-####################
-
-#  rec_likelihood <- function(rec_param){
-#   rec_param = r_t # recovery rate at time t
-#   rec_singlell = dbinom(rec_data, size=I(t-1), prob = r_t, log = T) # rec_param is in the r_t
-#   rec_sumll = sum(rec_singlell)
-#   return(rec_sumll)
-#}
-
-# rec_prior <- function(rec_param){
-#   recprior = dbeta(rec_param, shape1, shape2, ncp = 0, log = T)
-#   return(recprior)
-#}
-
-# rec_posterior <- function(rec_param){
-#   return(rec_likelihood + rec_prior)
-#}
-
-##########
-## MCMC ##
-##########
-
-# proposalfunction <- function(param){
-#   return(rnorm(1,mean = param, sd= 1))
-# }
-
-# run_metropolis_MCMC <- function(startvalue, iterations){
-#   chain = array(dim = c(iterations+1,2))
-#   chain[1,] = startvalue
-#   
-#   for (i in 1:iterations){
-#     # Infection rate
-#     inf_proposal = proposalfunction(chain[i,1])
-#     inf_probab = exp(inf_posterior(inf_proposal) - inf_posterior(chain[i,1]))
-#     if (runif(1) < inf_probab){
-#       chain[i+1,1] = inf_proposal
-#     }else{
-#       chain[i+1,1] = chain[i,1]
-#     }
-#     # Recovery rate
-#     rec_proposal = proposalfunction(chain[i,])
-#     rec_probab = exp(rec_posterior(rec_proposal) - rec_posterior(chain[i,2]))
-#     if (runif(1) < rec_probab){
-#       chain[i+1,2] = rec_proposal
-#     }else{
-#       chain[i+1,2] = chain[i,2]
-#     }
-#   }
-#   
-#   return(chain)
-# }
