@@ -101,11 +101,12 @@ likelihood <- function(param){
   
   for (i in 1:nrow(run_stoch)){
   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I*timestep))), log = T)
-  gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, gamma, log = T)
-  sumll = sumll + (betalikelihood + gammalikelihood)
+  gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (1-(exp(-gamma*timestep))), log = T)
+  sum_betagamma = betalikelihood + gammalikelihood
   }
-  #rint(gammalikelihood)
-  return(sumll)
+  total_sum = sum(sum_betagamma)
+  print(total_sum)
+  return(total_sum)
 }
 
 # Prior distribution
@@ -123,8 +124,13 @@ posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
 
-proposalfunction <- function(param){
-  return(rnorm(2, mean = param, sd = 1))
+proposalfunction <- function(param){ # beta and gamma need to be >0
+  beta_prop = rnorm(1, mean = param[1], sd = 1)
+  gamma_prop = rnorm(1, mean = param[2], sd = 1)
+  #gamma_prop = runif(1, min = 0, max = 1)
+  print(c(beta_prop, gamma_prop))
+  return(c(beta_prop, gamma_prop))
+  #return(c(0.1, 0.1))
 }
 
 run_metropolis_MCMC <- function(startvalue, iterations){
@@ -132,26 +138,28 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   chain[1,] = startvalue
   for (i in 1:iterations){
     proposal = proposalfunction(chain[i,])
-
-    probab = exp(posterior(proposal) - posterior(chain[i,]))
-    print(posterior(chain[i,]))
     
-    if (runif(1) < probab){
-      chain[i+1,] = proposal
-    }else{
+    if (proposal[1] | proposal[2] <0){
       chain[i+1,] = chain[i,]
     }
+    else{
+      probab = exp(posterior(proposal) - posterior(chain[i,]))
+      if (runif(1) < probab){
+        chain[i+1,] = proposal
+      }else{
+        chain[i+1,] = chain[i,]
+        }
+      }
   }
-
   return(chain)
 }
 
 # Where to start the chain
-startvalue <- c(0.001,0.001)
+startvalue <- c(0.1,0.1)
 
 # Number of runs
 iterations = 10000
-set.seed(4)
+#set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
@@ -163,17 +171,17 @@ acceptance <- 1-mean(duplicated(chain[-(1:burnIn),]))
 ## MCMC Plots ##
 ################
 
-# par(mfrow = c(2,2))
-# 
-# hist(chain[-(1:burnIn),1],nclass=30, main="Posterior of beta")
-# abline(v = mean(chain[-(1:burnIn),1]), col = "red")
-# 
-# hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of gamma")
-# abline(v = mean(chain[-(1:burnIn),2]), col = "red")
-# 
-# plot(chain[-(1:burnIn),1], type = "l", main = "Chain values of beta")
-# 
-# plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
+par(mfrow = c(2,2))
+
+hist(chain[-(1:burnIn),1],nclass=30, main="Posterior of beta")
+abline(v = mean(chain[-(1:burnIn),1]), col = "red")
+
+hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of gamma")
+abline(v = mean(chain[-(1:burnIn),2]), col = "red")
+
+plot(chain[-(1:burnIn),1], type = "l", main = "Chain values of beta")
+
+plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 
 ########################################################################################################################
 
