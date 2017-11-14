@@ -88,26 +88,29 @@ plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", yli
 ## Likelihood, prior, posterior ##
 ##################################
 
+# Likelihood distribution
 likelihood <- function(param){
   beta = as.numeric(param[1])
   gamma = as.numeric(param[2])
-  total = 0
+  total = array(0, dim = (c(nrow(run_stoch))))
 
   for (i in 1:nrow(run_stoch)){
-  betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I[i-1]*timestep))), log = T)
-  gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (1-(exp(-gamma*timestep))), log = T)
-  total = total + (betalikelihood + gammalikelihood)
+    betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
+    gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
+    #print(betalikelihood)
+    #print(betalikelihood + gammalikelihood)
+    total[i] = betalikelihood + gammalikelihood
   }
-  return(sum(total))
+  return(sum(total, na.rm = T))
 }
 
 # Prior distribution
 prior <- function(param){
   beta = as.numeric(param[1])
   gamma = as.numeric(param[2])
-
   betaprior = dunif(beta, min = 0, max = 100, log = T)
   gammaprior = dunif(gamma, min = 0, max = 100, log = T)
+  print(betaprior + gammaprior)
   return(betaprior + gammaprior)
 }
 
@@ -120,10 +123,6 @@ proposalfunction <- function(param){ # beta and gamma need to be >0
 
   beta_prop = rnorm(1, mean = param[1], sd = 1)
   gamma_prop = rnorm(1, mean = param[2], sd = 1)
-  #beta_prop = runif(1, min = 0, max = 10)
-  #gamma_prop = runif(1, min = 0, max = 10)
-
-  #print(c(beta_prop, gamma_prop))
   return(c(beta_prop, gamma_prop))
 }
 
@@ -152,7 +151,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- c(0.1,0.1)
 
 # Number of runs
-iterations = 1000
+iterations = 20
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
@@ -180,38 +179,3 @@ plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 ########################################################################################################################
 
 ########################################################################################################################
-
-# # R0 & duration of infectiousness
-# R0 <- 3
-# D_inf <- 2
-# 
-# # Calculating probabilities that do not change with time
-# p <- R0 * (timestep/(D_inf*N)) # probability of effective contact
-# r_t <- (1/D_inf)*timestep # Recovery rate
-# 
-# # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
-# for (time in times){
-#   if (time == 0){ # Set up the number of S/I/R at time 0
-#     data[1,2] <- init.values["S"] # number of susceptibles at time 0
-#     data[1,3] <- init.values["I"] # number of infecteds at time 0
-#     data[1,4] <- init.values["R"] # number of recovereds at time 0
-#     data[1,5] <- init.values["I"] # number newly infected at time 0
-#     data[1,6] <- init.values["R"] # number newly recovered at time 0
-#     
-#   } else{
-#     whole_time <- 1/timestep * time # makes time into the whole number that it corresponds to in the array
-#     foi_t <- 1 - (1 - p)^data[whole_time, 3] # Force of infection at time t, affected by the number infectious at prev t
-#     inf <- rbinom(1, size = data[whole_time,2], prob = foi_t) # number who become infected in this timestep
-#     rec <- rbinom(1, size = data[whole_time,3], prob = r_t)# number who become recovered in this timestep
-#     
-#     data[whole_time+1,2] <- data[whole_time,2] - inf # number of susceptibles at other times
-#     
-#     data[whole_time+1,3] <- data[whole_time,3]  + inf - rec # number of infecteds at other times
-#     
-#     data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at other times
-#     
-#     data[whole_time+1,5] <- data[whole_time+1,3] - data[whole_time,3] + data[whole_time+1,4] - data[whole_time,4] # number of newly infected
-#     
-#     data[whole_time+1,6] <- data[whole_time+1,4] - data[whole_time,4] # number of newly recovered
-#   }
-# }
