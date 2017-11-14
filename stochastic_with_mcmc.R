@@ -18,8 +18,8 @@ init.values = c(
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 0.2
-gamma <- 0.2
+beta <- 0.5
+gamma <- 0.5
 
 ###############
 ## The model ##
@@ -29,7 +29,7 @@ gamma <- 0.2
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-set.seed(7) # other good ones: 14, 22, 30
+set.seed(14) # other good ones: 7, 14, 22, 30
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -131,15 +131,33 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   for (i in 1:iterations){
     proposal = proposalfunction(chain[i,])
 
-    if (proposal[1] < 0.0 | proposal[2] < 0.0){
+    if (proposal[1] < 0.0 & proposal[2] < 0.0 ){
       chain[i+1,] = chain[i,]
-     }
-     else{
+      
+    } else if (proposal[1] < 0.0 & proposal[2] >= 0.0){
+      proposal[1] = chain[i,1]
       probab = exp(posterior(proposal) - posterior(chain[i,]))
       if (runif(1) < probab){
         chain[i+1,] = proposal
       }else{
         chain[i+1,] = chain[i,]
+      }
+       
+    } else if (proposal[1] >= 0.0 & proposal[2] < 0.0){
+      proposal[2] = chain[i,2]
+      probab = exp(posterior(proposal) - posterior(chain[i,]))
+      if (runif(1) < probab){
+        chain[i+1,] = proposal
+      }else{
+        chain[i+1,] = chain[i,]
+      }
+       
+     } else{
+        probab = exp(posterior(proposal) - posterior(chain[i,]))
+        if (runif(1) < probab){
+          chain[i+1,] = proposal
+        }else{
+          chain[i+1,] = chain[i,]
         }
       }
   }
@@ -150,7 +168,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- c(0.1,0.1)
 
 # Number of runs
-iterations = 5000
+iterations = 1000
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
@@ -178,3 +196,24 @@ plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 ########################################################################################################################
 
 ########################################################################################################################
+
+# run_metropolis_MCMC <- function(startvalue, iterations){
+#   chain = array(dim = c(iterations+1,2))
+#   chain[1,] = startvalue
+#   for (i in 1:iterations){
+#     proposal = proposalfunction(chain[i,])
+#     
+#     if (proposal[1] < 0.0 | proposal[2] < 0.0){
+#       chain[i+1,] = chain[i,]
+#     }
+#     else{
+#       probab = exp(posterior(proposal) - posterior(chain[i,]))
+#       if (runif(1) < probab){
+#         chain[i+1,] = proposal
+#       }else{
+#         chain[i+1,] = chain[i,]
+#       }
+#     }
+#   }
+#   return(chain)
+# }
