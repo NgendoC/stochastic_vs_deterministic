@@ -97,17 +97,31 @@ plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", yli
 likelihood <- function(param){
   beta = as.numeric(param[1])
   gamma = as.numeric(param[2])
-  sumll = 0 #sum of likelihoods is zero before you start counting
+  #sum_betagamma = array(dim = c(nrow(run_stoch), 1))
+  total = 0
   
   for (i in 1:nrow(run_stoch)){
   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I*timestep))), log = T)
   gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (1-(exp(-gamma*timestep))), log = T)
-  sum_betagamma = betalikelihood + gammalikelihood
+  #sum_betagamma[i] = betalikelihood + gammalikelihood
+  #print(sum_betagamma[i])
+  total = total + (betalikelihood + gammalikelihood)
   }
-  total_sum = sum(sum_betagamma)
-  print(total_sum)
-  return(total_sum)
+  #total_sum = sum(sum_betagamma)
+  #print(total_sum)
+  print(sum(total))
+  return(sum(total))
 }
+
+# sum_betagamma = array(dim = c(nrow(run_stoch), 1))
+# 
+# for (i in 1:nrow(run_stoch)){
+#   betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-0.1*run_stoch$I*timestep))), log = T)
+#   gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (1-(exp(-0.2*timestep))), log = T)
+#   sum_ll = betalikelihood + gammalikelihood
+#   sum_betagamma[i] = sum_ll
+#   print(sum_betagamma[i])
+# }
 
 # Prior distribution
 prior <- function(param){
@@ -116,6 +130,7 @@ prior <- function(param){
   
   betaprior = dunif(beta, min = 0, max = 100, log = T)
   gammaprior = dunif(gamma, min = 0, max = 100, log = T)
+  print(betaprior + gammaprior)
   return(betaprior + gammaprior)
 }
 
@@ -125,12 +140,14 @@ posterior <- function(param){
 }
 
 proposalfunction <- function(param){ # beta and gamma need to be >0
-  beta_prop = rnorm(1, mean = param[1], sd = 1)
-  gamma_prop = rnorm(1, mean = param[2], sd = 1)
-  #gamma_prop = runif(1, min = 0, max = 1)
-  print(c(beta_prop, gamma_prop))
+  
+  # beta_prop = rnorm(1, mean = param[1], sd = 1)
+  # gamma_prop = rnorm(1, mean = param[2], sd = 1)
+  beta_prop = runif(1, min = 0, max = 10)
+  gamma_prop = runif(1, min = 0, max = 10)
+  
+  #print(c(beta_prop, gamma_prop))
   return(c(beta_prop, gamma_prop))
-  #return(c(0.1, 0.1))
 }
 
 run_metropolis_MCMC <- function(startvalue, iterations){
@@ -139,17 +156,17 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   for (i in 1:iterations){
     proposal = proposalfunction(chain[i,])
     
-    if (proposal[1] | proposal[2] <0){
-      chain[i+1,] = chain[i,]
-    }
-    else{
+    # if (proposal[1] < 0.0 | proposal[2] < 0.0){
+    #   chain[i+1,] = chain[i,]
+    # }
+    # else{
       probab = exp(posterior(proposal) - posterior(chain[i,]))
       if (runif(1) < probab){
         chain[i+1,] = proposal
       }else{
         chain[i+1,] = chain[i,]
         }
-      }
+      #}
   }
   return(chain)
 }
