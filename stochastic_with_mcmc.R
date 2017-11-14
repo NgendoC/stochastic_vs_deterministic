@@ -18,8 +18,8 @@ init.values = c(
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 0.008
-gamma <- 0.5
+beta <- 0.2
+gamma <- 0.2
 
 ###############
 ## The model ##
@@ -28,7 +28,9 @@ gamma <- 0.5
 # Array for holding collective disease status information for whole period of time
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
-  
+
+set.seed(7) # other good ones: 14, 22, 30
+
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
   if (time == 0){ # Set up the number of S/I/R at time 0
