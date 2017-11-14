@@ -101,15 +101,16 @@ likelihood <- function(param){
   total = 0
   
   for (i in 1:nrow(run_stoch)){
-  betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I*timestep))), log = T)
+  betalikelihood = dbinom(run_stoch$new_I, run_stoch$S, (1-(exp(-beta*run_stoch$I[i-1]*timestep))), log = T)
   gammalikelihood = dbinom(run_stoch$new_R, run_stoch$I, (1-(exp(-gamma*timestep))), log = T)
   #sum_betagamma[i] = betalikelihood + gammalikelihood
   #print(sum_betagamma[i])
   total = total + (betalikelihood + gammalikelihood)
+  #print(total)
   }
   #total_sum = sum(sum_betagamma)
   #print(total_sum)
-  print(sum(total))
+  #print(sum(total))
   return(sum(total))
 }
 
@@ -130,7 +131,6 @@ prior <- function(param){
   
   betaprior = dunif(beta, min = 0, max = 100, log = T)
   gammaprior = dunif(gamma, min = 0, max = 100, log = T)
-  print(betaprior + gammaprior)
   return(betaprior + gammaprior)
 }
 
