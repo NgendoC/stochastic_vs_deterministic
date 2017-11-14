@@ -123,6 +123,7 @@ proposalfunction <- function(param){ # beta and gamma need to be >0
 
   beta_prop = rnorm(1, mean = param[1], sd = 1)
   gamma_prop = rnorm(1, mean = param[2], sd = 1)
+  print(c(beta_prop, gamma_prop))
   return(c(beta_prop, gamma_prop))
 }
 
@@ -132,17 +133,17 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   for (i in 1:iterations){
     proposal = proposalfunction(chain[i,])
 
-    # if (proposal[1] < 0.0 | proposal[2] < 0.0){
-    #   chain[i+1,] = chain[i,]
-    # }
-    # else{
+    if (proposal[1] < 0.0 | proposal[2] < 0.0){
+      chain[i+1,] = chain[i,]
+     }
+     else{
       probab = exp(posterior(proposal) - posterior(chain[i,]))
       if (runif(1) < probab){
         chain[i+1,] = proposal
       }else{
         chain[i+1,] = chain[i,]
         }
-      #}
+      }
   }
   return(chain)
 }
@@ -151,7 +152,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- c(0.1,0.1)
 
 # Number of runs
-iterations = 20
+iterations = 100
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
