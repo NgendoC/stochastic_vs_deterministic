@@ -18,8 +18,8 @@ init.values = c(
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 0.5
-gamma <- 0.5
+beta <- 0.2
+gamma <- 0.2
 
 ###############
 ## The model ##
@@ -29,7 +29,7 @@ gamma <- 0.5
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-set.seed(14) # other good ones: 7, 14, 22, 30
+#set.seed(22) # other good ones: 7, 14, 22, 30
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -67,7 +67,7 @@ for (time in times){
 run_stoch <- data.frame(data) # make array into a dataframe
 colnames(run_stoch) <- c("time","S", "I", "R", "new_I", "new_R")
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,1))
 
 # Plot for SIR model
 plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N),
@@ -81,10 +81,10 @@ plot(x = run_stoch$time, y = run_stoch$R, type = "line", col = "orange", ylim = 
 legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
 # Plot for newly infected and newly recovered
-plot(x = run_stoch$time, y = run_stoch$new_I, type = "line", col = "red", ylim = c(0,max(run_stoch$new_I)),
-     xlab = "Time", ylab = "Number newly infected/recovered", main = "New infections/recoveries")
-par(new=T)
-plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", ylim = c(0,max(run_stoch$new_I)), ylab = "", xlab = "") # add susceptible line
+# plot(x = run_stoch$time, y = run_stoch$new_I, type = "line", col = "red", ylim = c(0,max(run_stoch$new_I)),
+#      xlab = "Time", ylab = "Number newly infected/recovered", main = "New infections/recoveries")
+# par(new=T)
+# plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", ylim = c(0,max(run_stoch$new_I)), ylab = "", xlab = "") # add susceptible line
 
 ##################################
 ## Likelihood, prior, posterior ##
@@ -120,8 +120,8 @@ posterior <- function(param){
 
 proposalfunction <- function(param){ # beta and gamma need to be >0
 
-  beta_prop = rnorm(1, mean = param[1], sd = 1)
-  gamma_prop = rnorm(1, mean = param[2], sd = 1)
+  beta_prop = rnorm(1, mean = param[1], sd = 0.01)
+  gamma_prop = rnorm(1, mean = param[2], sd = 0.01)
   return(c(beta_prop, gamma_prop))
 }
 
@@ -165,10 +165,10 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 }
 
 # Where to start the chain
-startvalue <- c(0.1,0.1)
+startvalue <- c(0.01,0.01)
 
 # Number of runs
-iterations = 1000
+iterations = 500
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
@@ -210,6 +210,45 @@ plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 #       probab = exp(posterior(proposal) - posterior(chain[i,]))
 #       if (runif(1) < probab){
 #         chain[i+1,] = proposal
+#       }else{
+#         chain[i+1,] = chain[i,]
+#       }
+#     }
+#   }
+#   return(chain)
+# }
+
+# run_metropolis_MCMC <- function(startvalue, iterations){
+#   chain = array(dim = c(iterations+1,2))
+#   chain[1,] = startvalue
+#   for (i in 1:iterations){
+#     proposal = proposalfunction(chain[i,])
+#     
+#     if (proposal[1] < 0.0 & proposal[2] < 0.0 ){
+#       chain[i+1,] = chain[i,]
+#       
+#     } else if (proposal[1] < 0.0 & proposal[2] >= 0.0){
+#       proposal[1] = chain[i,1]
+#       probab = posterior(proposal) - posterior(chain[i,])
+#       if (log(runif(1)) < probab){
+#         chain[i+1,] = exp(proposal)
+#       }else{
+#         chain[i+1,] = chain[i,]
+#       }
+#       
+#     } else if (proposal[1] >= 0.0 & proposal[2] < 0.0){
+#       proposal[2] = chain[i,2]
+#       probab = posterior(proposal) - posterior(chain[i,])
+#       if (log(runif(1)) < probab){
+#         chain[i+1,] = exp(proposal)
+#       }else{
+#         chain[i+1,] = chain[i,]
+#       }
+#       
+#     } else{
+#       probab = posterior(proposal) - posterior(chain[i,])
+#       if (log(runif(1)) < probab){
+#         chain[i+1,] = exp(proposal)
 #       }else{
 #         chain[i+1,] = chain[i,]
 #       }
