@@ -6,7 +6,7 @@
 ##########################
 
 # Time
-timestep <- 0.1
+timestep <- 1
 times <- seq(0, 100, by = timestep)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
@@ -18,8 +18,8 @@ init.values = c(
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 0.2
-gamma <- 0.2
+beta <- 5e-3
+gamma <- 8e-2
 
 ###############
 ## The model ##
@@ -118,7 +118,7 @@ posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
 
-proposalfunction <- function(param){ # beta and gamma need to be >0
+proposalfunction <- function(param){ 
 
   beta_prop = rnorm(1, mean = param[1], sd = 0.01)
   gamma_prop = rnorm(1, mean = param[2], sd = 0.01)
@@ -133,33 +133,33 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
     if (proposal[1] < 0.0 & proposal[2] < 0.0 ){
       chain[i+1,] = chain[i,]
-      
+
     } else if (proposal[1] < 0.0 & proposal[2] >= 0.0){
       proposal[1] = chain[i,1]
-      probab = exp(posterior(proposal) - posterior(chain[i,]))
-      if (runif(1) < probab){
+      probab = posterior(proposal) - posterior(chain[i,])
+      if (log(runif(1)) < probab){
         chain[i+1,] = proposal
       }else{
         chain[i+1,] = chain[i,]
       }
-       
+
     } else if (proposal[1] >= 0.0 & proposal[2] < 0.0){
       proposal[2] = chain[i,2]
-      probab = exp(posterior(proposal) - posterior(chain[i,]))
-      if (runif(1) < probab){
+      probab = posterior(proposal) - posterior(chain[i,])
+      if (log(runif(1)) < probab){
         chain[i+1,] = proposal
       }else{
         chain[i+1,] = chain[i,]
       }
-       
-     } else{
-        probab = exp(posterior(proposal) - posterior(chain[i,]))
-        if (runif(1) < probab){
-          chain[i+1,] = proposal
-        }else{
-          chain[i+1,] = chain[i,]
-        }
+
+    } else{
+      probab = posterior(proposal) - posterior(chain[i,])
+      if (log(runif(1)) < probab){
+        chain[i+1,] = proposal
+      }else{
+        chain[i+1,] = chain[i,]
       }
+    }
   }
   return(chain)
 }
@@ -168,7 +168,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- c(0.01,0.01)
 
 # Number of runs
-iterations = 500
+iterations = 5000
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
@@ -197,62 +197,3 @@ plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 
 ########################################################################################################################
 
-# run_metropolis_MCMC <- function(startvalue, iterations){
-#   chain = array(dim = c(iterations+1,2))
-#   chain[1,] = startvalue
-#   for (i in 1:iterations){
-#     proposal = proposalfunction(chain[i,])
-#     
-#     if (proposal[1] < 0.0 | proposal[2] < 0.0){
-#       chain[i+1,] = chain[i,]
-#     }
-#     else{
-#       probab = exp(posterior(proposal) - posterior(chain[i,]))
-#       if (runif(1) < probab){
-#         chain[i+1,] = proposal
-#       }else{
-#         chain[i+1,] = chain[i,]
-#       }
-#     }
-#   }
-#   return(chain)
-# }
-
-# run_metropolis_MCMC <- function(startvalue, iterations){
-#   chain = array(dim = c(iterations+1,2))
-#   chain[1,] = startvalue
-#   for (i in 1:iterations){
-#     proposal = proposalfunction(chain[i,])
-#     
-#     if (proposal[1] < 0.0 & proposal[2] < 0.0 ){
-#       chain[i+1,] = chain[i,]
-#       
-#     } else if (proposal[1] < 0.0 & proposal[2] >= 0.0){
-#       proposal[1] = chain[i,1]
-#       probab = posterior(proposal) - posterior(chain[i,])
-#       if (log(runif(1)) < probab){
-#         chain[i+1,] = exp(proposal)
-#       }else{
-#         chain[i+1,] = chain[i,]
-#       }
-#       
-#     } else if (proposal[1] >= 0.0 & proposal[2] < 0.0){
-#       proposal[2] = chain[i,2]
-#       probab = posterior(proposal) - posterior(chain[i,])
-#       if (log(runif(1)) < probab){
-#         chain[i+1,] = exp(proposal)
-#       }else{
-#         chain[i+1,] = chain[i,]
-#       }
-#       
-#     } else{
-#       probab = posterior(proposal) - posterior(chain[i,])
-#       if (log(runif(1)) < probab){
-#         chain[i+1,] = exp(proposal)
-#       }else{
-#         chain[i+1,] = chain[i,]
-#       }
-#     }
-#   }
-#   return(chain)
-# }
