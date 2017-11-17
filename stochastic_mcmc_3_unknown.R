@@ -196,8 +196,17 @@ plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 
 # Plot beta vs. gamma
 par(mfrow = c(1,1))
-plot(x = chain[,1], y = chain[,2], xlab = "Beta", ylab = "Gamma")
+plot(x = chain[,2], y = chain[,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
+abline(lm(chain[,1]~chain[,2]), col="red") # regression line
 
 ########################################################################################################################
 
 ########################################################################################################################
+
+# A method of randomly choosing -1 or +1 with equal probability
+inf_list <- c(-1, 1)
+sample(inf_list, 1)
+
+
+
+
