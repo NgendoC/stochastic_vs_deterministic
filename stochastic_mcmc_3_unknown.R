@@ -100,7 +100,8 @@ likelihood <- function(param){
   for (i in 1:nrow(run_stoch)){
     betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
-    total[i] = betalikelihood + gammalikelihood
+    # inflikelihood = dgamma
+    total[i] = betalikelihood + gammalikelihood # + inflikelihood
   }
   return(sum(total, na.rm = T))
 }
@@ -123,7 +124,10 @@ proposalfunction <- function(param){
   
   beta_prop = rnorm(1, mean = param[1], sd = 0.01)
   gamma_prop = rnorm(1, mean = param[2], sd = 0.01)
-  return(c(beta_prop, gamma_prop))
+  # inf_list <- c(-1, 1)
+  # inf <- sample(inf_list, 1)
+  
+  return(c(beta_prop, gamma_prop)) # , inf))
 }
 
 run_metropolis_MCMC <- function(startvalue, iterations){
@@ -204,8 +208,8 @@ abline(lm(chain[,1]~chain[,2]), col="red") # regression line
 ########################################################################################################################
 
 # A method of randomly choosing -1 or +1 with equal probability
-inf_list <- c(-1, 1)
-sample(inf_list, 1)
+# inf_list <- c(-1, 1)
+# sample(inf_list, 1)
 
 
 
