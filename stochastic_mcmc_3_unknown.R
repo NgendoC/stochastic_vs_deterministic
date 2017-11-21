@@ -213,7 +213,7 @@ plot(x = chain[,2], y = chain[,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex 
 k <- 11
 my.cols <- rev(brewer.pal(k, "RdYlBu"))
 z <- kde2d(chain[,2], chain[,1], n=50)
-filled.contour(z, drawlabels=FALSE, nlevels=k, col=my.cols, cex = 2.0, add=TRUE, xlab = "Gamma", ylab = "Beta")
+filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
 
 ########################################################################################################################
 
