@@ -95,11 +95,15 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 likelihood <- function(param){
   beta = as.numeric(param[1])
   gamma = as.numeric(param[2])
+  # inf = as.numeric(param[3])
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch)){
     betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
+    
+    # betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
+    # gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
     # inflikelihood = dgamma
     total[i] = betalikelihood + gammalikelihood # + inflikelihood
   }
@@ -173,7 +177,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- c(0.01,0.01)
 
 # Number of runs
-iterations = 5000
+iterations = 10000
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
@@ -200,8 +204,16 @@ plot(chain[-(1:burnIn),2], type = "l", main = "Chain values of gamma")
 
 # Plot beta vs. gamma
 par(mfrow = c(1,1))
+library(RColorBrewer)
+library(MASS)
+
 plot(x = chain[,2], y = chain[,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
-abline(lm(chain[,1]~chain[,2]), col="red") # regression line
+# abline(lm(chain[,1]~chain[,2]), col="red") # regression line
+
+k <- 11
+my.cols <- rev(brewer.pal(k, "RdYlBu"))
+z <- kde2d(chain[,2], chain[,1], n=50)
+filled.contour(z, drawlabels=FALSE, nlevels=k, col=my.cols, cex = 2.0, add=TRUE, xlab = "Gamma", ylab = "Beta")
 
 ########################################################################################################################
 
