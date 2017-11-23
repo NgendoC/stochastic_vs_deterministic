@@ -21,6 +21,7 @@ N = sum(init.values)
 # Beta & gammma
 beta <- 5e-3
 gamma <- 8e-2
+1/gamma
 
 ###############
 ## The model ##
@@ -91,18 +92,19 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 ## Guess new_I ##
 #################
 
-inf_period <- 17 # infectious period is 2 days
+inf_period <- 1/gamma # mean infectious period calculated from gamma
 
 for (i in 1:nrow(run_stoch)){
 run_stoch$guess_new_I[i] <- run_stoch$new_R[i+(inf_period/timestep)] # guess newly infected, translates days into no. of timesteps
 run_stoch$guess_I[i] <- run_stoch$R[i+(inf_period/timestep)] - run_stoch$R[i]
 }
 
-plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "line")
+plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "line", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
 par(new=T)
-plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "line")
+plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "line", col = "red", xlab = " ", ylab = " ")
 par(new=T)
-plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N))
+plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "black", ylim = c(0,N), xlab = " ", ylab = " ")
+legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, col = c("orange", "red", "black"), bty = "n")
 
 ##################################
 ## Likelihood, prior, posterior ##
