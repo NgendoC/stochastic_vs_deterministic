@@ -97,7 +97,9 @@ inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
 for (i in 1:nrow(run_stoch)){
 run_stoch$guess_new_I[i] <- run_stoch$new_R[i+(inf_period/timestep)] # guess newly infected, translates days into no. of timesteps
 run_stoch$guess_I[i] <- run_stoch$R[i+(inf_period/timestep)] - run_stoch$R[i]
+run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
 }
+run_stoch[is.na(run_stoch)] <- 0
 
 plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "line", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
 par(new=T)
@@ -118,9 +120,10 @@ likelihood <- function(param){
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch)){
-    betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
-    gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
-    
+    betalikelihood = dbinom(run_stoch$guess_new_I[i+1], run_stoch$guess_S[i], (1-(exp(-beta*run_stoch$guess_I[i]*timestep))), log = T)
+    gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$guess_I[i], (1-(exp(-gamma*timestep))), log = T)
+    #print(betalikelihood)
+    #print(gammalikelihood)
     # betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
     # gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
     # inflikelihood = dgamma
@@ -165,6 +168,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     } else if (proposal[1] < 0.0 & proposal[2] >= 0.0){
       proposal[1] = chain[i,1]
       probab = posterior(proposal) - posterior(chain[i,])
+      # print(probab)
       if (log(runif(1)) < probab){
         chain[i+1,] = proposal
       }else{
@@ -174,6 +178,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     } else if (proposal[1] >= 0.0 & proposal[2] < 0.0){
       proposal[2] = chain[i,2]
       probab = posterior(proposal) - posterior(chain[i,])
+      # print(probab)
       if (log(runif(1)) < probab){
         chain[i+1,] = proposal
       }else{
@@ -182,6 +187,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       
     } else{
       probab = posterior(proposal) - posterior(chain[i,])
+      # print(probab)
       if (log(runif(1)) < probab){
         chain[i+1,] = proposal
       }else{
