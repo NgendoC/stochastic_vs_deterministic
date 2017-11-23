@@ -87,6 +87,16 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 # par(new=T)
 # plot(x = run_stoch$time, y = run_stoch$new_R, type = "line", col = "orange", ylim = c(0,max(run_stoch$new_I)), ylab = "", xlab = "") # add susceptible line
 
+#################
+## Guess new_I ##
+#################
+
+inf_period <- 2 # infectious period is 2 days
+
+for (i in 1:nrow(run_stoch)){
+run_stoch$guess_I[i] <- run_stoch$new_R[i+(inf_period/timestep)] # translate days into timesteps
+}
+
 ##################################
 ## Likelihood, prior, posterior ##
 ##################################
