@@ -92,7 +92,7 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 ## Guess new_I ##
 #################
 
-inf_period <- 1/gamma # mean infectious period calculated from gamma
+inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
 
 for (i in 1:nrow(run_stoch)){
 run_stoch$guess_new_I[i] <- run_stoch$new_R[i+(inf_period/timestep)] # guess newly infected, translates days into no. of timesteps
