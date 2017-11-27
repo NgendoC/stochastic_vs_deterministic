@@ -112,25 +112,46 @@ legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, 
 ## Likelihood, prior, posterior ##
 ##################################
 
-# Likelihood distribution
+# Likelihood distribution for beta and gamma
 likelihood <- function(param){
   beta = as.numeric(param[1])
   gamma = as.numeric(param[2])
-  # inf = as.numeric(param[3])
   total = array(0, dim = (c(nrow(run_stoch))))
+  #   I = as.numeric(inf_chain[iteration,,1])
+  #   new_I = as.numeric(inf_chain[iteration,,2])
   
   for (i in 1:nrow(run_stoch)){
     betalikelihood = dbinom(run_stoch$guess_new_I[i+1], run_stoch$guess_S[i], (1-(exp(-beta*run_stoch$guess_I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$guess_I[i], (1-(exp(-gamma*timestep))), log = T)
-    #print(betalikelihood)
-    #print(gammalikelihood)
-    # betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
-    # gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
-    # inflikelihood = dgamma
-    total[i] = betalikelihood + gammalikelihood # + inflikelihood
+    total[i] = betalikelihood + gammalikelihood
   }
+  
+  # for (i in 1:nrow(run_stoch)){
+  #   betalikelihood = dbinom(new_I[i+1], (N - I[i] - run_stoch$R[i]), (1-(exp(-beta*I[i]*timestep))), log = T)
+  #   gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
+  #   total[i] = betalikelihood + gammalikelihood
+  # }
+  
   return(sum(total, na.rm = T))
 }
+
+# Likelihood distribution for infection
+# Keep beta and gamma constant, change I
+# inf_likelihood <- function(param){
+#   beta = as.numeric(chain[iteration-1,1]) # most recent guess of beta
+#   gamma = as.numeric(chain[iteration-1,2]) # most recent guess of gamma
+#   I = as.numeric(param[1])
+#   new_I = as.numeric(param[2])
+#   
+#   total = array(0, dim = (c(nrow(run_stoch))))
+#   
+#   for (i in 1:nrow(run_stoch)){
+#     betalikelihood = dbinom(new_I[i+1], (N - I[i] - run_stoch$R[i]), (1-(exp(-beta*I[i]*timestep))), log = T)
+#     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
+#     total[i] = betalikelihood + gammalikelihood
+#   }
+#   return(sum(total, na.rm = T))
+# }
 
 # Prior distribution
 prior <- function(param){
@@ -141,25 +162,60 @@ prior <- function(param){
   return(betaprior + gammaprior)
 }
 
-# Posterior distribution
+# Posterior distribution for beta and gamma
 posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
 
+# Posterior distribution for infectious
+# inf_posterior <- function(param){
+#   return (inf_likelihood(param) + prior(param))
+# }
+
 proposalfunction <- function(param){ 
   
-  beta_prop = rnorm(1, mean = param[1], sd = 0.01)
+  beta_prop = rnorm(1, mean = param[1], sd = 0.01 )
   gamma_prop = rnorm(1, mean = param[2], sd = 0.01)
-  # inf_list <- c(-1, 1)
-  # inf <- sample(inf_list, 1)
+
   
-  return(c(beta_prop, gamma_prop)) # , inf))
+  return(c(beta_prop, gamma_prop))
 }
+
+# inf_proposalfunction(param){
+#   # changed_I <- sample(length(times), 1) # choose the timepoint at which I will be changed
+#   inf_list <- c(-1, 1)
+#   inf <- sample(inf_list, 1) # will the change at that timepoint be + or - 1 I
+#   
+#   I_prop <- param[1] + inf
+#   new_I_prop <- param[2] + inf
+#   
+#   return(c(I_prop, new_I_prop))
+# }
+
+# Give a starting point for running iterations, necessary for putting the right betas, gammas, and Is into functions
+iteration = 0
 
 run_metropolis_MCMC <- function(startvalue, iterations){
   chain = array(dim = c(iterations+1,2))
   chain[1,] = startvalue
+  
+  # inf_chain = array(dim = c(length(times), iterations+1, 2)) # chain for infectious
+  # inf_chain[,1,] = start_I
+  
+  # Proposals
   for (i in 1:iterations){
+    iteration = iteration + 1 # keeps track of which iteration you're on
+    
+  # Infectious
+  #   inf_proposal = inf_proposalfunction(inf_chain[i,sample(length(times), 1),])
+  #   inf_probab = inf_posterior(inf_proposal) - inf_posterior(inf_chain[i,])
+  #   if (log(runif(1)) < inf_probab){
+  #     inf_chain[i+1,] = inf_proposal
+  #   }else{
+  #     inf_chain[i+1,] = inf_chain[i,]
+  #   }
+    
+    # Beta and gamma
     proposal = proposalfunction(chain[i,])
     
     if (proposal[1] < 0.0 & proposal[2] < 0.0 ){
@@ -198,11 +254,14 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   return(chain)
 }
 
-# Where to start the chain
+# Where to start the chain for beta and gamma
 startvalue <- c(0.01,0.01)
 
+# Where to start the guessing for I
+start_I <- c(run_stoch$guess_I, run_stoch$guess_new_I)
+
 # Number of runs
-iterations = 10000
+iterations = 5000
 #set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
@@ -248,6 +307,10 @@ filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
 # inf_list <- c(-1, 1)
 # sample(inf_list, 1)
 
-
+# Keeps track of which iteration you're on
+# iteration = 0
+# for (i in 1:iterations){
+#   iteration = iteration + 1
+# }
 
 
