@@ -108,23 +108,23 @@ legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, 
 
 # Likelihood distribution for beta and gamma
 likelihood <- function(param){
-  dim(param)
   beta = as.numeric(param[1,1])
   gamma = as.numeric(param[2,1])
-  I = as.numeric(param[,2])
-  new_I = as.numeric(param[,3])
-  
+  I = as.numeric(param[,2]) # Infected
+  new_I = as.numeric(param[,3]) # Newly infected
+
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch)){
-    betalikelihood = dbinom(new_I[i+1], (N - I[i] - run_stoch$R[i]), (1-(exp(-beta*I[i]*timestep))), log = T)
+    S = (N - I[i] - run_stoch$R[i]) # Susceptibles
+    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
-    total[i] = betalikelihood + gammalikelihood
-    # print(betalikelihood)
-    # print(gammalikelihood)
+    total[i] = (betalikelihood + gammalikelihood)
   }
-  #print(sum(total, na.rm = T))
-  return(sum(total, na.rm = T))
+  
+  ll = sum(total, na.rm = T)
+
+  return(ll)
 }
 
 # Prior distribution
@@ -146,10 +146,21 @@ posterior <- function(param){
 inf_proposalfunction <- function(param){
   changed_I <- sample(length(times), 1)
   inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
-  inf <- sample(inf_list, 1) # will the change at that timepoint be + or - 1 I
+  
+  inf <- sample(c(-1, 1), 1) # will the change at that timepoint be + or - 1 I
+  
+  neighbour <- if (changed_I == 1){
+    changed_I + 1
+    } else if (changed_I == length(times)){
+      changed_I - 1
+      } else{
+        changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
+        }
 
   param[changed_I[1],2] = param[changed_I[1], 2] + inf
   param[changed_I[1],3] = param[changed_I[1], 3] + inf
+  param[neighbour,2] = param[neighbour, 2] - inf
+  param[neighbour,3] = param[neighbour, 3] - inf
   return(param)
 }
 
@@ -180,14 +191,17 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     if(min(inf_proposal[,2]) < 0 | min(inf_proposal[,3]) < 0){
       chain[,i+1,2:3] = chain[,i,2:3]
 
-    } else{
-      inf_probab = posterior(inf_proposal) - posterior(chain[,i,])
-        if (log(runif(1)) < inf_probab){
-        chain[,i+1,2:3] = inf_proposal[,2:3]
-        } else{
-          chain[,i+1,2:3] = chain[,i,2:3]
-          }
-    }
+      } else{
+        inf_probab = posterior(inf_proposal) - posterior(chain[,i,])
+      # print(inf_probab)
+      # print(likelihood(inf_proposal))
+      # print(likelihood(chain[,i,]))
+          if (log(runif(1)) < inf_probab){
+            chain[,i+1,2:3] = inf_proposal[,2:3]
+            } else{
+              chain[,i+1,2:3] = chain[,i,2:3]
+              }
+        }
     
     # Beta and gamma
     proposal = proposalfunction(chain[,i,]) # beta proposal and gamma proposal
@@ -195,35 +209,46 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     if (proposal[1,1] < 0.0 & proposal[2,1] < 0.0 ){
       chain[1:2,i+1,1] = chain[1:2,i,1]
       
-    } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
-      proposal[1,1] = chain[1,i,1]
-      probab = posterior(proposal) - posterior(chain[,i,])
-      #print(probab)
-      if (log(runif(1)) < probab){
-        chain[,i+1,1] = proposal[,1]
-      }else{
-        chain[,i+1,1] = chain[,i,1]
-      }
+      } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
+        proposal[1,1] = chain[1,i,1]
+        probab = posterior(proposal) - posterior(chain[,i,])
+        # print(probab)
+        # print(likelihood(proposal))
+        # print(likelihood(chain[,i,]))
+        if (log(runif(1)) < probab){
+          chain[,i+1,1] = proposal[,1]
+          } else{
+            chain[,i+1,1] = chain[,i,1]
+            }
       
-    } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
-      proposal[2,1] = chain[2,i,1]
-      probab = posterior(proposal) - posterior(chain[,i,])
-      #print(probab)
-      if (log(runif(1)) < probab){
-        chain[,i+1,1] = proposal[,1]
-      }else{
-        chain[,i+1,1] = chain[,i,1]
-      }
+        } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
+          proposal[2,1] = chain[2,i,1]
+          probab = posterior(proposal) - posterior(chain[,i,])
+          # print(probab)
+          # print(likelihood(proposal))
+          # print(likelihood(chain[,i,]))
+          if (log(runif(1)) < probab){
+            chain[,i+1,1] = proposal[,1]
+          } else{
+            chain[,i+1,1] = chain[,i,1]
+            }
       
-    } else{
-      probab = posterior(proposal) - posterior(chain[,i,])
-      #print(probab)
-      if (log(runif(1)) < probab){
-        chain[,i+1,1] = proposal[,1]
-      }else{
-        chain[,i+1,1] = chain[,i,1]
-      }
+          } else{
+            probab = posterior(proposal) - posterior(chain[,i,])
+            # print(probab)
+            # print(likelihood(proposal))
+            # print(likelihood(chain[,i,]))
+            if (log(runif(1)) < probab){
+              chain[,i+1,1] = proposal[,1]
+              } else{
+                chain[,i+1,1] = chain[,i,1]
+                }
+            }
+    # Print every nth iteration, to know how far along run is
+    if (i%%10000 == 0) {
+      print(i)
     }
+    
   }
   return(chain)
 }
@@ -236,7 +261,7 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 3000000
+iterations = 400000
 
 # Run the MCMC
 #set.seed(4)
@@ -270,7 +295,6 @@ library(RColorBrewer)
 library(MASS)
 
 plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
-# abline(lm(chain[,1]~chain[,2]), col="red") # regression line
 
 k <- 11
 my.cols <- rev(brewer.pal(k, "RdYlBu"))
