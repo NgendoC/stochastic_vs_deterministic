@@ -31,7 +31,7 @@ gamma <- 8e-2
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-#set.seed(22) # other good ones: 7, 14, 22, 30
+set.seed(7) # Good ones: 7, 14, 22, 30
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -44,8 +44,6 @@ for (time in times){
     
   } else{
     whole_time <- 1/timestep * time # makes time into the whole number that it corresponds to in the array
-    #inf <- rbinom(1, size = data[whole_time,2], prob = foi_t) # number who become infected in this timestep
-    #rec <- rbinom(1, size = data[whole_time,3], prob = r_t)# number who become recovered in this timestep
     
     inf <- rbinom(1, size = data[whole_time,2], (1-(exp(-beta*data[whole_time,3]*timestep)))) # number who become infected in this timestep
     rec <- rbinom(1, size = data[whole_time,3], (1-(exp(-gamma*timestep)))) # number who become recovered in this timestep
@@ -72,12 +70,12 @@ colnames(run_stoch) <- c("time","S", "I", "R", "new_I", "new_R")
 par(mfrow = c(1,1))
 
 # Plot for SIR model
-plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "red", ylim = c(0,N),
+plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "red", ylim = c(0,N),
      xlab = "Time", ylab = "Number susceptible/infected/recovered", main = "Stochastic SIR Model")
 par(new=T)
-plot(x = run_stoch$time, y = run_stoch$S, type = "line", ylim = c(0,N), ylab = "", xlab = "") # add susceptible line
+plot(x = run_stoch$time, y = run_stoch$S, type = "l", ylim = c(0,N), ylab = "", xlab = "") # add susceptible line
 par(new=T)
-plot(x = run_stoch$time, y = run_stoch$R, type = "line", col = "orange", ylim = c(0,N), ylab = "", xlab = "") # recovered
+plot(x = run_stoch$time, y = run_stoch$R, type = "l", col = "orange", ylim = c(0,N), ylab = "", xlab = "") # recovered
 
 # Add legend
 legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
@@ -87,26 +85,40 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 #################
 
 inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
+inf_timestep <- inf_period/timestep # translates days into no. of timesteps
 
+# Calculating the new guessed parameters
 for (i in 1:nrow(run_stoch)){
-run_stoch$guess_new_I[i] <- run_stoch$new_R[i+(inf_period/timestep)] # guess newly infected, translates days into no. of timesteps
-run_stoch$guess_I[i] <- run_stoch$R[i+(inf_period/timestep)] - run_stoch$R[i]
+run_stoch$guess_new_I[i] <- if(i == 1){
+  sum(run_stoch$new_R[1:inf_timestep+1])
+  } else{
+    run_stoch$new_R[i+(inf_timestep)] # guess newly infected, translates days into no. of timesteps
+    }
+  
+  run_stoch$guess_I[i] <- if(i == 1){
+    run_stoch$guess_new_I[i] 
+    } else{
+      run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
+      }
+    # run_stoch$guess_I[i] <- run_stoch$R[i+(inf_period/timestep)] - run_stoch$R[i]
+
 run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
 }
+
 run_stoch[is.na(run_stoch)] <- 0
 
-plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "line", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
+plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "l", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
 par(new=T)
-plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "line", col = "red", xlab = " ", ylab = " ")
+plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "l", col = "red", xlab = " ", ylab = " ")
 par(new=T)
-plot(x = run_stoch$time, y = run_stoch$I, type = "line", col = "black", ylim = c(0,N), xlab = " ", ylab = " ")
+plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "black", ylim = c(0,N), xlab = " ", ylab = " ")
 legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, col = c("orange", "red", "black"), bty = "n")
 
 ##################################
 ## Likelihood, prior, posterior ##
 ##################################
 
-# Likelihood distribution for beta and gamma
+# Likelihood distribution
 likelihood <- function(param){
   beta = as.numeric(param[1,1])
   gamma = as.numeric(param[2,1])
@@ -119,11 +131,18 @@ likelihood <- function(param){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
     betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
+    #print(c(new_I[i+1], S, I[i], beta, betalikelihood))
+    #print(c(S, betalikelihood))
+    if (is.na(new_I[i+1]) == F & betalikelihood == -Inf){
+      betalikelihood = -1000
+    }
+    if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
+      gammalikelihood = -1000
+    }
     total[i] = (betalikelihood + gammalikelihood)
   }
   
   ll = sum(total, na.rm = T)
-
   return(ll)
 }
 
@@ -137,7 +156,7 @@ prior <- function(param){
   return(betaprior + gammaprior)
 }
 
-# Posterior distribution for beta and gamma
+# Posterior distribution
 posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
@@ -159,8 +178,8 @@ inf_proposalfunction <- function(param){
 
   param[changed_I[1],2] = param[changed_I[1], 2] + inf
   param[changed_I[1],3] = param[changed_I[1], 3] + inf
-  param[neighbour,2] = param[neighbour, 2] - inf
-  param[neighbour,3] = param[neighbour, 3] - inf
+  #param[neighbour,2] = param[neighbour, 2] - inf
+  #param[neighbour,3] = param[neighbour, 3] - inf
   return(param)
 }
 
@@ -187,15 +206,19 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     
     # Infectious
     inf_proposal = inf_proposalfunction(chain[,i,])
+
+    # Check susceptibles for negative numbers
+    S = array(dim = c(nrow(startvalue)))
+
+    for (time in (1:nrow(startvalue))){
+      S[time] = (N - (inf_proposal[time,2] + run_stoch$R[time]))
+    }
     
-    if(min(inf_proposal[,2]) < 0 | min(inf_proposal[,3]) < 0){
+    if(min(inf_proposal[,2]) < 0 | min(inf_proposal[,3]) < 0 | min(S) < 0){
       chain[,i+1,2:3] = chain[,i,2:3]
 
       } else{
         inf_probab = posterior(inf_proposal) - posterior(chain[,i,])
-      # print(inf_probab)
-      # print(likelihood(inf_proposal))
-      # print(likelihood(chain[,i,]))
           if (log(runif(1)) < inf_probab){
             chain[,i+1,2:3] = inf_proposal[,2:3]
             } else{
@@ -212,9 +235,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
         proposal[1,1] = chain[1,i,1]
         probab = posterior(proposal) - posterior(chain[,i,])
-        # print(probab)
-        # print(likelihood(proposal))
-        # print(likelihood(chain[,i,]))
         if (log(runif(1)) < probab){
           chain[,i+1,1] = proposal[,1]
           } else{
@@ -224,9 +244,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
         } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
           proposal[2,1] = chain[2,i,1]
           probab = posterior(proposal) - posterior(chain[,i,])
-          # print(probab)
-          # print(likelihood(proposal))
-          # print(likelihood(chain[,i,]))
           if (log(runif(1)) < probab){
             chain[,i+1,1] = proposal[,1]
           } else{
@@ -235,9 +252,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       
           } else{
             probab = posterior(proposal) - posterior(chain[,i,])
-            # print(probab)
-            # print(likelihood(proposal))
-            # print(likelihood(chain[,i,]))
             if (log(runif(1)) < probab){
               chain[,i+1,1] = proposal[,1]
               } else{
@@ -245,7 +259,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
                 }
             }
     # Print every nth iteration, to know how far along run is
-    if (i%%10000 == 0) {
+    if (i%%(iterations/20) == 0) {
       print(i)
     }
     
@@ -261,10 +275,10 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 400000
+iterations = 100000
 
 # Run the MCMC
-#set.seed(4)
+set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
@@ -294,7 +308,7 @@ par(mfrow = c(1,1))
 library(RColorBrewer)
 library(MASS)
 
-plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
+# plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
 
 k <- 11
 my.cols <- rev(brewer.pal(k, "RdYlBu"))
@@ -309,9 +323,9 @@ par(mfrow = c(1,1))
 #   }
 #   lines(run_stoch$I, type = "line", col = "grey", xlab = " ", ylab = " ")
   
-plot(chain[,1,2], ylim = c(0, N), type = "line", col = "red", xlab = " ", ylab = " ")
-  lines(run_stoch$I, type = "line", col = "grey", xlab = " ", ylab = " ")  
-  lines(chain[,iterations,2], type = "line", lty = 2, col = "black", xlab = " ", ylab = " ")
+plot(chain[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = " ", ylab = " ")
+  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
+  lines(chain[,iterations,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
   
 
 ########################################################################################################################
