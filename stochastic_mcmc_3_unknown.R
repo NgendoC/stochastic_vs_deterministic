@@ -32,7 +32,7 @@ gamma <- 8e-2
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-#set.seed(7) # Good ones: 7, 14, 22, 30
+set.seed(7) # Good ones: 7, 14, 22, 30
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -163,14 +163,14 @@ posterior <- function(param){
 
 # Proposal function for infectious
 inf_proposalfunction <- function(param){
-  changed_I <- sample(length(times), 1)
+  changed_I <- sample(nrow(run_stoch), 1)
   inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
   
   inf <- sample(c(-1, 1), 1) # will the change at that timepoint be + or - 1 I
   
   neighbour <- if (changed_I == 1){
     changed_I + 1
-    } else if (changed_I == length(times)){
+    } else if (changed_I == nrow(run_stoch)){
       changed_I - 1
       } else{
         changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
@@ -178,8 +178,8 @@ inf_proposalfunction <- function(param){
 
   param[changed_I[1],2] = param[changed_I[1], 2] + inf
   param[changed_I[1],3] = param[changed_I[1], 3] + inf
-  #param[neighbour,2] = param[neighbour, 2] - inf
-  #param[neighbour,3] = param[neighbour, 3] - inf
+  param[neighbour,2] = param[neighbour, 2] - inf
+  param[neighbour,3] = param[neighbour, 3] - inf
   return(param)
 }
 
@@ -275,10 +275,10 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 100
+iterations = 10000
 
 # Run the MCMC
-#set.seed(4)
+set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
