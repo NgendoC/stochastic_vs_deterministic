@@ -32,7 +32,7 @@ gamma <- 8e-2
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-set.seed(7) # Good ones: 7, 14, 22, 30
+#set.seed(7) # Good ones: 7, 14, 22, 30
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -278,7 +278,7 @@ startvalue[,3] <- run_stoch$guess_new_I # new I guess
 iterations = 100
 
 # Run the MCMC
-set.seed(4)
+#set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
@@ -317,9 +317,10 @@ filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
  
 par(mfrow = c(1,1))
   
-plot(chain[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = " ", ylab = " ")
+plot(chain[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
   lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
   lines(chain[,iterations,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
   
 
 ########################################################################################################################
