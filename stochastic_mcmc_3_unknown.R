@@ -8,7 +8,8 @@
 
 # Time
 timestep <- 0.5
-times <- seq(0, 80, by = timestep)
+end <- 80
+times <- seq(0, end, by = timestep)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
 init.values = c(
@@ -85,24 +86,43 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 #################
 
 inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
-inf_timestep <- inf_period/timestep # translates days into no. of timesteps
+inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
 
 # Calculating the new guessed parameters
+# for (i in 1:nrow(run_stoch)){
+# run_stoch$guess_new_I[i] <- if(i == 1){
+#   sum(run_stoch$new_R[1:inf_timestep+1])
+#   } else{
+#     run_stoch$new_R[i+(inf_timestep)] # guess newly infected, translates days into no. of timesteps
+#     }
+#   
+#   run_stoch$guess_I[i] <- if(i == 1){
+#     run_stoch$guess_new_I[i] 
+#     } else{
+#       run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
+#       }
+#     # run_stoch$guess_I[i] <- run_stoch$R[i+(inf_period/timestep)] - run_stoch$R[i]
+# 
+# run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
+# }
+
+times = times + inf_timestep
+zero_array <- array(0, dim = c(inf_timestep, ncol(run_stoch)))
+colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
+run_stoch <- rbind(zero_array, run_stoch)
+run_stoch$time <- seq(0, (end+inf_period), by = timestep)
+
 for (i in 1:nrow(run_stoch)){
-run_stoch$guess_new_I[i] <- if(i == 1){
-  sum(run_stoch$new_R[1:inf_timestep+1])
-  } else{
+  run_stoch$guess_new_I[i] <- {
     run_stoch$new_R[i+(inf_timestep)] # guess newly infected, translates days into no. of timesteps
-    }
+  }
   
   run_stoch$guess_I[i] <- if(i == 1){
     run_stoch$guess_new_I[i] 
-    } else{
-      run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
-      }
-    # run_stoch$guess_I[i] <- run_stoch$R[i+(inf_period/timestep)] - run_stoch$R[i]
-
-run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
+  } else{
+    run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
+  }
+  run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
 }
 
 run_stoch[is.na(run_stoch)] <- 0
@@ -268,7 +288,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 }
 
 # Where to start the chain for beta, gamma, and I
-startvalue <- array(dim = c(length(times), 3))
+startvalue <- array(dim = c(nrow(run_stoch), 3))
 startvalue[1,1] <- 0.01 # beta guess
 startvalue[2,1] <- 0.01 # gamma guess
 startvalue[,2] <- run_stoch$guess_I # I guess
@@ -331,3 +351,8 @@ plot(chain[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = " ", ylab = " 
 ########################################################################################################################
 
 ########################################################################################################################
+  
+num <- array(1, dim = c(2,3))
+#new_values <- c(1,2,3)
+rbind(data.frame(1,2,3), num)
+  
