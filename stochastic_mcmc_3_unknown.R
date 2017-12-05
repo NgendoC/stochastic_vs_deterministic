@@ -195,17 +195,21 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  chain = array(dim = c(nrow(startvalue), iterations+1, ncol(startvalue))) # Array for storing chain data
+  divisor = 10 # the interval at which chain values are saved
+  chain = array(dim = c(nrow(startvalue), (iterations/divisor), ncol(startvalue))) # Array for storing chain data
+  temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # temporary chain used for single iterations
 
   chain[1,1,1] = startvalue[1,1] # beta
   chain[2,1,1] = startvalue[2,1] # gamma
   chain[,1,2] = startvalue[,2] # all infectious
   chain[,1,3] = startvalue[,3] # newly infectious
   
+  temp_chain[,1,] = chain[,1,]
+  
   for (i in 1:iterations){
     
     # Infectious
-    inf_proposal = inf_proposalfunction(chain[,i,])
+    inf_proposal = inf_proposalfunction(temp_chain[,1,])
 
     # Check susceptibles for negative numbers
     S = array(dim = c(nrow(startvalue)))
@@ -215,49 +219,58 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     }
     
     if(min(inf_proposal[,2]) < 0 | min(inf_proposal[,3]) < 0 | min(S) < 0){
-      chain[,i+1,2:3] = chain[,i,2:3]
+      temp_chain[,2,2:3] = temp_chain[,1,2:3]
 
       } else{
-        inf_probab = posterior(inf_proposal) - posterior(chain[,i,])
+        inf_probab = posterior(inf_proposal) - posterior(temp_chain[,1,])
           if (log(runif(1)) < inf_probab){
-            chain[,i+1,2:3] = inf_proposal[,2:3]
+            temp_chain[,2,2:3] = inf_proposal[,2:3]
             } else{
-              chain[,i+1,2:3] = chain[,i,2:3]
+              temp_chain[,2,2:3] = temp_chain[,1,2:3]
               }
         }
     
     # Beta and gamma
-    proposal = proposalfunction(chain[,i,]) # beta proposal and gamma proposal
+    proposal = proposalfunction(temp_chain[,1,]) # beta proposal and gamma proposal
     
     if (proposal[1,1] < 0.0 & proposal[2,1] < 0.0 ){
-      chain[1:2,i+1,1] = chain[1:2,i,1]
+      temp_chain[1:2,2,1] = temp_chain[1:2,1,1]
       
       } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
-        proposal[1,1] = chain[1,i,1]
-        probab = posterior(proposal) - posterior(chain[,i,])
+        proposal[1,1] = temp_chain[1,1,1]
+        probab = posterior(proposal) - posterior(temp_chain[,1,])
         if (log(runif(1)) < probab){
-          chain[,i+1,1] = proposal[,1]
+          temp_chain[,2,1] = proposal[,1]
           } else{
-            chain[,i+1,1] = chain[,i,1]
+            temp_chain[,2,1] = temp_chain[,1,1]
             }
       
         } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
-          proposal[2,1] = chain[2,i,1]
-          probab = posterior(proposal) - posterior(chain[,i,])
+          proposal[2,1] = temp_chain[2,1,1]
+          probab = posterior(proposal) - posterior(temp_chain[,1,])
           if (log(runif(1)) < probab){
-            chain[,i+1,1] = proposal[,1]
+            temp_chain[,2,1] = proposal[,1]
           } else{
-            chain[,i+1,1] = chain[,i,1]
+            temp_chain[,2,1] = temp_chain[,1,1]
             }
       
           } else{
-            probab = posterior(proposal) - posterior(chain[,i,])
+            probab = posterior(proposal) - posterior(temp_chain[,1,])
             if (log(runif(1)) < probab){
-              chain[,i+1,1] = proposal[,1]
+              temp_chain[,2,1] = proposal[,1]
               } else{
-                chain[,i+1,1] = chain[,i,1]
+                temp_chain[,2,1] = temp_chain[,1,1]
                 }
-            }
+          }
+    
+    # Save chain if the iteration is divisible by something
+    if (i%%divisor == 0) {
+      chain[,(i/divisor),] = temp_chain[,2,]
+    }    
+
+    # Re-set temporary chain
+    temp_chain[,1,] = temp_chain[,2,]
+    
     # Print every nth iteration, to know how far along run is
     if (i%%(iterations/20) == 0) {
       print(i)
@@ -275,7 +288,8 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 50
+iterations = 5000
+divisor = 10 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
@@ -283,7 +297,7 @@ chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
-burnIn = 0.5*iterations
+burnIn = 0.0*(iterations/divisor)
 acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),]))
 inf_acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),2]))
 
@@ -308,7 +322,7 @@ par(mfrow = c(1,1))
 library(RColorBrewer)
 library(MASS)
 
-# plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
+plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
 
 k <- 11
 my.cols <- rev(brewer.pal(k, "RdYlBu"))
@@ -319,7 +333,7 @@ par(mfrow = c(1,1))
   
 plot(chain[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
   lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
-  lines(chain[,iterations,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+  lines(chain[,(iterations/divisor),2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
 legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
   
 
