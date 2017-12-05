@@ -275,7 +275,7 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 10000
+iterations = 50
 
 # Run the MCMC
 set.seed(4)
