@@ -81,9 +81,9 @@ plot(x = run_stoch$time, y = run_stoch$R, type = "l", col = "orange", ylim = c(0
 # Add legend
 legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
-#################
-## Guess new_I ##
-#################
+#############################
+## Approximate new_I and I ##
+#############################
 
 inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
 inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
@@ -133,6 +133,8 @@ likelihood <- function(param){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
     betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
+    
+    # To deal with -Inf (i.e. log(0))
     if (is.na(new_I[i+1]) == F & betalikelihood == -Inf){
       betalikelihood = -1000
     }
@@ -153,6 +155,7 @@ prior <- function(param){
   
   betaprior = dunif(beta, min = 0, max = 100, log = T)
   gammaprior = dunif(gamma, min = 0, max = 100, log = T)
+  
   return(betaprior + gammaprior)
 }
 
@@ -166,7 +169,7 @@ inf_proposalfunction <- function(param){
   changed_I <- sample(nrow(run_stoch), 1)
   inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
   
-  inf <- sample(c(-1, 1), 1) # will the change at that timepoint be + or - 1 I
+  inf <- sample(c(-5, -4, -3, -2, -1, 1, 2, 3, 4, 5), 1) # will the change at that timepoint be + or - n I
   
   neighbour <- if (changed_I == 1){
     changed_I + 1
@@ -175,9 +178,11 @@ inf_proposalfunction <- function(param){
       } else{
         changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
         }
+  
+  # neighbour <- sample(nrow(run_stoch), 1)
 
-  param[changed_I[1],2] = param[changed_I[1], 2] + inf
-  param[changed_I[1],3] = param[changed_I[1], 3] + inf
+  param[changed_I,2] = param[changed_I, 2] + inf
+  param[changed_I,3] = param[changed_I, 3] + inf
   param[neighbour,2] = param[neighbour, 2] - inf
   param[neighbour,3] = param[neighbour, 3] - inf
   return(param)
@@ -185,8 +190,9 @@ inf_proposalfunction <- function(param){
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1,1] = rnorm(1, mean = param[1,1], sd = 0.005 ) # beta proposal
-  param[2,1] = rnorm(1, mean = param[2,1], sd = 0.1) # gamma proposal
+  param[1,1] = rnorm(1, mean = param[1,1], sd = 0.005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
+  param[2,1] = rnorm(1, mean = param[2,1], sd = 0.1) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
+  #print(c(param[1,1], param[2,1]))
   return(param)
   }
 
@@ -197,7 +203,7 @@ proposalfunction <- function(param){
 run_metropolis_MCMC <- function(startvalue, iterations){
   divisor = 10 # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor), ncol(startvalue))) # Array for storing chain data
-  temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # temporary chain used for single iterations
+  temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # Temporary array used for single iterations
 
   chain[1,1,1] = startvalue[1,1] # beta
   chain[2,1,1] = startvalue[2,1] # gamma
@@ -207,6 +213,38 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   temp_chain[,1,] = chain[,1,]
   
   for (i in 1:iterations){
+    # Beta and gamma
+    proposal = proposalfunction(temp_chain[,1,]) # beta proposal and gamma proposal
+    
+    if (proposal[1,1] < 0.0 & proposal[2,1] < 0.0 ){
+      temp_chain[1:2,2,1] = temp_chain[1:2,1,1]
+      
+    } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
+      proposal[1,1] = temp_chain[1,1,1]
+      probab = posterior(proposal) - posterior(temp_chain[,1,])
+      if (log(runif(1)) < probab){
+        temp_chain[,2,1] = proposal[,1]
+      } else{
+        temp_chain[,2,1] = temp_chain[,1,1]
+      }
+      
+    } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
+      proposal[2,1] = temp_chain[2,1,1]
+      probab = posterior(proposal) - posterior(temp_chain[,1,])
+      if (log(runif(1)) < probab){
+        temp_chain[,2,1] = proposal[,1]
+      } else{
+        temp_chain[,2,1] = temp_chain[,1,1]
+      }
+      
+    } else{
+      probab = posterior(proposal) - posterior(temp_chain[,1,])
+      if (log(runif(1)) < probab){
+        temp_chain[,2,1] = proposal[,1]
+      } else{
+        temp_chain[,2,1] = temp_chain[,1,1]
+      }
+    }
     
     # Infectious
     inf_proposal = inf_proposalfunction(temp_chain[,1,])
@@ -220,60 +258,32 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     
     if(min(inf_proposal[,2]) < 0 | min(inf_proposal[,3]) < 0 | min(S) < 0){
       temp_chain[,2,2:3] = temp_chain[,1,2:3]
-
-      } else{
+    } else{
         inf_probab = posterior(inf_proposal) - posterior(temp_chain[,1,])
           if (log(runif(1)) < inf_probab){
             temp_chain[,2,2:3] = inf_proposal[,2:3]
-            } else{
+          } else{
               temp_chain[,2,2:3] = temp_chain[,1,2:3]
-              }
-        }
-    
-    # Beta and gamma
-    proposal = proposalfunction(temp_chain[,1,]) # beta proposal and gamma proposal
-    
-    if (proposal[1,1] < 0.0 & proposal[2,1] < 0.0 ){
-      temp_chain[1:2,2,1] = temp_chain[1:2,1,1]
-      
-      } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
-        proposal[1,1] = temp_chain[1,1,1]
-        probab = posterior(proposal) - posterior(temp_chain[,1,])
-        if (log(runif(1)) < probab){
-          temp_chain[,2,1] = proposal[,1]
-          } else{
-            temp_chain[,2,1] = temp_chain[,1,1]
             }
-      
-        } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
-          proposal[2,1] = temp_chain[2,1,1]
-          probab = posterior(proposal) - posterior(temp_chain[,1,])
-          if (log(runif(1)) < probab){
-            temp_chain[,2,1] = proposal[,1]
-          } else{
-            temp_chain[,2,1] = temp_chain[,1,1]
-            }
-      
-          } else{
-            probab = posterior(proposal) - posterior(temp_chain[,1,])
-            if (log(runif(1)) < probab){
-              temp_chain[,2,1] = proposal[,1]
-              } else{
-                temp_chain[,2,1] = temp_chain[,1,1]
-                }
-          }
+      }
     
-    # Save chain if the iteration is divisible by something
+
+    # Save the iteration if it is divisible by the divisor without residuals
     if (i%%divisor == 0) {
       chain[,(i/divisor),] = temp_chain[,2,]
     }    
 
-    # Re-set temporary chain
+    # Re-set temporary chain for next iteration
     temp_chain[,1,] = temp_chain[,2,]
     
     # Print every nth iteration, to know how far along run is
-    if (i%%(iterations/20) == 0) {
+    if (i%%(iterations/100) == 0) {
       print(i)
+      
+      plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+      lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+      lines(temp_chain[,1,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+      legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
     }
     
   }
@@ -284,20 +294,20 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- array(dim = c(nrow(run_stoch), 3))
 startvalue[1,1] <- 0.01 # beta guess
 startvalue[2,1] <- 0.01 # gamma guess
-startvalue[,2] <- run_stoch$guess_I # I guess
-startvalue[,3] <- run_stoch$guess_new_I # new I guess
+startvalue[,2] <- run_stoch$guess_I # I guess array(0, dim = c(nrow(run_stoch)))
+startvalue[,3] <- run_stoch$guess_new_I # new I guess array(0, dim = c(nrow(run_stoch)))
 
 # Number of runs
-iterations = 5000
+iterations = 10000
 divisor = 10 # how often runs are being saved
 
 # Run the MCMC
-set.seed(4)
+# set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
-burnIn = 0.0*(iterations/divisor)
+burnIn = 0.1*(iterations/divisor)
 acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),]))
 inf_acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),2]))
 
@@ -331,11 +341,17 @@ filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
  
 par(mfrow = c(1,1))
   
-plot(chain[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+  lines(chain[,ncol(chain),2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+  legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
+
+plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
   lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
-  lines(chain[,(iterations/divisor),2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
-legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
-  
+  for (i in 1:ncol(chain)){
+  lines(chain[,i,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+  }
+  legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")  
 
 ########################################################################################################################
 
