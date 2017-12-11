@@ -122,10 +122,10 @@ legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, 
 
 # Likelihood distribution
 likelihood <- function(param){
-  beta = as.numeric(param[1,1])
-  gamma = as.numeric(param[2,1])
-  I = as.numeric(param[,2]) # Infected
-  new_I = as.numeric(param[,3]) # Newly infected
+  beta = as.numeric(param[1,1,1])
+  gamma = as.numeric(param[2,1,1])
+  I = as.numeric(param[,1,2]) # Infected
+  new_I = as.numeric(param[,1,3]) # Newly infected
 
   total = array(0, dim = (c(nrow(run_stoch))))
   
@@ -150,8 +150,8 @@ likelihood <- function(param){
 
 # Prior distribution
 prior <- function(param){
-  beta = as.numeric(param[1,1])
-  gamma = as.numeric(param[2,1])
+  beta = as.numeric(param[1,1,1])
+  gamma = as.numeric(param[2,1,1])
   
   betaprior = dunif(beta, min = 0, max = 100, log = T)
   gammaprior = dunif(gamma, min = 0, max = 100, log = T)
@@ -181,17 +181,17 @@ inf_proposalfunction <- function(param){
   
   # neighbour <- sample(nrow(run_stoch), 1)
 
-  param[changed_I,2] = param[changed_I, 2] + inf
-  param[changed_I,3] = param[changed_I, 3] + inf
-  param[neighbour,2] = param[neighbour, 2] - inf
-  param[neighbour,3] = param[neighbour, 3] - inf
+  param[changed_I, 1, 2] = param[changed_I, 1, 2] + inf
+  param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
+  param[neighbour, 1, 2] = param[neighbour, 1, 2] - inf
+  param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
   return(param)
 }
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1,1] = rnorm(1, mean = param[1,1], sd = 0.005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
-  param[2,1] = rnorm(1, mean = param[2,1], sd = 0.1) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
+  param[1, 1, 1] = rnorm(1, mean = param[1, 1, 1], sd = 0.005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
+  param[2, 1, 1] = rnorm(1, mean = param[2, 1, 1], sd = 0.1) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
   #print(c(param[1,1], param[2,1]))
   return(param)
   }
@@ -213,61 +213,61 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   temp_chain[,1,] = chain[,1,]
   
   for (i in 1:iterations){
-    # Beta and gamma
-    proposal = proposalfunction(temp_chain[,1,]) # beta proposal and gamma proposal
-    
-    if (proposal[1,1] < 0.0 & proposal[2,1] < 0.0 ){
-      temp_chain[1:2,2,1] = temp_chain[1:2,1,1]
-      
-    } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
-      proposal[1,1] = temp_chain[1,1,1]
-      probab = posterior(proposal) - posterior(temp_chain[,1,])
-      if (log(runif(1)) < probab){
-        temp_chain[,2,1] = proposal[,1]
-      } else{
-        temp_chain[,2,1] = temp_chain[,1,1]
-      }
-      
-    } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
-      proposal[2,1] = temp_chain[2,1,1]
-      probab = posterior(proposal) - posterior(temp_chain[,1,])
-      if (log(runif(1)) < probab){
-        temp_chain[,2,1] = proposal[,1]
-      } else{
-        temp_chain[,2,1] = temp_chain[,1,1]
-      }
-      
-    } else{
-      probab = posterior(proposal) - posterior(temp_chain[,1,])
-      if (log(runif(1)) < probab){
-        temp_chain[,2,1] = proposal[,1]
-      } else{
-        temp_chain[,2,1] = temp_chain[,1,1]
-      }
-    }
     
     # Infectious
-    inf_proposal = inf_proposalfunction(temp_chain[,1,])
-
+    inf_proposal = inf_proposalfunction(temp_chain[,,])
+    
     # Check susceptibles for negative numbers
     S = array(dim = c(nrow(startvalue)))
-
+    
     for (time in (1:nrow(startvalue))){
-      S[time] = (N - (inf_proposal[time,2] + run_stoch$R[time]))
+      S[time] = (N - (inf_proposal[time,1,2] + run_stoch$R[time]))
     }
     
-    if(min(inf_proposal[,2]) < 0 | min(inf_proposal[,3]) < 0 | min(S) < 0){
+    if(min(inf_proposal[,1,2]) < 0 | min(inf_proposal[,1,3]) < 0 | min(S) < 0){
       temp_chain[,2,2:3] = temp_chain[,1,2:3]
     } else{
-        inf_probab = posterior(inf_proposal) - posterior(temp_chain[,1,])
-          if (log(runif(1)) < inf_probab){
-            temp_chain[,2,2:3] = inf_proposal[,2:3]
-          } else{
-              temp_chain[,2,2:3] = temp_chain[,1,2:3]
-            }
+      inf_probab = posterior(inf_proposal) - posterior(temp_chain[,,])
+      if (log(runif(1)) < inf_probab){
+        temp_chain[,2,2:3] = inf_proposal[,1,2:3]
+      } else{
+        temp_chain[,2,2:3] = temp_chain[,1,2:3]
       }
+    }
     
-
+    # Beta and gamma
+    proposal = proposalfunction(temp_chain[,,]) # beta proposal and gamma proposal
+    
+    if (proposal[1,1,1] < 0.0 & proposal[2,1,1] < 0.0 ){
+      temp_chain[1:2,2,1] = temp_chain[1:2,1,1]
+      
+    } else if (proposal[1,1,1] < 0.0 & proposal[2,1,1] >= 0.0){
+      proposal[1,1,1] = temp_chain[1,1,1]
+      probab = posterior(proposal) - posterior(temp_chain[,,])
+      if (log(runif(1)) < probab){
+        temp_chain[,2,1] = proposal[,1,1]
+      } else{
+        temp_chain[,2,1] = temp_chain[,1,1]
+      }
+      
+    } else if (proposal[1,1,1] >= 0.0 & proposal[2,1,1] < 0.0){
+      proposal[2,1,1] = temp_chain[2,1,1]
+      probab = posterior(proposal) - posterior(temp_chain[,,])
+      if (log(runif(1)) < probab){
+        temp_chain[,2,1] = proposal[,1,1]
+      } else{
+        temp_chain[,2,1] = temp_chain[,1,1]
+      }
+      
+    } else{
+      probab = posterior(proposal) - posterior(temp_chain[,,])
+      if (log(runif(1)) < probab){
+        temp_chain[,2,1] = proposal[,1,1]
+      } else{
+        temp_chain[,2,1] = temp_chain[,1,1]
+      }
+    }
+    
     # Save the iteration if it is divisible by the divisor without residuals
     if (i%%divisor == 0) {
       chain[,(i/divisor),] = temp_chain[,2,]
