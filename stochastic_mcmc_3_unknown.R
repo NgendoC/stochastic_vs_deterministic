@@ -129,7 +129,7 @@ bg_likelihood <- function(param){
   
   total = array(0, dim = (c(nrow(run_stoch))))
   
-  for (i in 1:nrow(run_stoch)){
+  for (i in 1:nrow(run_stoch -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
     betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
@@ -156,7 +156,7 @@ inf_likelihood <- function(param){
 
   total = array(0, dim = (c(nrow(run_stoch))))
   
-  for (i in 1:nrow(run_stoch)){
+  for (i in 1:(nrow(run_stoch) -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
     betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
@@ -169,9 +169,11 @@ inf_likelihood <- function(param){
       gammalikelihood = -1000
     }
     total[i] = (betalikelihood + gammalikelihood)
+    # print(c(betalikelihood, gammalikelihood))
   }
   
   ll = sum(total, na.rm = T)
+  # print(ll)
   return(ll)
 }
 
@@ -215,8 +217,21 @@ inf_proposalfunction <- function(param){
   
   # neighbour <- sample(nrow(run_stoch), 1)
 
-  param[changed_I, 1, 2:3] = param[changed_I, 1, 2:3] + inf
-  param[neighbour, 1, 2:3] = param[neighbour, 1, 2:3] - inf
+  param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
+  param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
+  
+  # Calculate total infectious curve from changed new_I values
+  for (i in 1:nrow(run_stoch)){ 
+    param[i,1,2] <- if(i == 1){
+    param[i,1,3] 
+    } else{
+      param[i-1,1,2] + param[i,1,3] - run_stoch$new_R[i]
+      }
+  }
+  
+  # plot(param[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+  #   lines(run_stoch$new_R)
+  #   lines(run_stoch$new_I)
   
   return(param)
 }
@@ -325,8 +340,8 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(nrow(run_stoch), 3))
-startvalue[1,1] <- 0.01 # beta guess
-startvalue[2,1] <- 0.01 # gamma guess
+startvalue[1,1] <- 0.0065 # beta guess
+startvalue[2,1] <- 0.08 # gamma guess
 startvalue[,2] <- run_stoch$guess_I # I guess 
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
