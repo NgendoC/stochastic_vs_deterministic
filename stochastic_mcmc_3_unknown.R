@@ -121,12 +121,12 @@ legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, 
 ##################################
 
 # Likelihood distribution
-inf_likelihood <- function(param){
+bg_likelihood <- function(param){
   beta = as.numeric(param[1,1,1])
   gamma = as.numeric(param[2,1,1])
   I = as.numeric(param[,1,2]) # Infected
   new_I = as.numeric(param[,1,3]) # Newly infected
-
+  
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch)){
@@ -148,12 +148,12 @@ inf_likelihood <- function(param){
   return(ll)
 }
 
-bg_likelihood <- function(param){
-  beta = as.numeric(param[1,1,1])
-  gamma = as.numeric(param[2,1,1])
-  I = as.numeric(param[,2,2]) # Infected
-  new_I = as.numeric(param[,2,3]) # Newly infected
-  
+inf_likelihood <- function(param){
+  beta = as.numeric(param[1,2,1])
+  gamma = as.numeric(param[2,2,1])
+  I = as.numeric(param[,1,2]) # Infected
+  new_I = as.numeric(param[,1,3]) # Newly infected
+
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch)){
@@ -215,10 +215,9 @@ inf_proposalfunction <- function(param){
   
   # neighbour <- sample(nrow(run_stoch), 1)
 
-  param[changed_I, 1, 2] = param[changed_I, 1, 2] + inf
-  param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
-  param[neighbour, 1, 2] = param[neighbour, 1, 2] - inf
-  param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
+  param[changed_I, 1, 2:3] = param[changed_I, 1, 2:3] + inf
+  param[neighbour, 1, 2:3] = param[neighbour, 1, 2:3] - inf
+  
   return(param)
 }
 
@@ -247,27 +246,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   temp_chain[,1,] = chain[,1,]
   
   for (i in 1:iterations){
-    
-    # Infectious
-    inf_proposal = inf_proposalfunction(temp_chain[,,])
-    
-    # Check susceptibles for negative numbers
-    S = array(dim = c(nrow(startvalue)))
-    
-    for (time in (1:nrow(startvalue))){
-      S[time] = (N - (inf_proposal[time,1,2] + run_stoch$R[time]))
-    }
-    
-    if(min(inf_proposal[,1,2]) < 0 | min(inf_proposal[,1,3]) < 0 | min(S) < 0){
-      temp_chain[,2,2:3] = temp_chain[,1,2:3]
-    } else{
-      inf_probab = inf_posterior(inf_proposal) - inf_posterior(temp_chain[,,])
-      if (log(runif(1)) < inf_probab){
-        temp_chain[,2,2:3] = inf_proposal[,1,2:3]
-      } else{
-        temp_chain[,2,2:3] = temp_chain[,1,2:3]
-      }
-    }
     
     # Beta and gamma
     proposal = proposalfunction(temp_chain[,,]) # beta proposal and gamma proposal
@@ -302,6 +280,27 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       }
     }
     
+    # Infectious
+    inf_proposal = inf_proposalfunction(temp_chain[,,])
+    
+    # Check susceptibles for negative numbers
+    S = array(dim = c(nrow(startvalue)))
+    for (time in (1:nrow(startvalue))){
+      S[time] = (N - (inf_proposal[time,1,2] + run_stoch$R[time]))
+    }
+    
+    if(min(inf_proposal[,1,3]) < 0 | min(S) < 0){
+      temp_chain[,2,2:3] = temp_chain[,1,2:3]
+    } else{
+      inf_probab = inf_posterior(inf_proposal) - inf_posterior(temp_chain[,,])
+      # print(c(inf_posterior(inf_proposal), inf_posterior(temp_chain[,,])))
+      if (log(runif(1)) < inf_probab){
+        temp_chain[,2,2:3] = inf_proposal[,1,2:3]
+      } else{
+        temp_chain[,2,2:3] = temp_chain[,1,2:3]
+      }
+    }
+    
     # Save the iteration if it is divisible by the divisor without residuals
     if (i%%divisor == 0) {
       chain[,(i/divisor),] = temp_chain[,2,]
@@ -311,7 +310,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     temp_chain[,1,] = temp_chain[,2,]
     
     # Print every nth iteration, to know how far along run is
-    if (i%%(iterations/100) == 0) {
+    if (i%%(iterations/20) == 0) {
       print(i)
       
       plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
@@ -328,8 +327,8 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 startvalue <- array(dim = c(nrow(run_stoch), 3))
 startvalue[1,1] <- 0.01 # beta guess
 startvalue[2,1] <- 0.01 # gamma guess
-startvalue[,2] <- run_stoch$guess_I # I guess array(0, dim = c(nrow(run_stoch)))
-startvalue[,3] <- run_stoch$guess_new_I # new I guess array(0, dim = c(nrow(run_stoch)))
+startvalue[,2] <- run_stoch$guess_I # I guess 
+startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
 iterations = 10000
