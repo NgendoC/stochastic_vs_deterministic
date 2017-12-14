@@ -249,7 +249,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 10 # the interval at which chain values are saved
+  divisor = 1000 # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor), ncol(startvalue))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # Temporary array used for single iterations
 
@@ -346,8 +346,8 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 10000
-divisor = 10 # how often runs are being saved
+iterations = 3000000
+divisor = 1000 # how often runs are being saved
 
 # Run the MCMC
 # set.seed(4)
@@ -397,10 +397,13 @@ plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timeste
 plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
   lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
   for (i in 1:ncol(chain)){
-  lines(chain[,i,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+    lines(chain[,i,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
   }
   legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")  
 
 ########################################################################################################################
 
 ########################################################################################################################
+
+# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# write.csv(data.frame(chain), file = "mcmc_3par_fixedproposal_3mil.csv")
