@@ -205,7 +205,7 @@ inf_proposalfunction <- function(param){
   changed_I <- sample(nrow(run_stoch), 1)
   inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
   
-  inf <- sample(c(-2, -1, 1, 2), 1) # will the change at that timepoint be + or - n I
+  inf <- sample(c(-2, 2), 1) # will the change at that timepoint be + or - n I
   
   neighbour <- if (changed_I == 1){
     changed_I + 1
@@ -249,7 +249,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 1000 # the interval at which chain values are saved
+  divisor = 100 # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor), ncol(startvalue))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # Temporary array used for single iterations
 
@@ -346,11 +346,11 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 3000000
-divisor = 1000 # how often runs are being saved
+iterations = 500000
+divisor = 100 # how often runs are being saved
 
 # Run the MCMC
-# set.seed(4)
+set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
@@ -405,5 +405,6 @@ plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timeste
 
 ########################################################################################################################
 
-# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-# write.csv(data.frame(chain), file = "mcmc_3par_fixedproposal_3mil.csv")
+setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+write.csv(data.frame(chain), file = "mcmc_3par_fixedprop_pm2_500k.csv")
+  
