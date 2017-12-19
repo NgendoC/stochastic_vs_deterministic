@@ -1,6 +1,12 @@
-# MCMC estimating stochastic processes
+# MCMC estimating stochastic processes with a deterministic likelihood
 # 3 unknowns: beta, gamma, and the time of infection for each individual
+# Assuming that time of infection is deterministic
 # 18/12/17
+
+#######################
+## Required packages ##
+#######################
+library("deSolve") #package for solving differential equations
 
 ##########################
 ## Input values for SIR ##
@@ -120,22 +126,56 @@ legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, 
 ## Likelihood, prior, posterior ##
 ##################################
 
+sir <- function(time, state, param) {
+  
+  # define model parameters in term of the natural parameters
+  beta <- param[1,1] 
+  gamma <- param[2,1]
+  
+  with(as.list(c(state, parameters)), {
+    
+    dS <- -beta * S * I 
+    dI <-  beta * S * I - gamma * I
+    dR <-  gamma * I
+    
+    return(list(c(dS, dI, dR)))
+  })
+}
+
 # Likelihood distribution
 bg_likelihood <- function(param){
   beta = as.numeric(param[1,1])
   gamma = as.numeric(param[2,1])
   
+  det_sir <- ode(y = init.values, times = times, func = sir, parms = param)
+  det_sir <- as.data.frame(det_sir)
+  
+  plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+  lines(det_sir$I, type = "l", col = "red", xlab = " ", ylab = " ")
+  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+  legend(130, 1.0*N, c("Stochastic recovered", "Deterministic infected", "Stochastic infected"), pch = 1, col = c("orange", "red", "grey"), bty = "n")
+  
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch -1)){
-    betalikelihood = dbinom(run_stoch$new_I[i+1], run_stoch$S[i], (1-(exp(-beta*run_stoch$I[i]*timestep))), log = T)
-    gammalikelihood = dbinom(run_stoch$new_R[i+1], run_stoch$I[i], (1-(exp(-gamma*timestep))), log = T)
+    S = round((N - det_sir$I[i] - run_stoch$R[i])) # Susceptibles for timestep i
+    new_I = round(det_sir$I[i+1] - det_sir$I[i] - run_stoch$new_R[i+1]) # new I for timestep i+1
+    I = round(det_sir$I[i])
+    # print(c(S, new_I, det_sir$I[i], run_stoch$new_R[i], run_stoch$R[i]))
+    
+    if (is.na(new_I) == F & (S<0 | new_I<0 | I<0)){
+      betalikelihood = -1000
+      gammalikelihood = -1000
+    } else {
+      betalikelihood = dbinom(new_I, S, (1-(exp(-beta*I*timestep))), log = T)
+      gammalikelihood = dbinom(run_stoch$new_R[i+1], I, (1-(exp(-gamma*timestep))), log = T)
+    }
     
     # To deal with -Inf (i.e. log(0))
-    if (is.na(run_stoch$new_I[i+1]) == F & betalikelihood == -Inf){
+    if (is.na(new_I) == F & betalikelihood == -Inf){
       betalikelihood = -1000
     }
-    if (is.na(run_stoch$new_I[i+1]) == F & gammalikelihood == -Inf){
+    if (is.na(new_I) == F & gammalikelihood == -Inf){
       gammalikelihood = -1000
     }
     total[i] = (betalikelihood + gammalikelihood)
@@ -174,7 +214,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 1 # the interval at which chain values are saved
+  divisor = 10 # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2)) # Temporary array used for single iterations
   
@@ -246,7 +286,7 @@ startvalue[2] <- 0.08 # gamma guess
 
 # Number of runs
 iterations =  50000
-divisor = 1 # how often runs are being saved
+divisor = 10 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
@@ -290,4 +330,4 @@ filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
 ########################################################################################################################
 
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-# write.csv(data.frame(chain), file = "mcmc_3par_fixedprop_pm2_500k.csv")
+# write.csv(data.frame(chain), file = "test.csv")
