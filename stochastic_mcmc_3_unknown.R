@@ -405,6 +405,6 @@ plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timeste
 
 ########################################################################################################################
 
-setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-write.csv(data.frame(chain), file = "mcmc_3par_fixedprop_pm2_500k.csv")
+# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# write.csv(data.frame(chain), file = "mcmc_3par_fixedprop_pm2_500k.csv")
   
