@@ -6,6 +6,7 @@
 #######################
 ## Required packages ##
 #######################
+#install.packages("deSolve")
 library("deSolve") #package for solving differential equations
 
 ##########################
@@ -132,7 +133,7 @@ sir <- function(time, state, param) {
   beta <- param[1,1] 
   gamma <- param[2,1]
   
-  with(as.list(c(state, parameters)), {
+  with(as.list(c(state, param)), {
     
     dS <- -beta * S * I 
     dI <-  beta * S * I - gamma * I
@@ -150,10 +151,10 @@ bg_likelihood <- function(param){
   det_sir <- ode(y = init.values, times = times, func = sir, parms = param)
   det_sir <- as.data.frame(det_sir)
   
-  plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-  lines(det_sir$I, type = "l", col = "red", xlab = " ", ylab = " ")
-  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-  legend(130, 1.0*N, c("Stochastic recovered", "Deterministic infected", "Stochastic infected"), pch = 1, col = c("orange", "red", "grey"), bty = "n")
+  # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+  # lines(det_sir$I, type = "l", col = "red", xlab = " ", ylab = " ")
+  # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+  # legend(130, 1.0*N, c("Stochastic recovered", "Deterministic infected", "Stochastic infected"), pch = 1, col = c("orange", "red", "grey"), bty = "n")
   
   total = array(0, dim = (c(nrow(run_stoch))))
   
@@ -285,7 +286,7 @@ startvalue[1] <- 0.0065 # beta guess
 startvalue[2] <- 0.08 # gamma guess
 
 # Number of runs
-iterations =  50000
+iterations =  1000
 divisor = 10 # how often runs are being saved
 
 # Run the MCMC
