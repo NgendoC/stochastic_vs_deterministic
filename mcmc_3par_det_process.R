@@ -152,16 +152,17 @@ bg_likelihood <- function(param){
   det_sir <- as.data.frame(det_sir)
   
   # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-  # lines(det_sir$I, type = "l", col = "red", xlab = " ", ylab = " ")
+  # lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
   # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
   # legend(130, 1.0*N, c("Stochastic recovered", "Deterministic infected", "Stochastic infected"), pch = 1, col = c("orange", "red", "grey"), bty = "n")
   
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch -1)){
-    S = round((N - det_sir$I[i] - run_stoch$R[i])) # Susceptibles for timestep i
-    new_I = round(det_sir$I[i+1] - det_sir$I[i] - run_stoch$new_R[i+1]) # new I for timestep i+1
     I = round(det_sir$I[i])
+    S = (N - I - run_stoch$R[i]) # Susceptibles for timestep i
+    new_I = (round(det_sir$I[i+1]) - I - run_stoch$new_R[i+1]) # new I for timestep i+1
+
     # print(c(S, new_I, det_sir$I[i], run_stoch$new_R[i], run_stoch$R[i]))
     
     if (is.na(new_I) == F & (S<0 | new_I<0 | I<0)){
@@ -215,7 +216,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 10 # the interval at which chain values are saved
+  divisor = 1 # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2)) # Temporary array used for single iterations
   
@@ -287,7 +288,7 @@ startvalue[2] <- 0.08 # gamma guess
 
 # Number of runs
 iterations =  1000
-divisor = 10 # how often runs are being saved
+divisor = 1 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
