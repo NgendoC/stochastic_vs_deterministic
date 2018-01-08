@@ -151,10 +151,11 @@ bg_likelihood <- function(param){
   det_sir <- ode(y = init.values, times = times, func = sir, parms = param)
   det_sir <- as.data.frame(det_sir)
   
-  # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-  # lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
-  # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-  # legend(130, 1.0*N, c("Stochastic recovered", "Deterministic infected", "Stochastic infected"), pch = 1, col = c("orange", "red", "grey"), bty = "n")
+  plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+  lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
+  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+  lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
+  legend(130, 1.0*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
   
   total = array(0, dim = (c(nrow(run_stoch))))
   
@@ -287,7 +288,7 @@ startvalue[1] <- 0.0065 # beta guess
 startvalue[2] <- 0.08 # gamma guess
 
 # Number of runs
-iterations =  1000
+iterations =  300
 divisor = 1 # how often runs are being saved
 
 # Run the MCMC
@@ -333,3 +334,4 @@ filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
 
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 # write.csv(data.frame(chain), file = "test.csv")
+
