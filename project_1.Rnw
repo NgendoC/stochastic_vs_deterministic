@@ -1,0 +1,203 @@
+%%%%%%%%%%%%%%%%%%%%%
+%% Document set-up %%
+%%%%%%%%%%%%%%%%%%%%%
+
+% Requirements:
+  % Double-spaced
+  % minimum 11pt font
+  % Arial or Verdana font
+  % 2 cm margins
+
+\documentclass[a4paper, 11pt]{article} % sets document shape and font size
+
+\usepackage[margin=2.0cm]{geometry} % set margins to 2cm
+
+\usepackage{setspace, caption}
+\captionsetup{font=doublespacing} %double-spaced float captions
+\doublespacing %double-spaced document
+
+% change font to Arial
+
+\renewcommand*\contentsname{} % removes Table of Contents' title
+
+\usepackage{graphicx}
+\graphicspath{ {C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Plots/} } % Where the images will be found 
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Start of document %%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+%%%%%%%%%%%
+%% Title %%
+%%%%%%%%%%%
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{4.5cm}
+        
+        \textbf{Stochastic vs. deterministic Markov Chain Monte Carlo parameterisation for simple SIR models}
+        
+        \vspace{0.5cm}
+        MRes Biomedical Research Project 1
+        
+        \vspace{0.5cm}
+        
+        \textbf{Janetta E. Skarp}
+        
+        \vspace{1cm}
+        
+        %\includegraphics[width=0.4\textwidth]{Imperial_College_London_crest.png}
+        
+        \vspace{1cm}
+        
+        Supervisor: Xavier Didelot\\ 
+        Submitted: March 2018\\
+        Department of Surgery and Cancer, Imperial College London
+        
+    \end{center}
+    
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Originality statement %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Statement of Originality}
+
+I certify that this thesis, and the research to which it refers, are the product of my own work, conducted during the current year of the MRes in Biomedical Research at Imperial College London. Any ideas or quotations from the work of other people, published or otherwise, or from my own previous work are fully acknowledged in accordance with the standard referencing practices of the discipline.
+% Also acknowledge work of other researchers if necessary e.g. if you got samples from someone else.
+
+%%%%%%%%%%%%%%
+%% Abstract %%
+%%%%%%%%%%%%%%
+
+\newpage
+\section{Abstract}
+% 0.5 to 1 page
+
+%%%%%%%%%%%%%%%%%%%%%%
+%% Acknowledgements %%
+%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Acknowledgements}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Table of contents %%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Table of Contents}
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%
+%% Abbreviations %%
+%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Abbreviations}
+MCMC: Markov Chain Monte Carlo
+
+%%%%%%%%%%%%%%%%%%
+%% Introduction %%
+%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Introduction}
+% 5-10 pages
+
+\begin{itemize}
+  \item Using stochastic models (especially individual-based models) is currently trendy
+  \item MCMC methods can be used to parameterise models - provides a range of suitable values for the model in question
+  \item Stochastic models can be more difficult to deal with than deterministic models: MCMC takes time to run, due to stochastic nature many runs of the model are needed, many things can go wrong
+  \item For some questions, it may not matter whether you use a stochastic or deterministic model.
+  \item When is using a fully stochastic model in your MCMC a waste of your time?
+  \item History of using deterministic modelling instead of stochastic - cite some papers
+\end{itemize}
+
+MCMC has been combined with a deterministic process for example in a paper exploring public health responses to bioterrorism (Elderd et al. 2006).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Materials and methods %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Materials and Methods}
+% 5-10 pages
+
+\subsection{Creating data for fitting}
+
+I constructed a stochastic population-based compartmental SIR model (Figure X). The number of individuals joining the infected compartment, \(b_i\), or recovered compartment, \(c_i\) at timestep i were chosen randomly from a binomial distribution: \break
+
+\begin{equation}
+b_{i} ~ Bin(S_{i}, 1 - e^{-\beta} I_{i} dt)
+\end{equation}
+
+\begin{math}
+c_{i} ~ Bin(I_{i}, 1 - e^{-\gamma} R_{i} dt)
+\end{math}
+
+\break
+where S_{i}, I_{i}, and R_{i} represent the number of susceptible, infected, and recovered individuals at time i respectively. \beta refers to the rate at which individuals move from susceptible to infected compartments, while \gamma refers to the rate at which individuals move from infected to recovered compartments. The size of a timestep is referred to by dt. 
+\break
+
+Then the number of susceptible, infected, and recovered individuals at time i+1 could thus be calculated:
+\break
+$$S_{i+1} = S_{i} - b_{i}$$ 
+\break
+$$I_{i+1} = I_{i} + b_{i} - c_{i}$$
+\break
+$$R_{i+1} = R_{i} + c{i}$$
+\break
+
+I used the output of this model to create epidemic curves for which unknown parameter value ranges, such as \beta and \gamma, or missing data, such as the infectious curve, are estimated through various processes.
+
+\subsection{Stochastic Markov Chain Monte Carlo}
+
+A Metropolis-Hastings algorithm was used to infer the values of beta, the rate at which susceptibles become infectious, and gamma, the rate at which infectious individuals recover, in the stochastic SIR model. The prior distribution for \beta and \gamma was set to be uniform, implying that there was no original guess at the value that \beta and \gamma should take. I calculated the likelihood distribution as follows: \break
+
+\displaystyle\prod_{i=1}^{N}p(b_{i}, c_{i} \mid \beta, \gamma)
+
+\break 
+where
+\break
+
+p(b_{i}, c_{i} \mid \beta, \gamma) = Bin(b_{i}, S_{i} \mid 1-e^{-\beta I_{i} dt}) \times Bin(c_{i}, I_{i} \mid 1-e^{-\gamma R_{i} dt})
+
+\subsection{Markov Chain Monte Carlo with a deterministic process}
+
+I altered the stochastic MCMC I had previously created to only have two unknown parameters, \beta and \gamma. I then changed the likelihood function so that it created a deterministic SIR model for every set of \beta and \gamma tested. 
+
+%%%%%%%%%%%%%
+%% Results %%
+%%%%%%%%%%%%%
+
+\newpage
+\section{Results}
+% 10-15 pages
+
+%%%%%%%%%%%%%%%%
+%% Discussion %%
+%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Discussion}
+% 5-10 pages
+
+%%%%%%%%%%%%%%%%
+%% References %%
+%%%%%%%%%%%%%%%%
+
+\newpage
+\section{References}
+% 5 pages
+
+%%%%%%%%%%%%%%
+%% Appendix %%
+%%%%%%%%%%%%%%
+
+% \section{Appendix}
+
+\end{document}
