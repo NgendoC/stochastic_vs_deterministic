@@ -92,36 +92,36 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 ## Approximate new_I and I ##
 #############################
 
-inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
-inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
-
-times = times + inf_timestep
-zero_array <- array(0, dim = c(inf_timestep, ncol(run_stoch)))
-colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
-run_stoch <- rbind(zero_array, run_stoch)
-run_stoch$time <- seq(0, (end+inf_period), by = timestep)
-
-for (i in 1:nrow(run_stoch)){
-  run_stoch$guess_new_I[i] <- {
-    run_stoch$new_R[i+(inf_timestep)] # guess newly infected, translates days into no. of timesteps
-  }
-  
-  run_stoch$guess_I[i] <- if(i == 1){
-    run_stoch$guess_new_I[i] 
-  } else{
-    run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
-  }
-  run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
-}
-
-run_stoch[is.na(run_stoch)] <- 0
-
-plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "l", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
-par(new=T)
-plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "l", col = "red", xlab = " ", ylab = " ")
-par(new=T)
-plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "black", ylim = c(0,N), xlab = " ", ylab = " ")
-legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, col = c("orange", "red", "black"), bty = "n")
+# inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
+# inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
+# 
+# times = times + inf_timestep
+# zero_array <- array(0, dim = c(inf_timestep, ncol(run_stoch)))
+# colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
+# run_stoch <- rbind(zero_array, run_stoch)
+# run_stoch$time <- seq(0, (end+inf_period), by = timestep)
+# 
+# for (i in 1:nrow(run_stoch)){
+#   run_stoch$guess_new_I[i] <- {
+#     run_stoch$new_R[i+(inf_timestep)] # guess newly infected, translates days into no. of timesteps
+#   }
+#   
+#   run_stoch$guess_I[i] <- if(i == 1){
+#     run_stoch$guess_new_I[i] 
+#   } else{
+#     run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
+#   }
+#   run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
+# }
+# 
+# run_stoch[is.na(run_stoch)] <- 0
+# 
+# plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "l", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
+# par(new=T)
+# plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "l", col = "red", xlab = " ", ylab = " ")
+# par(new=T)
+# plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "black", ylim = c(0,N), xlab = " ", ylab = " ")
+# legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, col = c("orange", "red", "black"), bty = "n")
 
 ##################################
 ## Likelihood, prior, posterior ##
@@ -151,11 +151,11 @@ bg_likelihood <- function(param){
   det_sir <- ode(y = init.values, times = times, func = sir, parms = param)
   det_sir <- as.data.frame(det_sir)
   
-  plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-  lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
-  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-  lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
-  legend(130, 1.0*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
+  # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+  # lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
+  # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+  # lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
+  # legend(130, 1.0*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
   
   total = array(0, dim = (c(nrow(run_stoch))))
   
@@ -206,8 +206,8 @@ bg_posterior <- function(param){
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
-  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.1) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
+  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.0005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
+  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.005) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
   # print(c(param[1,1,1], param[2,1,1]))
   return(param)
 }
@@ -217,7 +217,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 1 # the interval at which chain values are saved
+  divisor = 100 # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2)) # Temporary array used for single iterations
   
@@ -284,15 +284,15 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(2))
-startvalue[1] <- 0.0065 # beta guess
-startvalue[2] <- 0.08 # gamma guess
+startvalue[1] <- 0.01 # beta guess
+startvalue[2] <- 0.1 # gamma guess
 
 # Number of runs
-iterations =  300
-divisor = 1 # how often runs are being saved
+iterations =  500000
+divisor = 100 # how often runs are being saved
 
 # Run the MCMC
-set.seed(4)
+# set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
