@@ -20,7 +20,7 @@ times <- seq(0, end, by = timestep)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
 init.values = c(
-  S = 100-1,
+  S = (100-1),
   I = 1,
   R = 0
 )
@@ -206,7 +206,7 @@ bg_posterior <- function(param){
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.0005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
+  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.0005) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001)
   param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.005) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
   # print(c(param[1,1,1], param[2,1,1]))
   return(param)
@@ -218,11 +218,12 @@ proposalfunction <- function(param){
 
 run_metropolis_MCMC <- function(startvalue, iterations){
   divisor = 100 # the interval at which chain values are saved
-  chain = array(dim = c(nrow(startvalue), (iterations/divisor))) # Array for storing chain data
-  temp_chain = array(dim = c(nrow(startvalue), 2)) # Temporary array used for single iterations
+  chain = array(dim = c((nrow(startvalue)+1), (iterations/divisor))) # Array for storing chain data
+  temp_chain = array(dim = c((nrow(startvalue)+1), 2)) # Temporary array used for single iterations
   
   chain[1,1] = startvalue[1] # beta
   chain[2,1] = startvalue[2] # gamma
+  chain[3,1] = 0             # likelihood
 
   
   temp_chain[,1] = chain[,1]
@@ -230,44 +231,52 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   for (i in 1:iterations){
     
     # Beta and gamma
-    proposal = proposalfunction(temp_chain[,]) # beta proposal and gamma proposal
+    proposal = proposalfunction(temp_chain[1:2,]) # beta proposal and gamma proposal
 
     if (proposal[1,1] < 0.0 & proposal[2,1] < 0.0 ){
       temp_chain[1:2,2] = temp_chain[1:2,1]
+      temp_chain[3,2] = temp_chain[3,1]
       
     } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
       proposal[1,1] = temp_chain[1,1]
-      probab = bg_posterior(proposal) - bg_posterior(temp_chain[,])
+      probab = bg_posterior(proposal) - bg_posterior(temp_chain[1:2,])
       # print(c(bg_posterior(proposal), bg_posterior(temp_chain[,])))
       if (log(runif(1)) < probab){
-        temp_chain[,2] = proposal[,1]
+        temp_chain[1:2,2] = proposal[1:2,1]
+        temp_chain[3,2] = bg_likelihood(proposal)
       } else{
-        temp_chain[,2] = temp_chain[,1]
+        temp_chain[1:2,2] = temp_chain[1:2,1]
+        temp_chain[3,2] = bg_likelihood(temp_chain[1:2,])
       }
       
     } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
       proposal[2,1] = temp_chain[2,1]
-      probab = bg_posterior(proposal) - bg_posterior(temp_chain[,])
+      probab = bg_posterior(proposal) - bg_posterior(temp_chain[1:2,])
       # print(c(bg_posterior(proposal), bg_posterior(temp_chain[,])))
       if (log(runif(1)) < probab){
-        temp_chain[,2] = proposal[,1]
+        temp_chain[1:2,2] = proposal[1:2,1]
+        temp_chain[3,2] = bg_likelihood(proposal)
       } else{
-        temp_chain[,2] = temp_chain[,1]
+        temp_chain[1:2,2] = temp_chain[1:2,1]
+        temp_chain[3,2] = bg_likelihood(temp_chain[1:2,])
       }
       
     } else{
-      probab = bg_posterior(proposal) - bg_posterior(temp_chain[,])
+      probab = bg_posterior(proposal) - bg_posterior(temp_chain[1:2,])
       # print(c(bg_posterior(proposal), bg_posterior(temp_chain[,])))
       if (log(runif(1)) < probab){
-        temp_chain[,2] = proposal[,1]
+        temp_chain[1:2,2] = proposal[1:2,1]
+        temp_chain[3,2] = bg_likelihood(proposal)
       } else{
-        temp_chain[,2] = temp_chain[,1]
+        temp_chain[1:2,2] = temp_chain[1:2,1]
+        temp_chain[3,2] = bg_likelihood(temp_chain[1:2,])
       }
     }
     
     # Save the iteration if it is divisible by the divisor without residuals
     if (i%%divisor == 0) {
       chain[,(i/divisor)] = temp_chain[,2]
+      
     }    
     
     # Re-set temporary chain for next iteration
@@ -276,6 +285,14 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     # Print every nth iteration, to know how far along run is
     if (i%%(iterations/20) == 0) {
       print(i)
+      det_sir <- ode(y = init.values, times = times, func = sir, parms = temp_chain[1:2,])
+      det_sir <- as.data.frame(det_sir)
+      
+      plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+      lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
+      lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+      lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
+      legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
     }
     
   }
@@ -284,15 +301,15 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(2))
-startvalue[1] <- 0.01 # beta guess
-startvalue[2] <- 0.1 # gamma guess
+startvalue[1] <- 0.005 # beta guess
+startvalue[2] <- 0.08 # gamma guess
 
 # Number of runs
-iterations =  500000
+iterations =  200000
 divisor = 100 # how often runs are being saved
 
 # Run the MCMC
-# set.seed(4)
+set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
@@ -312,9 +329,9 @@ abline(v = mean(chain[1,-(1:burnIn)]), col = "red")
 hist(chain[2, -(1:burnIn)],nclass=30, main="Posterior of gamma")
 abline(v = mean(chain[2,-(1:burnIn)]), col = "red")
 
-plot(chain[1, -(1:burnIn)], type = "l", main = "Chain values of beta")
+plot(chain[1,], type = "l", main = "Chain values of beta")
 
-plot(chain[2, -(1:burnIn)], type = "l", main = "Chain values of gamma")
+plot(chain[2,], type = "l", main = "Chain values of gamma")
 
 # Plot beta vs. gamma
 par(mfrow = c(1,1))
@@ -327,6 +344,16 @@ k <- 11
 my.cols <- rev(brewer.pal(k, "RdYlBu"))
 z <- kde2d(chain[2,], chain[1,], n=50)
 filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
+
+#####################
+## Likelihood plot ##
+#####################
+
+par(mfrow = c(1,2), mar=c(5,6,2,0.5))
+plot(chain[3,], type = "l", main = "Chain values of log likelihood", xlab = "", ylab = "Log(likelihood)")
+mtext("Iteration x100",side=1,line=2)
+plot(chain[3,-(1:burnIn)], type = "l", main = "Zoomed in" , xlab = "", ylab = "Log(likelihood)")
+mtext("(Iteration - burn-in) x100",side=1,line=2)
 
 ########################################################################################################################
 
