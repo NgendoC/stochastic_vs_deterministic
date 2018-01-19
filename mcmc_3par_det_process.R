@@ -20,16 +20,15 @@ times <- seq(0, end, by = timestep)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
 init.values = c(
-  S = (100-1),
-  I = 1,
+  S = (100-1)*100,
+  I = 1*100,
   R = 0
 )
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 5e-3
-gamma <- 8e-2
-1/gamma
+beta <- 5e-5
+gamma <- 1e-1
 
 ###############
 ## The model ##
@@ -88,41 +87,6 @@ plot(x = run_stoch$time, y = run_stoch$R, type = "l", col = "orange", ylim = c(0
 # Add legend
 legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
-#############################
-## Approximate new_I and I ##
-#############################
-
-# inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
-# inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
-# 
-# times = times + inf_timestep
-# zero_array <- array(0, dim = c(inf_timestep, ncol(run_stoch)))
-# colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
-# run_stoch <- rbind(zero_array, run_stoch)
-# run_stoch$time <- seq(0, (end+inf_period), by = timestep)
-# 
-# for (i in 1:nrow(run_stoch)){
-#   run_stoch$guess_new_I[i] <- {
-#     run_stoch$new_R[i+(inf_timestep)] # guess newly infected, translates days into no. of timesteps
-#   }
-#   
-#   run_stoch$guess_I[i] <- if(i == 1){
-#     run_stoch$guess_new_I[i] 
-#   } else{
-#     run_stoch$guess_I[i-1] + run_stoch$guess_new_I[i] - run_stoch$new_R[i]
-#   }
-#   run_stoch$guess_S[i] <- N - (run_stoch$R[i] + run_stoch$guess_I[i])
-# }
-# 
-# run_stoch[is.na(run_stoch)] <- 0
-# 
-# plot(run_stoch$time, run_stoch$R, ylim = c(0,N), type = "l", col = "orange", xlab = "time (days)", ylab = "Number infectious/recovered")
-# par(new=T)
-# plot(run_stoch$time, run_stoch$guess_I, ylim = c(0,N), type = "l", col = "red", xlab = " ", ylab = " ")
-# par(new=T)
-# plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "black", ylim = c(0,N), xlab = " ", ylab = " ")
-# legend(60, 0.8*N, c("Recovered", "Guessed infected", "True infected"), pch = 1, col = c("orange", "red", "black"), bty = "n")
-
 ##################################
 ## Likelihood, prior, posterior ##
 ##################################
@@ -136,7 +100,7 @@ sir <- function(time, state, param) {
   with(as.list(c(state, param)), {
     
     dS <- -beta * S * I 
-    dI <-  beta * S * I - gamma * I
+    dI <- (beta * S * I) -(gamma * I)
     dR <-  gamma * I
     
     return(list(c(dS, dI, dR)))
@@ -151,22 +115,20 @@ bg_likelihood <- function(param){
   det_sir <- ode(y = init.values, times = times, func = sir, parms = param)
   det_sir <- as.data.frame(det_sir)
   
-  # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-  # lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
-  # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-  # lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
-  # legend(130, 1.0*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
-  
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:nrow(run_stoch -1)){
     I = round(det_sir$I[i])
-    S = (N - I - run_stoch$R[i]) # Susceptibles for timestep i
-    new_I = (round(det_sir$I[i+1]) - I - run_stoch$new_R[i+1]) # new I for timestep i+1
-
-    # print(c(S, new_I, det_sir$I[i], run_stoch$new_R[i], run_stoch$R[i]))
+    S = (N - (I + run_stoch$R[i])) # Susceptibles for timestep i
+    new_I = if (i == 1){
+      I
+    } else {
+      (round(det_sir$I[i+1]) - I + run_stoch$R[i+1] - run_stoch$R[i]) # new I for timestep i+1
+    }
+  
+    # print(c(S, new_I, det_sir$I[i], run_stoch$new_R[i], run_stoch$R[i], (S + I + run_stoch$R[i])))
     
-    if (is.na(new_I) == F & (S<0 | new_I<0 | I<0)){
+    if (is.na(new_I) == F & (S<0 | new_I<0 | I<0)){ # (S<0 | new_I<0 | I<0)
       betalikelihood = -1000
       gammalikelihood = -1000
     } else {
@@ -206,8 +168,8 @@ bg_posterior <- function(param){
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.0005) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001)
-  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.005) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
+  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.00000005) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001)
+  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.00005) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
   # print(c(param[1,1,1], param[2,1,1]))
   return(param)
 }
@@ -217,7 +179,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 100 # the interval at which chain values are saved
+  divisor = 10 # the interval at which chain values are saved
   chain = array(dim = c((nrow(startvalue)+1), (iterations/divisor))) # Array for storing chain data
   temp_chain = array(dim = c((nrow(startvalue)+1), 2)) # Temporary array used for single iterations
   
@@ -283,16 +245,37 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     temp_chain[,1] = temp_chain[,2]
     
     # Print every nth iteration, to know how far along run is
-    if (i%%(iterations/20) == 0) {
+    if (i%%(iterations/20) == 0 | i == 1) {
       print(i)
       det_sir <- ode(y = init.values, times = times, func = sir, parms = temp_chain[1:2,])
       det_sir <- as.data.frame(det_sir)
+      
+      S = array(0, dim = (c(nrow(run_stoch))))
+      new_I = array(0, dim = (c(nrow(run_stoch))))
+      
+      for (i in 1:nrow(run_stoch -1)){
+        S[i] = (N - (round(det_sir$I[i]) + run_stoch$R[i])) # Susceptibles for timestep i
+        new_I[i] = if (i == 1){
+          round(det_sir$I[i])
+        } else {
+          (round(det_sir$I[i+1]) - round(det_sir$I[i]) + run_stoch$R[i+1] - run_stoch$R[i]) # new I for timestep i+1
+        }
+      }
+
+      par(mfrow = c(2,1))
       
       plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
       lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
       lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
       lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
-      legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
+      lines(S, type = "l", col = "darkolivegreen3", xlab = "", ylab = "")
+      legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected", "Susceptible"), pch = 1, col = c("black", "orange", "red", "grey", "darkolivegreen3"), bty = "n")
+    
+      plot(new_I, ylim = c(-400, 800), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals")
+      # lines(run_stoch$new_R, type = "l", col = "orange", xlab = "", ylab = "")
+      lines(run_stoch$new_I, type = "l", col = "grey", xlab = "", ylab = "")
+      legend(100, 0.5*1000, c("Newly infected", "True newly infected"), pch = 1, col = c("red", "grey"), bty = "n")
+      
     }
     
   }
@@ -301,12 +284,12 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(2))
-startvalue[1] <- 0.005 # beta guess
-startvalue[2] <- 0.08 # gamma guess
+startvalue[1] <-  beta # beta guess
+startvalue[2] <-  gamma # gamma guess
 
 # Number of runs
-iterations =  200000
-divisor = 100 # how often runs are being saved
+iterations =  10000
+divisor = 10 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
@@ -340,10 +323,10 @@ library(MASS)
 
 plot(x = chain[2,], y = chain[1,], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
 
-k <- 11
-my.cols <- rev(brewer.pal(k, "RdYlBu"))
-z <- kde2d(chain[2,], chain[1,], n=50)
-filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
+# k <- 11
+# my.cols <- rev(brewer.pal(k, "RdYlBu"))
+# z <- kde2d(chain[2,], chain[1,], n=50)
+# filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
 
 #####################
 ## Likelihood plot ##
