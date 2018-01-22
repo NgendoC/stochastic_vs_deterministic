@@ -106,9 +106,6 @@ sir <- function(time, state, param) {
   })
 }
 
-det_sir <- ode(y = init.values, times = times, func = sir, parms = param)
-det_sir <- as.data.frame(det_sir)
-
 ####################
 ## Residual Error ##
 ####################
@@ -136,7 +133,17 @@ param <- c(
 )
 
 # Function for optimisation
-optim(param, sse)
+fit <- optim(param, sse)
+
+# Plot the results
+run_det <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = fit$par))
+
+plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+lines(run_det$I, type = "l", col = "red", xlab = " ", ylab = " ")
+lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+lines(run_det$R, type = "l", col = "black", xlab = "", ylab = "")
+legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
+
 
 # Bootstrapping for confidence intervals
 
