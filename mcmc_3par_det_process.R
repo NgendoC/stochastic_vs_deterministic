@@ -20,15 +20,15 @@ times <- seq(0, end, by = timestep)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
 init.values = c(
-  S = (100-1)*100,
-  I = 1*100,
+  S = (100-1),
+  I = 1,
   R = 0
 )
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 5e-5
-gamma <- 1e-1
+beta <- 5e-3
+gamma <- 8e-2
 
 ###############
 ## The model ##
@@ -168,8 +168,8 @@ bg_posterior <- function(param){
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.00000005) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001)
-  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.00005) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
+  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.00004) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001)
+  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.0004) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
   # print(c(param[1,1,1], param[2,1,1]))
   return(param)
 }
@@ -179,7 +179,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 10 # the interval at which chain values are saved
+  divisor = 100 # the interval at which chain values are saved
   chain = array(dim = c((nrow(startvalue)+1), (iterations/divisor))) # Array for storing chain data
   temp_chain = array(dim = c((nrow(startvalue)+1), 2)) # Temporary array used for single iterations
   
@@ -271,10 +271,10 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       lines(S, type = "l", col = "darkolivegreen3", xlab = "", ylab = "")
       legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected", "Susceptible"), pch = 1, col = c("black", "orange", "red", "grey", "darkolivegreen3"), bty = "n")
     
-      plot(new_I, ylim = c(-400, 800), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals")
+      plot(new_I, ylim = c(-10, N*0.25), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals")
       # lines(run_stoch$new_R, type = "l", col = "orange", xlab = "", ylab = "")
       lines(run_stoch$new_I, type = "l", col = "grey", xlab = "", ylab = "")
-      legend(100, 0.5*1000, c("Newly infected", "True newly infected"), pch = 1, col = c("red", "grey"), bty = "n")
+      legend(100, 0.5*(N*0.25), c("Newly infected", "True newly infected"), pch = 1, col = c("red", "grey"), bty = "n")
       
     }
     
@@ -288,8 +288,8 @@ startvalue[1] <-  beta # beta guess
 startvalue[2] <-  gamma # gamma guess
 
 # Number of runs
-iterations =  10000
-divisor = 10 # how often runs are being saved
+iterations =  100000
+divisor = 100 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
