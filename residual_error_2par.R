@@ -90,11 +90,6 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 ## Deterministic model ##
 #########################
 
-param <- c(
-  5e-2, # 5e-3, # beta
-  8e-1# 8e-2 # gamma
-)
-
 sir <- function(time, state, param) {
   
   # define model parameters in term of the natural parameters
@@ -122,6 +117,7 @@ det_sir <- as.data.frame(det_sir)
 sse <- function(param){
   
   data = run_stoch[,4]
+  det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = param))
   model = det_sir[,4]
   
   diff_sq = array(0, dim = (c(nrow(run_stoch))))
@@ -132,6 +128,12 @@ sse <- function(param){
   
   return(sum(diff_sq))
 } 
+
+# Starting point for parameters
+param <- c(
+  5e-2, # 5e-3, # beta
+  8e-1# 8e-2 # gamma
+)
 
 # Function for optimisation
 optim(param, sse)
