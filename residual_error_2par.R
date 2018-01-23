@@ -113,11 +113,11 @@ sir <- function(time, state, param) {
 # Function for calculation sum of squared differences (deterministic model vs. stochastic data)
 sse <- function(param){
   
-  data = run_stoch[,4]
   det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = param))
-  model = det_sir[,4]
-  
-  diff_sq = array(0, dim = (c(nrow(run_stoch))))
+  model = det_sir[,4] # Recovered curve for deterministic model
+  data = run_stoch[,4] # Recovered curve for stochastic model
+
+  diff_sq = array(0, dim = (c(length(data_sample))))
   
   for (i in 1:nrow(run_stoch)){
     diff_sq[i] = (model[i] - data[i])^2
@@ -126,25 +126,75 @@ sse <- function(param){
   return(sum(diff_sq))
 } 
 
+# Bootstrap function
+sse_bootstrap <- function(param){
+ 
+  det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = param))
+  model = det_sir[,4] # Recovered curve for deterministic model
+  data = run_stoch[,4] # Recovered curve for stochastic model
+  
+  data_sample <- sample(1:nrow(run_stoch), nrow(run_stoch), replace=T) # resampling with replacement
+  diff_sq = array(0, dim = (c(length(data_sample))))
+  
+  for (i in data_sample){
+    diff_sq[data_sample] = (model[data_sample] - data[data_sample])^2
+  }
+
+  return(sum(diff_sq))
+} 
+
+##################
+## Optimisation ##
+##################
+
 # Starting point for parameters
 param <- c(
-  5e-2, # 5e-3, # beta
-  8e-1# 8e-2 # gamma
+  5e-3, # 5e-3, # beta
+  8e-2 # 8e-2 # gamma
 )
 
-# Function for optimisation
-fit <- optim(param, sse)
+# Optimisation function
+sse_fit <- optim(param, sse)
 
-# Plot the results
-run_det <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = fit$par))
+############################
+## Bootstrap optimisation ##
+############################
 
+iterations = 1000 # how many runs for bootstraps
+
+# Dataset for storing iteration data
+sse_bootstrap_data = array(dim = (c(length(param), iterations)))
+
+# Bootstrap function for optimisation
+for (i in 1:iterations){
+  fit <- optim(param, sse_bootstrap)
+  sse_bootstrap_data[,i] = fit$par
+  
+  if (i%%(iterations/10) == 0) {
+    print(i)
+  }
+}
+
+###########
+## Plots ##
+###########
+
+# Histogram
+par(mfrow = c(1,2))
+
+hist(sse_dataset[1,],nclass=30, main="Beta", xlab="Beta value")
+abline(v = sse_fit$par[1], col = "red")
+
+hist(sse_dataset[2,],nclass=30, main="Gamma", xlab="Gamma value")
+abline(v = sse_fit$par[2], col = "red")
+
+
+# Lines
+run_det <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_fit$par))
+
+par(mfrow = c(1,1))
 plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
 lines(run_det$I, type = "l", col = "red", xlab = " ", ylab = " ")
 lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
 lines(run_det$R, type = "l", col = "black", xlab = "", ylab = "")
 legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
-
-
-# Bootstrapping for confidence intervals
-
-# https://ms.mcmaster.ca/~bolker/eeid/2011_eco/EEID2011_Fitting.pdf
