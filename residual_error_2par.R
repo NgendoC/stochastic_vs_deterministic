@@ -167,8 +167,8 @@ sse_bootstrap_data = array(dim = (c(length(param), iterations)))
 
 # Bootstrap function for optimisation
 for (i in 1:iterations){
-  fit <- optim(param, sse_bootstrap)
-  sse_bootstrap_data[,i] = fit$par
+  fit <- optim(param, sse_bootstrap) # optimisation function
+  sse_bootstrap_data[,i] = fit$par # save beta and gamma values in array
   
   if (i%%(iterations/10) == 0) {
     print(i)
@@ -182,10 +182,10 @@ for (i in 1:iterations){
 # Histogram
 par(mfrow = c(1,2))
 
-hist(sse_dataset[1,],nclass=30, main="Beta", xlab="Beta value")
+hist(sse_bootstrap_data[1,],nclass=30, main="Beta", xlab="Beta value")
 abline(v = sse_fit$par[1], col = "red")
 
-hist(sse_dataset[2,],nclass=30, main="Gamma", xlab="Gamma value")
+hist(sse_bootstrap_data[2,],nclass=30, main="Gamma", xlab="Gamma value")
 abline(v = sse_fit$par[2], col = "red")
 
 
@@ -198,3 +198,7 @@ lines(run_det$I, type = "l", col = "red", xlab = " ", ylab = " ")
 lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
 lines(run_det$R, type = "l", col = "black", xlab = "", ylab = "")
 legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected"), pch = 1, col = c("black", "orange", "red", "grey"), bty = "n")
+
+# Beta vs. Gamma
+par(mfrow = c(1,1))
+plot(x = sse_bootstrap_data[2,], y = sse_bootstrap_data[1,], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
