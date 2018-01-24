@@ -11,6 +11,7 @@
 \documentclass[a4paper, 11pt]{article} % sets document shape and font size
 
 \usepackage[margin=2.0cm]{geometry} % set margins to 2cm
+% \usepackage[document]{ragged2e} % make text left-aligned
 
 \usepackage{setspace, caption}
 \captionsetup{font=doublespacing} %double-spaced float captions
@@ -20,6 +21,7 @@
 
 \renewcommand*\contentsname{} % removes Table of Contents' title
 
+\usepackage{amsmath} % Needed for maths equations
 \usepackage{graphicx}
 \graphicspath{ {C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Plots/} } % Where the images will be found 
 
@@ -38,10 +40,10 @@
     \begin{center}
         \vspace*{4.5cm}
         
-        \textbf{Stochastic vs. deterministic Markov Chain Monte Carlo parameterisation for simple SIR models}
+        \textbf{Comparing stochastic and deterministic SIR models for parameterisation and data augmentation}
         
         \vspace{0.5cm}
-        MRes Biomedical Research Project 1
+        MRes Biomedical Research (Epidemiology, Evolution, and Control of Infectious Diseases Stream) Project 1
         
         \vspace{0.5cm}
         
@@ -107,17 +109,30 @@ MCMC: Markov Chain Monte Carlo
 \newpage
 \section{Introduction}
 % 5-10 pages
-
+\subsection{Deterministic and stochastic models for infectious disease epidemiology}
+When one is deciding on a model to use, a decision must be made regarding whether the model should be deterministic, always producing the same outcome with the same input, or stochastic, with changing outcomes with every run of the same input. The differences between stochastic and deterministic modelling methods include: 
 \begin{itemize}
-  \item Using stochastic models (especially individual-based models) is currently trendy
+  \item Deterministic models being easier to implement
+  \item Stochastic models being better for smaller populations
+  \item For some questions, it may not matter whether you use a stochastic or deterministic model.
+\end{itemize}
+
+When a model is being chosen, a researcher may not always ponder about what the best modelling strategy is for the task at hand, but rather use the method that they understand best or habitually use. As computers have become more powerful, the production of more computationally demanding stochastic models has gained popularity, though for some tasks, a simpler deterministic model could perform equally well. 
+% Find a couple of examples where the model used for the task may not have been the best?
+
+\subsection{Model parameterisation}
+\begin{itemize}
   \item MCMC methods can be used to parameterise models - provides a range of suitable values for the model in question
   \item Stochastic models can be more difficult to deal with than deterministic models: MCMC takes time to run, due to stochastic nature many runs of the model are needed, many things can go wrong
-  \item For some questions, it may not matter whether you use a stochastic or deterministic model.
   \item When is using a fully stochastic model in your MCMC a waste of your time?
   \item History of using deterministic modelling instead of stochastic - cite some papers
 \end{itemize}
 
-MCMC has been combined with a deterministic process for example in a paper exploring public health responses to bioterrorism (Elderd et al. 2006).
+In the light of the claim that deterministic parameterisation methods are quicker and may sometimes be as good as sotchastic parameterisation methods, one might ask if the two could be combined to distil the best of both methods. MCMC has been combined with a deterministic process for example in a paper exploring public health responses to bioterrorism (Elderd et al. 2006). The method is also briefly explored in this project. 
+
+\break
+
+In this project, I compare the parameterisation capabilities of stochastic and deterministic models under different population settings. The aim of this is to elucidate the conditions under which a deterministic model might be used just as well as a stochastic model if one is trying to quantify the range of values that a parameter might take.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Materials and methods %%
@@ -127,48 +142,61 @@ MCMC has been combined with a deterministic process for example in a paper explo
 \section{Materials and Methods}
 % 5-10 pages
 
+%%%%%%%%%%
+
 \subsection{Creating data for fitting}
 
-I constructed a stochastic population-based compartmental SIR model (Figure X). The number of individuals joining the infected compartment, \(b_i\), or recovered compartment, \(c_i\) at timestep i were chosen randomly from a binomial distribution: \break
+I constructed a stochastic population-based compartmental SIR model (Figure X). The number of individuals joining the infected compartment, \textit{b\textsubscript{i}}, or recovered compartment, \textit{c\textsubscript{i}} at timestep \textit{i} were chosen randomly from a binomial distribution: 
+\begin{align*}
+b_{i} &\sim Bin(S_{i}, 1 - e^{-\beta I_{i} dt}) \\
+c_{i} &\sim Bin(I_{i}, 1 - e^{-\gamma R_{i} dt})
+\end{align*}
 
-\begin{equation}
-b_{i} ~ Bin(S_{i}, 1 - e^{-\beta} I_{i} dt)
-\end{equation}
+\noindent where $S_{i}$, $I_{i}$, and $R_{i}$ represent the number of susceptible, infected, and recovered individuals at time i respectively. $\beta$ refers to the rate at which individuals move from susceptible to infected compartments, while $\gamma$ refers to the rate at which individuals move from infected to recovered compartments. The size of a timestep is referred to by $dt$.
 
-\begin{math}
-c_{i} ~ Bin(I_{i}, 1 - e^{-\gamma} R_{i} dt)
-\end{math}
+From this, the numbers of susceptible, infected, and recovered individuals at time $i+1$ could thus be calculated:
+\begin{align*}
+S_{i+1} &= S_{i} - b_{i} \\
+I_{i+1} &= I_{i} + b_{i} - c_{i} \\
+R_{i+1} &= R_{i} + c{i}
+\end{align*}
 
-\break
-where S_{i}, I_{i}, and R_{i} represent the number of susceptible, infected, and recovered individuals at time i respectively. \beta refers to the rate at which individuals move from susceptible to infected compartments, while \gamma refers to the rate at which individuals move from infected to recovered compartments. The size of a timestep is referred to by dt. 
-\break
+I used the output of this model to create epidemic curves for which unknown parameter value ranges, such as $\beta$ and $\gamma$, or missing data, such as the infectious curve, are estimated through various processes.
 
-Then the number of susceptible, infected, and recovered individuals at time i+1 could thus be calculated:
-\break
-$$S_{i+1} = S_{i} - b_{i}$$ 
-\break
-$$I_{i+1} = I_{i} + b_{i} - c_{i}$$
-\break
-$$R_{i+1} = R_{i} + c{i}$$
-\break
+%%%%%%%%%%
 
-I used the output of this model to create epidemic curves for which unknown parameter value ranges, such as \beta and \gamma, or missing data, such as the infectious curve, are estimated through various processes.
+\subsection{Parameterisation}
 
-\subsection{Stochastic Markov Chain Monte Carlo}
+\subsubsection{Residual error}
+\begin{itemize}
+  \item used optim package
+  \item point estimate is the best guess
+  \item bootstrapping used for confidence intervals
+\end{itemize}
 
-A Metropolis-Hastings algorithm was used to infer the values of beta, the rate at which susceptibles become infectious, and gamma, the rate at which infectious individuals recover, in the stochastic SIR model. The prior distribution for \beta and \gamma was set to be uniform, implying that there was no original guess at the value that \beta and \gamma should take. I calculated the likelihood distribution as follows: \break
+%%%%%%%%%%
 
+\subsubsection{Stochastic Markov Chain Monte Carlo}
+
+A Metropolis-Hastings algorithm was used to infer the values of $\beta$, the rate at which susceptibles become infectious, and $\gamma$, the rate at which infectious individuals recover, in the stochastic SIR model. The prior distribution for $\beta$ and $\gamma$ was set to be uniform, implying that there was no original guess at the value that $\beta$ and $\gamma$ should take. I calculated the likelihood distribution as follows: 
+\begin{align*}
 \displaystyle\prod_{i=1}^{N}p(b_{i}, c_{i} \mid \beta, \gamma)
+\end{align*}
 
-\break 
-where
-\break
-
+\noindent where
+\begin{align*}
 p(b_{i}, c_{i} \mid \beta, \gamma) = Bin(b_{i}, S_{i} \mid 1-e^{-\beta I_{i} dt}) \times Bin(c_{i}, I_{i} \mid 1-e^{-\gamma R_{i} dt})
+\end{align*}
 
-\subsection{Markov Chain Monte Carlo with a deterministic process}
+%%%%%%%%%%
 
-I altered the stochastic MCMC I had previously created to only have two unknown parameters, \beta and \gamma. I then changed the likelihood function so that it created a deterministic SIR model for every set of \beta and \gamma tested. 
+\subsubsection{Markov Chain Monte Carlo with a deterministic process}
+
+I altered the stochastic MCMC I had previously created to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ tested.
+
+%%%%%%%%%%
+
+\subsection{Model comparison}
 
 %%%%%%%%%%%%%
 %% Results %%
@@ -177,6 +205,12 @@ I altered the stochastic MCMC I had previously created to only have two unknown 
 \newpage
 \section{Results}
 % 10-15 pages
+
+\subsection{Residual error}
+
+\subsection{Stochastic Markov Chain Monte Carlo}
+
+\subsection{Markov Chain Monte Carlo with deterministic process}
 
 %%%%%%%%%%%%%%%%
 %% Discussion %%
