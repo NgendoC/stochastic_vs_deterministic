@@ -188,11 +188,22 @@ A Metropolis-Hastings algorithm was used to infer the values of $\beta$, the rat
 p(b_{i}, c_{i} \mid \beta, \gamma) = Bin(b_{i}, S_{i} \mid 1-e^{-\beta I_{i} dt}) \times Bin(c_{i}, I_{i} \mid 1-e^{-\gamma R_{i} dt})
 \end{align*}
 
+The MCMC was then adapted to guess the number of infectious individuals at timestep $i$. A first guess of the infectious curve was obtained by assuming a constant infectious period and thus back-calculating the infectious curve from the known recovered curve. This original infectious curve was then changed by adding or subtracting one infectious person from a given timepoint $i$ and moving them to another timepoint at every iteration of the MCMC. 
+
 %%%%%%%%%%
 
 \subsubsection{Markov Chain Monte Carlo with a deterministic process}
 
-I altered the stochastic MCMC I had previously created to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ tested.
+I altered the stochastic MCMC I had previously created (see previous subsection) to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ tested. I used the deSolve package to construct the deterministic model. THe number of infectious individuals from output of the deterministic model was then rounded to the nearest integer for each time step. The susceptible curve was devised from the known stochastic recovered curve, $sR_{i}$ and the deterministic infectious curve, $dI_{i}$ so that
+\begin{align*}
+S_{i} &= N - dI_{i} - sR_{i}
+\end{align*}
+where $N$ represents the total population size.
+
+Similarly, the number of newly infected individuals, $newI$, for each time step $i$ was also affected by the deterministic infectious curve and the stochastic recovered curve:
+\begin{align*}
+newI_{i+1} &= dI_{i+1} - dI_{i} + sR_{i+1} - sR_{i}
+\end{align*}
 
 %%%%%%%%%%
 
