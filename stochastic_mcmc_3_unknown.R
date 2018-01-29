@@ -2,97 +2,111 @@
 # 3 unknowns: beta, gamma, and the time of infection for each individual
 # 17/11/17
 
-##########################
-## Input values for SIR ##
-##########################
-
-# Time
-timestep <- 0.5
-end <- 80
-times <- seq(0, end, by = timestep)
-
-# Initial population: N-1 susceptible, 1 infectious, 0 recovered
-init.values = c(
-  S = 100-1,
-  I = 1,
-  R = 0
-)
-N = sum(init.values)
-
-# Beta & gammma
-beta <- 5e-3
-gamma <- 8e-2
-1/gamma
+# ##########################
+# ## Input values for SIR ##
+# ##########################
+# 
+# # Time
+# timestep <- 0.5
+# end <- 80
+# times <- seq(0, end, by = timestep)
+# 
+# # Initial population: N-1 susceptible, 1 infectious, 0 recovered
+# init.values = c(
+#   S = 100-1,
+#   I = 1,
+#   R = 0
+# )
+# N = sum(init.values)
+# 
+# # Beta & gammma
+# beta <- 5e-3
+# gamma <- 8e-2
+# 
+# ###############
+# ## The model ##
+# ###############
+# 
+# # Array for holding collective disease status information for whole period of time
+# data <- array(0, dim =c(length(times), length(init.values)+3))
+# data[,1] <- times # make first column the timesteps to make plotting easier later on
+# 
+# set.seed(7) # Good ones: 7, 14, 22, 30
+# 
+# # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
+# for (time in times){
+#   if (time == 0){ # Set up the number of S/I/R at time 0
+#     data[1,2] <- init.values["S"] # number of susceptibles at time 0
+#     data[1,3] <- init.values["I"] # number of infecteds at time 0
+#     data[1,4] <- init.values["R"] # number of recovereds at time 0
+#     data[1,5] <- init.values["I"] # number newly infected at time 0
+#     data[1,6] <- init.values["R"] # number newly recovered at time 0
+#     
+#   } else{
+#     whole_time <- 1/timestep * time # makes time into the whole number that it corresponds to in the array
+#     
+#     inf <- rbinom(1, size = data[whole_time,2], (1-(exp(-beta*data[whole_time,3]*timestep)))) # number who become infected in this timestep
+#     rec <- rbinom(1, size = data[whole_time,3], (1-(exp(-gamma*timestep)))) # number who become recovered in this timestep
+#     
+#     data[whole_time+1,2] <- data[whole_time,2] - inf # number of susceptibles at other times
+#     
+#     data[whole_time+1,3] <- data[whole_time,3]  + inf - rec # number of infecteds at other times
+#     
+#     data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at other times
+#     
+#     data[whole_time+1,5] <- data[whole_time+1,3] - data[whole_time,3] + data[whole_time+1,4] - data[whole_time,4] # number of newly infected
+#     
+#     data[whole_time+1,6] <- data[whole_time+1,4] - data[whole_time,4] # number of newly recovered
+#   }
+# }
+# 
+# ###############
+# ## SIR plots ##
+# ###############
+# 
+# run_stoch <- data.frame(data) # make array into a dataframe
+# colnames(run_stoch) <- c("time","S", "I", "R", "new_I", "new_R")
+# 
+# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# 
+# # Beta, gamma, and likelihood data
+# write.csv(data.frame(beta_gamma_loglik), file = "run_stoch.csv")
+# 
+# par(mfrow = c(1,1))
+# 
+# # Plot for SIR model
+# plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "red", ylim = c(0,N),
+#      xlab = "Time", ylab = "Number susceptible/infected/recovered", main = "Stochastic SIR Model")
+# par(new=T)
+# plot(x = run_stoch$time, y = run_stoch$S, type = "l", ylim = c(0,N), ylab = "", xlab = "") # add susceptible line
+# par(new=T)
+# plot(x = run_stoch$time, y = run_stoch$R, type = "l", col = "orange", ylim = c(0,N), ylab = "", xlab = "") # recovered
+# 
+# # Add legend
+# legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
 
 ###############
-## The model ##
+## Read data ##
 ###############
-
-# Array for holding collective disease status information for whole period of time
-data <- array(0, dim =c(length(times), length(init.values)+3))
-data[,1] <- times # make first column the timesteps to make plotting easier later on
-
-set.seed(7) # Good ones: 7, 14, 22, 30
-
-# For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
-for (time in times){
-  if (time == 0){ # Set up the number of S/I/R at time 0
-    data[1,2] <- init.values["S"] # number of susceptibles at time 0
-    data[1,3] <- init.values["I"] # number of infecteds at time 0
-    data[1,4] <- init.values["R"] # number of recovereds at time 0
-    data[1,5] <- init.values["I"] # number newly infected at time 0
-    data[1,6] <- init.values["R"] # number newly recovered at time 0
-    
-  } else{
-    whole_time <- 1/timestep * time # makes time into the whole number that it corresponds to in the array
-    
-    inf <- rbinom(1, size = data[whole_time,2], (1-(exp(-beta*data[whole_time,3]*timestep)))) # number who become infected in this timestep
-    rec <- rbinom(1, size = data[whole_time,3], (1-(exp(-gamma*timestep)))) # number who become recovered in this timestep
-    
-    data[whole_time+1,2] <- data[whole_time,2] - inf # number of susceptibles at other times
-    
-    data[whole_time+1,3] <- data[whole_time,3]  + inf - rec # number of infecteds at other times
-    
-    data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at other times
-    
-    data[whole_time+1,5] <- data[whole_time+1,3] - data[whole_time,3] + data[whole_time+1,4] - data[whole_time,4] # number of newly infected
-    
-    data[whole_time+1,6] <- data[whole_time+1,4] - data[whole_time,4] # number of newly recovered
-  }
-}
-
-###############
-## SIR plots ##
-###############
-
-run_stoch <- data.frame(data) # make array into a dataframe
-colnames(run_stoch) <- c("time","S", "I", "R", "new_I", "new_R")
-
-par(mfrow = c(1,1))
-
-# Plot for SIR model
-plot(x = run_stoch$time, y = run_stoch$I, type = "l", col = "red", ylim = c(0,N),
-     xlab = "Time", ylab = "Number susceptible/infected/recovered", main = "Stochastic SIR Model")
-par(new=T)
-plot(x = run_stoch$time, y = run_stoch$S, type = "l", ylim = c(0,N), ylab = "", xlab = "") # add susceptible line
-par(new=T)
-plot(x = run_stoch$time, y = run_stoch$R, type = "l", col = "orange", ylim = c(0,N), ylab = "", xlab = "") # recovered
-
-# Add legend
-legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("black", "red", "orange"), bty = "n")
+setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+run_stoch <- read.csv("run_stoch.csv")
 
 #############################
 ## Approximate new_I and I ##
 #############################
 
-inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
-inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
+timestep <- run_stoch$time[2] - run_stoch$time[1]
+inf_period <- 12 # need to guess an infectious period
 
-times = times + inf_timestep
+# inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
+inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
+epi_time <- max(run_stoch$time) + inf_period
+times <- seq(0, epi_time, by = timestep)
+
 zero_array <- array(0, dim = c(inf_timestep, ncol(run_stoch)))
 colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 run_stoch <- rbind(zero_array, run_stoch)
-run_stoch$time <- seq(0, (end+inf_period), by = timestep)
+run_stoch$time <- times
 
 for (i in 1:nrow(run_stoch)){
   run_stoch$guess_new_I[i] <- {
@@ -149,6 +163,7 @@ bg_likelihood <- function(param){
 }
 
 inf_likelihood <- function(param){
+  # print(dim(param))
   beta = as.numeric(param[1,2,1])
   gamma = as.numeric(param[2,2,1])
   I = as.numeric(param[,1,2]) # Infected
@@ -205,7 +220,7 @@ inf_proposalfunction <- function(param){
   changed_I <- sample(nrow(run_stoch), 1)
   inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
   
-  inf <- sample(c(-2, 2), 1) # will the change at that timepoint be + or - n I
+  inf <- sample(c(-1, 1), 1) # will the change at that timepoint be + or - n I
   
   neighbour <- if (changed_I == 1){
     changed_I + 1
@@ -249,7 +264,7 @@ proposalfunction <- function(param){
 ##########
 
 run_metropolis_MCMC <- function(startvalue, iterations){
-  divisor = 100 # the interval at which chain values are saved
+  divisor = divisor # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor), ncol(startvalue))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # Temporary array used for single iterations
 
@@ -319,19 +334,20 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     # Save the iteration if it is divisible by the divisor without residuals
     if (i%%divisor == 0) {
       chain[,(i/divisor),] = temp_chain[,2,]
+      chain[3,(i/divisor),1] = inf_likelihood(temp_chain[,,]) # saving the log-likelihood
     }    
 
     # Re-set temporary chain for next iteration
     temp_chain[,1,] = temp_chain[,2,]
     
     # Print every nth iteration, to know how far along run is
-    if (i%%(iterations/20) == 0) {
+    if (i%%(iterations/20) == 0 | i == 1) {
       print(i)
       
-      plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
-      lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-      lines(temp_chain[,1,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
-      legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
+      # plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+      # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+      # lines(temp_chain[,1,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+      # legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
     }
     
   }
@@ -340,14 +356,14 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(nrow(run_stoch), 3))
-startvalue[1,1] <- 0.0065 # beta guess
-startvalue[2,1] <- 0.08 # gamma guess
+startvalue[1,1] <- 1 # beta guess
+startvalue[2,1] <- 1 # gamma guess
 startvalue[,2] <- run_stoch$guess_I # I guess 
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Number of runs
-iterations = 500000
-divisor = 100 # how often runs are being saved
+iterations = 5
+divisor = 1 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
@@ -355,56 +371,77 @@ chain <- run_metropolis_MCMC(startvalue, iterations)
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
-burnIn = 0.1*(iterations/divisor)
-acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),]))
-inf_acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),2]))
+# burnIn = 0.1*(iterations/divisor)
+# acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),]))
+# inf_acceptance <- 1-mean(duplicated(chain[,-(1:burnIn),2]))
 
 ################
 ## MCMC Plots ##
 ################
 
-par(mfrow = c(2,2))
-
-hist(chain[1,-(1:burnIn),1],nclass=30, main="Posterior of beta")
-abline(v = mean(chain[1,-(1:burnIn),1]), col = "red")
-
-hist(chain[2, -(1:burnIn),1],nclass=30, main="Posterior of gamma")
-abline(v = mean(chain[2,-(1:burnIn),1]), col = "red")
-
-plot(chain[1, -(1:burnIn),1], type = "l", main = "Chain values of beta")
-
-plot(chain[2, -(1:burnIn),1], type = "l", main = "Chain values of gamma")
-
-# Plot beta vs. gamma
-par(mfrow = c(1,1))
-library(RColorBrewer)
-library(MASS)
-
-plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
-
-k <- 11
-my.cols <- rev(brewer.pal(k, "RdYlBu"))
-z <- kde2d(chain[2,,1], chain[1,,1], n=50)
-filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
- 
-par(mfrow = c(1,1))
-  
-plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
-  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-  lines(chain[,ncol(chain),2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
-  legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
-
-plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
-  lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
-  for (i in 1:ncol(chain)){
-    lines(chain[,i,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
-  }
-  legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")  
-
-########################################################################################################################
+# par(mfrow = c(2,2))
+# 
+# hist(chain[1,-(1:burnIn),1],nclass=30, main="Posterior of beta")
+# abline(v = mean(chain[1,-(1:burnIn),1]), col = "red")
+# 
+# hist(chain[2, -(1:burnIn),1],nclass=30, main="Posterior of gamma")
+# abline(v = mean(chain[2,-(1:burnIn),1]), col = "red")
+# 
+# plot(chain[1, -(1:burnIn),1], type = "l", main = "Chain values of beta")
+# 
+# plot(chain[2, -(1:burnIn),1], type = "l", main = "Chain values of gamma")
+# 
+# # Plot beta vs. gamma
+# par(mfrow = c(1,1))
+# library(RColorBrewer)
+# library(MASS)
+# 
+# plot(x = chain[2,,1], y = chain[1,,1], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
+# 
+# k <- 11
+# my.cols <- rev(brewer.pal(k, "RdYlBu"))
+# z <- kde2d(chain[2,,1], chain[1,,1], n=50)
+# filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
+#  
+# par(mfrow = c(1,1))
+#   
+# plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+#   lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+#   lines(chain[,ncol(chain),2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+#   legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")
+# 
+# plot(run_stoch$guess_I, ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
+#   lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")  
+#   for (i in 1:ncol(chain)){
+#     lines(chain[,i,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ")
+#   }
+#   legend(130, 1.0*N, c("True infected", "Guessed infected", "MCMC"), pch = 1, col = c("grey", "red", "black"), bty = "n")  
 
 ########################################################################################################################
 
-# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-# write.csv(data.frame(chain), file = "mcmc_3par_fixedprop_pm2_500k.csv")
-  
+########################################################################################################################
+
+#################
+## Saving data ##
+#################
+
+# Prepare data for saving
+## Saving beta, gamma, and log likelihood
+beta_gamma_loglik <- t(chain[1:3,,1]) # transpose beta, gamma, and log likelihood data so that rows become columns etc.
+colnames(beta_gamma_loglik) <- c("beta", "gamma", "loglik") # name the columns
+## Saving infectious data
+inf_data <- chain[,,2]
+timeframe <- array(dim = nrow(inf_data))
+
+for (i in 1:nrow(inf_data)){
+  timeframe[i] = i * timestep 
+}
+inf_data2 <- cbind(timeframe, inf_data)
+
+setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+
+# Beta, gamma, and likelihood data
+write.csv(data.frame(beta_gamma_loglik), file = "stoch_mcmc_beta_gamma_loglik_test.csv", row.names = FALSE)
+
+# Infectious curve data
+write.csv(data.frame(inf_data2), file = "stoch_mcmc_infectious_test.csv", row.names = FALSE)
