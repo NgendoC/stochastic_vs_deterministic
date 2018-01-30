@@ -8,12 +8,31 @@
 setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 run_stoch <- read.csv("run_stoch.csv")
 
+###########
+## Input ##
+###########
+
+inf_period <- 10 # Guess an infectious period for infectious curve starting point
+
+# Guesses for beta and gamma
+beta = 0.005
+gamma = 0.08
+
+# Proposal function SDs
+prop_sd_beta = 0.005
+prop_sd_gamma = 0.1
+
+# Number of runs
+iterations = 5 # How many iterations MCMC is running for
+divisor = 1 # How often runs are being saved
+
 #############################
 ## Approximate new_I and I ##
 #############################
 
+N = run_stoch$S[1] + run_stoch$I[1] + run_stoch$R[1]
+
 timestep <- run_stoch$time[2] - run_stoch$time[1]
-inf_period <- 12 # need to guess an infectious period
 
 # inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
 inf_timestep <- inf_period/timestep # translates infectious days into no. of timesteps
@@ -80,7 +99,6 @@ bg_likelihood <- function(param){
 }
 
 inf_likelihood <- function(param){
-  # print(dim(param))
   beta = as.numeric(param[1,2,1])
   gamma = as.numeric(param[2,2,1])
   I = as.numeric(param[,1,2]) # Infected
@@ -101,11 +119,9 @@ inf_likelihood <- function(param){
       gammalikelihood = -1000
     }
     total[i] = (betalikelihood + gammalikelihood)
-    # print(c(betalikelihood, gammalikelihood))
   }
   
   ll = sum(total, na.rm = T)
-  # print(ll)
   return(ll)
 }
 
@@ -116,9 +132,6 @@ prior <- function(param){
   
   betaprior = dunif(beta, min = 0, max = 100, log = T)
   gammaprior = dunif(gamma, min = 0, max = 100, log = T)
-  
-  # betaprior = dnorm(beta, mean = 0.005, sd = 0.001, log = T)
-  # gammaprior = dnorm(gamma, mean = 0.08, sd = 0.001, log = T)
   
   return(betaprior + gammaprior)
 }
@@ -146,8 +159,6 @@ inf_proposalfunction <- function(param){
       } else{
         changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
         }
-  
-  # neighbour <- sample(nrow(run_stoch), 1)
 
   param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
   param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
@@ -160,19 +171,13 @@ inf_proposalfunction <- function(param){
       param[i-1,1,2] + param[i,1,3] - run_stoch$new_R[i]
       }
   }
-  
-  # plot(param[,1,2], ylim = c(0, N), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals infected")
-  #   lines(run_stoch$new_R)
-  #   lines(run_stoch$new_I)
-  
   return(param)
 }
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1, 1, 1] = rnorm(1, mean = param[1, 1, 1], sd = 0.005 ) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001) 
-  param[2, 1, 1] = rnorm(1, mean = param[2, 1, 1], sd = 0.1) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
-  #print(c(param[1,1], param[2,1]))
+  param[1, 1, 1] = rnorm(1, mean = param[1, 1, 1], sd = prop_sd_beta) # beta proposal
+  param[2, 1, 1] = rnorm(1, mean = param[2, 1, 1], sd = prop_sd_gamma) # gamma proposal
   return(param)
   }
 
@@ -273,14 +278,10 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(nrow(run_stoch), 3))
-startvalue[1,1] <- 1 # beta guess
-startvalue[2,1] <- 1 # gamma guess
+startvalue[1,1] <- beta # beta guess
+startvalue[2,1] <- gamma # gamma guess
 startvalue[,2] <- run_stoch$guess_I # I guess 
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
-
-# Number of runs
-iterations = 5
-divisor = 1 # how often runs are being saved
 
 # Run the MCMC
 set.seed(4)
