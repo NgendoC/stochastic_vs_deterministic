@@ -83,10 +83,8 @@ bg_likelihood <- function(param){
     } else {
       (round(det_sir$I[i+1]) - I + run_stoch$R[i+1] - run_stoch$R[i]) # new I for timestep i+1
     }
-  
-    # print(c(S, new_I, det_sir$I[i], run_stoch$new_R[i], run_stoch$R[i], (S + I + run_stoch$R[i])))
     
-    if (is.na(new_I) == F & (S<0 | new_I<0 | I<0)){ # (S<0 | new_I<0 | I<0)
+    if (is.na(new_I) == F & (S<0 | new_I<0 | I<0)){
       betalikelihood = -1000
       gammalikelihood = -1000
     } else {
@@ -200,37 +198,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     # Print every nth iteration, to know how far along run is
     if (i%%(iterations/20) == 0 | i == 1) {
       print(i)
-      det_sir <- ode(y = init.values, times = times, func = sir, parms = temp_chain[1:2,])
-      det_sir <- as.data.frame(det_sir)
-      
-      S = array(0, dim = (c(nrow(run_stoch))))
-      new_I = array(0, dim = (c(nrow(run_stoch))))
-      
-      for (i in 1:nrow(run_stoch -1)){
-        S[i] = (N - (round(det_sir$I[i]) + run_stoch$R[i])) # Susceptibles for timestep i
-        new_I[i] = if (i == 1){
-          round(det_sir$I[i])
-        } else {
-          (round(det_sir$I[i+1]) - round(det_sir$I[i]) + run_stoch$R[i+1] - run_stoch$R[i]) # new I for timestep i+1
-        }
-      }
-
-      # par(mfrow = c(2,1))
-      # 
-      # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-      # lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
-      # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-      # lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
-      # lines(S, type = "l", col = "darkolivegreen3", xlab = "", ylab = "")
-      # legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected", "Susceptible"), pch = 1, col = c("black", "orange", "red", "grey", "darkolivegreen3"), bty = "n")
-      # 
-      # plot(new_I, ylim = c(-10, N*0.25), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals")
-      # # lines(run_stoch$new_R, type = "l", col = "orange", xlab = "", ylab = "")
-      # lines(run_stoch$new_I, type = "l", col = "grey", xlab = "", ylab = "")
-      # legend(100, 0.5*(N*0.25), c("Newly infected", "True newly infected"), pch = 1, col = c("red", "grey"), bty = "n")
-      
     }
-    
   }
   return(chain)
 }
@@ -245,52 +213,13 @@ set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 rownames(chain) <- c("beta", "gamma", "loglik")
 
-# The beginning of the chain is biased towards the starting point, so take them out
-# normally burnin is 10%-50% of the runs
-# burnIn = 0.1*(iterations/divisor)
-# acceptance <- 1-mean(duplicated(chain[,-(1:burnIn)]))
-
-################
-## MCMC Plots ##
-################
-
-# par(mfrow = c(2,2))
-# 
-# hist(chain[1,-(1:burnIn)],nclass=30, main="Posterior of beta")
-# abline(v = mean(chain[1,-(1:burnIn)]), col = "red")
-# 
-# hist(chain[2, -(1:burnIn)],nclass=30, main="Posterior of gamma")
-# abline(v = mean(chain[2,-(1:burnIn)]), col = "red")
-# 
-# plot(chain[1,], type = "l", main = "Chain values of beta")
-# 
-# plot(chain[2,], type = "l", main = "Chain values of gamma")
-# 
-# # Plot beta vs. gamma
-# par(mfrow = c(1,1))
-# library(RColorBrewer)
-# library(MASS)
-# 
-# plot(x = chain[2,], y = chain[1,], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
-#
-# k <- 11
-# my.cols <- rev(brewer.pal(k, "RdYlBu"))
-# z <- kde2d(chain[2,], chain[1,], n=50)
-# filled.contour(z, nlevels=k, col=my.cols, xlab = "Gamma", ylab = "Beta")
-
-#####################
-## Likelihood plot ##
-#####################
-
-# par(mfrow = c(1,2), mar=c(5,6,2,0.5))
-# plot(chain[3,], type = "l", main = "Chain values of log likelihood", xlab = "", ylab = "Log(likelihood)")
-# mtext("Iteration x100",side=1,line=2)
-# plot(chain[3,-(1:burnIn)], type = "l", main = "Zoomed in" , xlab = "", ylab = "Log(likelihood)")
-# mtext("(Iteration - burn-in) x100",side=1,line=2)
-
 ########################################################################################################################
 
 ########################################################################################################################
+
+#################
+## Saving data ##
+#################
 
 beta_gamma_loglik <- t(chain[,]) # transpose beta, gamma, and log likelihood data so that rows become columns etc.
 colnames(beta_gamma_loglik) <- c("beta", "gamma", "loglik") # name the columns
