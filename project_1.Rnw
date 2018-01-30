@@ -23,7 +23,8 @@
 
 \usepackage{amsmath} % Needed for maths equations
 \usepackage{graphicx}
-\graphicspath{ {C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Plots/} } % Where the images will be found 
+% \graphicspath{ {c:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Plots/} } % Where the images will be found 
+\graphicspath{ {/Work_folder/Plots/} } %
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Start of document %%
@@ -40,7 +41,7 @@
     \begin{center}
         \vspace*{4.5cm}
         
-        \textbf{Comparing stochastic and deterministic SIR models for parameterisation and data augmentation}
+        \textbf{Chance would be a fine thing: Comparing stochastic and deterministic SIR models for parameterisation and data augmentation}
         
         \vspace{0.5cm}
         MRes Biomedical Research (Epidemiology, Evolution, and Control of Infectious Diseases Stream) Project 1
@@ -51,7 +52,8 @@
         
         \vspace{1cm}
         
-        %\includegraphics[width=0.4\textwidth]{Imperial_College_London_crest.png}
+        % \includegraphics[width=0.4\textwidth]{ICL_crest}
+        \includegraphics{ICL_crest.png}
         
         \vspace{1cm}
         
@@ -117,8 +119,7 @@ When one is deciding on a model to use, a decision must be made regarding whethe
   \item For some questions, it may not matter whether you use a stochastic or deterministic model.
 \end{itemize}
 
-When a model is being chosen, a researcher may not always ponder about what the best modelling strategy is for the task at hand, but rather use the method that they understand best or habitually use. As computers have become more powerful, the production of more computationally demanding stochastic models has gained popularity, though for some tasks, a simpler deterministic model could perform equally well. 
-% Find a couple of examples where the model used for the task may not have been the best?
+When a model is being chosen, a researcher may not always ponder about what the best modelling strategy is for the task at hand, but rather use the method that they understand best or habitually use. As computers have become more powerful, the production of more computationally demanding stochastic models has gained popularity. This could be because of the acknowledgement of all epidemics originally being stochastic processes. For some tasks though, a simpler deterministic model could perform equally well. 
 
 \subsection{Model parameterisation}
 \begin{itemize}
@@ -127,6 +128,10 @@ When a model is being chosen, a researcher may not always ponder about what the 
   \item When is using a fully stochastic model in your MCMC a waste of your time?
   \item History of using deterministic modelling instead of stochastic - cite some papers
 \end{itemize}
+
+The data available for model parameterisation should also be considered, though it will not be explored in this project. If many factors are unknown, a complex stochastic model making a multitude of assumptions might perform worse than a simpler deterministic model (mention HIV modelling example?). 
+% Find a couple of examples where the model used for the task may not have been the best?
+% May (2003) Uses and abuses of mathematics in biology : Complex HIV model lost to a less complex model because the assumptions it made were wrong 
 
 In the light of the claim that deterministic parameterisation methods are quicker and may sometimes be as good as sotchastic parameterisation methods, one might ask if the two could be combined to distil the best of both methods. MCMC has been combined with a deterministic process for example in a paper exploring public health responses to bioterrorism (Elderd et al. 2006). The method is also briefly explored in this project. 
 
