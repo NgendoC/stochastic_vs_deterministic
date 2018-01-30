@@ -16,6 +16,22 @@ library("deSolve") #package for solving differential equations
 setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 run_stoch <- read.csv("run_stoch.csv")
 
+###########
+## Input ##
+###########
+
+# Beta and gamma guesses
+beta = 0.005
+gamma = 0.08
+
+# Number of runs
+iterations =  5 # how many iterations the MCMC will be running for
+divisor = 1 # how often runs are being saved
+
+# Proposal function SDs
+prop_sd_beta = 0.005
+prop_sd_gamma = 0.1
+
 ##################################
 ## Likelihood, prior, posterior ##
 ##################################
@@ -110,9 +126,8 @@ bg_posterior <- function(param){
 
 # Proposal function for beta and gamma
 proposalfunction <- function(param){
-  param[1, 1] = rnorm(1, mean = param[1, 1], sd = 0.00004) # beta proposal rnorm(1, mean = 0.005, sd = 0.00001)
-  param[2, 1] = rnorm(1, mean = param[2, 1], sd = 0.0004) # gamma proposal rnorm(1, mean = 0.08, sd = 0.00001)
-  # print(c(param[1,1,1], param[2,1,1]))
+  param[1, 1] = rnorm(1, mean = param[1, 1], sd = prop_sd_beta) # beta proposal
+  param[2, 1] = rnorm(1, mean = param[2, 1], sd = prop_sd_gamma) # gamma proposal
   return(param)
 }
 
@@ -144,7 +159,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     } else if (proposal[1,1] < 0.0 & proposal[2,1] >= 0.0){
       proposal[1,1] = temp_chain[1,1]
       probab = bg_posterior(proposal) - bg_posterior(temp_chain[1:2,])
-      # print(c(bg_posterior(proposal), bg_posterior(temp_chain[,])))
       if (log(runif(1)) < probab){
         temp_chain[1:2,2] = proposal[1:2,1]
         temp_chain[3,2] = bg_likelihood(proposal)
@@ -156,7 +170,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     } else if (proposal[1,1] >= 0.0 & proposal[2,1] < 0.0){
       proposal[2,1] = temp_chain[2,1]
       probab = bg_posterior(proposal) - bg_posterior(temp_chain[1:2,])
-      # print(c(bg_posterior(proposal), bg_posterior(temp_chain[,])))
       if (log(runif(1)) < probab){
         temp_chain[1:2,2] = proposal[1:2,1]
         temp_chain[3,2] = bg_likelihood(proposal)
@@ -167,7 +180,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       
     } else{
       probab = bg_posterior(proposal) - bg_posterior(temp_chain[1:2,])
-      # print(c(bg_posterior(proposal), bg_posterior(temp_chain[,])))
       if (log(runif(1)) < probab){
         temp_chain[1:2,2] = proposal[1:2,1]
         temp_chain[3,2] = bg_likelihood(proposal)
@@ -180,7 +192,6 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     # Save the iteration if it is divisible by the divisor without residuals
     if (i%%divisor == 0) {
       chain[,(i/divisor)] = temp_chain[,2]
-      
     }    
     
     # Re-set temporary chain for next iteration
@@ -204,19 +215,19 @@ run_metropolis_MCMC <- function(startvalue, iterations){
         }
       }
 
-      par(mfrow = c(2,1))
-      
-      plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
-      lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
-      lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
-      lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
-      lines(S, type = "l", col = "darkolivegreen3", xlab = "", ylab = "")
-      legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected", "Susceptible"), pch = 1, col = c("black", "orange", "red", "grey", "darkolivegreen3"), bty = "n")
-    
-      plot(new_I, ylim = c(-10, N*0.25), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals")
-      # lines(run_stoch$new_R, type = "l", col = "orange", xlab = "", ylab = "")
-      lines(run_stoch$new_I, type = "l", col = "grey", xlab = "", ylab = "")
-      legend(100, 0.5*(N*0.25), c("Newly infected", "True newly infected"), pch = 1, col = c("red", "grey"), bty = "n")
+      # par(mfrow = c(2,1))
+      # 
+      # plot(run_stoch$R, ylim = c(0, N), type = "l", col = "orange", xlab = "Timestep", ylab = "Number of individuals")
+      # lines(round(det_sir$I), type = "l", col = "red", xlab = " ", ylab = " ")
+      # lines(run_stoch$I, type = "l", col = "grey", xlab = " ", ylab = " ")
+      # lines(round(det_sir$R), type = "l", col = "black", xlab = "", ylab = "")
+      # lines(S, type = "l", col = "darkolivegreen3", xlab = "", ylab = "")
+      # legend(100, 0.5*N, c("Deterministic recovered", "True recovered", "Deterministic infected", "True infected", "Susceptible"), pch = 1, col = c("black", "orange", "red", "grey", "darkolivegreen3"), bty = "n")
+      # 
+      # plot(new_I, ylim = c(-10, N*0.25), type = "l", col = "red", xlab = "Timestep", ylab = "Number of individuals")
+      # # lines(run_stoch$new_R, type = "l", col = "orange", xlab = "", ylab = "")
+      # lines(run_stoch$new_I, type = "l", col = "grey", xlab = "", ylab = "")
+      # legend(100, 0.5*(N*0.25), c("Newly infected", "True newly infected"), pch = 1, col = c("red", "grey"), bty = "n")
       
     }
     
@@ -226,12 +237,8 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 
 # Where to start the chain for beta, gamma, and I
 startvalue <- array(dim = c(2))
-startvalue[1] <-  beta # beta guess
-startvalue[2] <-  gamma # gamma guess
-
-# Number of runs
-iterations =  5
-divisor = 1 # how often runs are being saved
+startvalue[1] <- beta # beta guess
+startvalue[2] <- gamma  # gamma guess
 
 # Run the MCMC
 set.seed(4)
@@ -240,32 +247,32 @@ rownames(chain) <- c("beta", "gamma", "loglik")
 
 # The beginning of the chain is biased towards the starting point, so take them out
 # normally burnin is 10%-50% of the runs
-burnIn = 0.1*(iterations/divisor)
-acceptance <- 1-mean(duplicated(chain[,-(1:burnIn)]))
+# burnIn = 0.1*(iterations/divisor)
+# acceptance <- 1-mean(duplicated(chain[,-(1:burnIn)]))
 
 ################
 ## MCMC Plots ##
 ################
 
-par(mfrow = c(2,2))
-
-hist(chain[1,-(1:burnIn)],nclass=30, main="Posterior of beta")
-abline(v = mean(chain[1,-(1:burnIn)]), col = "red")
-
-hist(chain[2, -(1:burnIn)],nclass=30, main="Posterior of gamma")
-abline(v = mean(chain[2,-(1:burnIn)]), col = "red")
-
-plot(chain[1,], type = "l", main = "Chain values of beta")
-
-plot(chain[2,], type = "l", main = "Chain values of gamma")
-
-# Plot beta vs. gamma
-par(mfrow = c(1,1))
-library(RColorBrewer)
-library(MASS)
-
-plot(x = chain[2,], y = chain[1,], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
-
+# par(mfrow = c(2,2))
+# 
+# hist(chain[1,-(1:burnIn)],nclass=30, main="Posterior of beta")
+# abline(v = mean(chain[1,-(1:burnIn)]), col = "red")
+# 
+# hist(chain[2, -(1:burnIn)],nclass=30, main="Posterior of gamma")
+# abline(v = mean(chain[2,-(1:burnIn)]), col = "red")
+# 
+# plot(chain[1,], type = "l", main = "Chain values of beta")
+# 
+# plot(chain[2,], type = "l", main = "Chain values of gamma")
+# 
+# # Plot beta vs. gamma
+# par(mfrow = c(1,1))
+# library(RColorBrewer)
+# library(MASS)
+# 
+# plot(x = chain[2,], y = chain[1,], xlab = "Gamma", ylab = "Beta", pch = 20, cex = 0.8)
+#
 # k <- 11
 # my.cols <- rev(brewer.pal(k, "RdYlBu"))
 # z <- kde2d(chain[2,], chain[1,], n=50)
@@ -275,11 +282,11 @@ plot(x = chain[2,], y = chain[1,], xlab = "Gamma", ylab = "Beta", pch = 20, cex 
 ## Likelihood plot ##
 #####################
 
-par(mfrow = c(1,2), mar=c(5,6,2,0.5))
-plot(chain[3,], type = "l", main = "Chain values of log likelihood", xlab = "", ylab = "Log(likelihood)")
-mtext("Iteration x100",side=1,line=2)
-plot(chain[3,-(1:burnIn)], type = "l", main = "Zoomed in" , xlab = "", ylab = "Log(likelihood)")
-mtext("(Iteration - burn-in) x100",side=1,line=2)
+# par(mfrow = c(1,2), mar=c(5,6,2,0.5))
+# plot(chain[3,], type = "l", main = "Chain values of log likelihood", xlab = "", ylab = "Log(likelihood)")
+# mtext("Iteration x100",side=1,line=2)
+# plot(chain[3,-(1:burnIn)], type = "l", main = "Zoomed in" , xlab = "", ylab = "Log(likelihood)")
+# mtext("(Iteration - burn-in) x100",side=1,line=2)
 
 ########################################################################################################################
 
