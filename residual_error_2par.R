@@ -20,10 +20,10 @@ run_stoch <- read.csv("run_stoch.csv")
 ###########
 
 # Starting point for parameters
-beta = 0.005
-gamma = 0.08
+beta = 0.05 # 0.005
+gamma = 0.8 # 0.08
 
-iterations = 10 # how many runs for bootstraps
+iterations = 1000 # how many runs for bootstraps
 
 #########################
 ## Deterministic model ##
@@ -69,7 +69,7 @@ sse <- function(param){
   model = det_sir[,4] # Recovered curve for deterministic model
   data = run_stoch[,4] # Recovered curve for stochastic model
 
-  diff_sq = array(0, dim = (c(length(nrow(run_stoch)))))
+  diff_sq = array(dim = (c(length(nrow(run_stoch)))))
   
   for (i in 1:nrow(run_stoch)){
     diff_sq[i] = (model[i] - data[i])^2
@@ -79,17 +79,18 @@ sse <- function(param){
 } 
 
 # Bootstrap function
-sse_bootstrap <- function(param){
- 
+sse_bootstrap <- function(param, constant){
+  
   det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = param))
   model = det_sir[,4] # Recovered curve for deterministic model
   data = run_stoch[,4] # Recovered curve for stochastic model
   
+  set.seed(constant) # keeps the data_sample number set constant for the iteration
   data_sample <- sample(1:nrow(run_stoch), nrow(run_stoch), replace=T) # resampling with replacement
-  diff_sq = array(0, dim = (c(length(data_sample))))
+  diff_sq = array(dim = (c(length(data_sample))))
   
-  for (i in data_sample){
-    diff_sq[i] = (model[i] - data[i])^2
+  for (i in 1:length(data_sample)){
+    diff_sq[i] = (model[data_sample[i]] - data[data_sample[i]])^2
   }
 
   return(sum(diff_sq))
@@ -121,10 +122,13 @@ colnames(sse_bootstrap_data) <- c("beta", "gamma", "RE")
 
 # Bootstrap function for optimisation
 for (i in 1:iterations){
-  fit <- optim(sse_fit$par, sse_bootstrap) # optimisation function
-  sse_bootstrap_data[i,1:2] = fit$par # save beta and gamma values in array
+  constant = i
+  fit <- optim(sse_fit$par, sse_bootstrap, constant = i) # optimisation function, point estimate as starting point
+  # fit <- optim(param, sse_bootstrap, constant = i) # optimisation function, original guess as starting point
+  sse_bootstrap_data[i,1:2] = fit$par[1:2] # save beta and gamma values in array
   sse_bootstrap_data[i,3] = fit$value # save residual error
   
+  # bootstrap_param[3] = bootstrap_param[3]+1
   if (i%%(iterations/10) == 0) {
     print(i)
   }
@@ -142,4 +146,4 @@ setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Projec
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
-write.csv(data.frame(sse_data), file = "re_betagamma_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+write.csv(data.frame(sse_data), file = "re_betagamma_badstart_01.02.18.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
