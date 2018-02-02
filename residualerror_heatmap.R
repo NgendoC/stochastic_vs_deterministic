@@ -22,8 +22,14 @@ run_stoch <- read.csv("run_stoch.csv")
 ######################################################
 
 # Starting point for parameters
-beta <- seq(0.003, 0.008, by = ((0.008-0.003)/50))
-gamma <- seq(0.05, 0.20, by = ((0.20-0.05)/50))
+beta_min <- 0.005
+beta_max <- 0.007
+gamma_min <- 0.075
+gamma_max <- 0.09
+intervals <- 50
+
+beta <- seq(beta_min, beta_max, by = ((beta_max-beta_min)/intervals))
+gamma <- seq(gamma_min, gamma_max, by = ((gamma_max-gamma_min)/intervals))
 
 bg_combo <- expand.grid(beta, gamma)
 
@@ -93,8 +99,8 @@ for (i in 1:nrow(bg_combo)){
   sse_heatmap_data[i,3] = re # save residual error
   
   # bootstrap_param[3] = bootstrap_param[3]+1
-  if (i%%(nrow(bg_combo)/10) == 0) {
-    print(i)
+  if (i%%(100) == 0) {
+    print(c(i, nrow(bg_combo)))
   }
 }
 
@@ -105,4 +111,4 @@ for (i in 1:nrow(bg_combo)){
 setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and residual error data
-write.csv(sse_heatmap_data, file = "re_heatmap_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+write.csv(sse_heatmap_data, file = "re_heatmap_small_range.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
