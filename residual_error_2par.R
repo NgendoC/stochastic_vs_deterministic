@@ -128,10 +128,9 @@ for (i in 1:iterations){
   sse_bootstrap_data[i,1:2] = fit$par[1:2] # save beta and gamma values in array
   sse_bootstrap_data[i,3] = fit$value # save residual error
   
-  # bootstrap_param[3] = bootstrap_param[3]+1
-  if (i%%(iterations/10) == 0) {
-    print(i)
-  }
+  # if (i%%(iterations/10) == 0) {
+  #   print(i)
+  # }
 }
 
 ########################################################################################################################
@@ -146,4 +145,4 @@ setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Projec
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
-write.csv(data.frame(sse_data), file = "re_betagamma_badstart_01.02.18.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+write.csv(data.frame(sse_data), file = "re_betagamma_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
