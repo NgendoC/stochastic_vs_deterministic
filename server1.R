@@ -16,7 +16,7 @@ library("deSolve") #package for solving differential equations
 ###############
 ## Read data ##
 ###############
-setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 run_stoch <- read.csv("run_stoch.csv")
 
 ###########
@@ -145,7 +145,7 @@ for (i in 1:iterations){
 ## Saving data ##
 #################
 
-setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
