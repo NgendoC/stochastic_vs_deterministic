@@ -9,9 +9,9 @@
 #######################
 ## Required packages ##
 #######################
-#install.packages("deSolve")
-if (!require("deSolve", lib="/janetta/Rpackages/")) install.packages("deSolve", lib="/janetta/Rpackages/")
-library("deSolve", lib.loc="/janetta/Rpackages/") #package for solving differential equations
+# install.packages("deSolve")
+# if (!require("deSolve", lib="/janetta/Rpackages/")) install.packages("deSolve", lib="/janetta/Rpackages/")
+# library("deSolve", lib.loc="/janetta/Rpackages/") #package for solving differential equations
 
 ###############
 ## Read data ##
