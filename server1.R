@@ -17,7 +17,7 @@ library("deSolve") #package for solving differential equations
 ## Read data ##
 ###############
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-run_stoch <- read.csv("run_stoch.csv")
+run_stoch <- read.csv("data_pop100_b0.005_g0.08_7.csv")
 
 ###########
 ## Input ##
@@ -127,8 +127,8 @@ colnames(sse_bootstrap_data) <- c("beta", "gamma", "RE")
 # Bootstrap function for optimisation
 for (i in 1:iterations){
   constant = i
-  fit <- optim(sse_fit$par, sse_bootstrap, constant = i) # optimisation function, point estimate as starting point
-  # fit <- optim(param, sse_bootstrap, constant = i) # optimisation function, original guess as starting point
+  # fit <- optim(sse_fit$par, sse_bootstrap, constant = i) # optimisation function, point estimate as starting point
+  fit <- optim(param, sse_bootstrap, constant = i) # optimisation function, original guess as starting point
   sse_bootstrap_data[i,1:2] = fit$par[1:2] # save beta and gamma values in array
   sse_bootstrap_data[i,3] = fit$value # save residual error
   
@@ -149,6 +149,6 @@ for (i in 1:iterations){
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
-write.csv(data.frame(sse_data), file = "re_betagamma_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+write.csv(data.frame(sse_data), file = "re_pop100_b0.005_g0.08_7.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
 
 
