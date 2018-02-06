@@ -13,7 +13,7 @@ library("deSolve") #package for solving differential equations
 ## Read data ##
 ###############
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-run_stoch <- read.csv("data_pop50_b0.005_g0.08_57.csv")
+run_stoch <- read.csv("data_pop100k_b0.005_g0.08_1000inf.csv")
 
 ###########
 ## Input ##
@@ -145,4 +145,4 @@ for (i in 1:iterations){
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
-write.csv(data.frame(sse_data), file = "re_pop50_b0.005_g0.08_57.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+write.csv(data.frame(sse_data), file = "re_pop100k_b0.005_g0.08_1000inf.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
