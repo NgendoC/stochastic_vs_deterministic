@@ -1,7 +1,3 @@
-#####################################
-## commands for execution on PuTTY ##
-#####################################
-
 # MCMC estimating stochastic processes
 # 3 unknowns: beta, gamma, and the time of infection for each individual
 # 17/11/17
@@ -10,7 +6,7 @@
 ## Read data ##
 ###############
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-run_stoch <- read.csv("data_pop50_b0.005_g0.08_95.csv")
+run_stoch <- read.csv("data_pop50_b2e-2_g7e-2_18.csv")
 
 ###########
 ## Input ##
@@ -18,11 +14,11 @@ run_stoch <- read.csv("data_pop50_b0.005_g0.08_95.csv")
 
 # Guesses for beta and gamma
 beta = 0.005
-gamma = 0.08
+gamma = 0.005
 
 # Proposal function SDs
-prop_sd_beta = 0.005
-prop_sd_gamma = 0.1
+prop_sd_beta = 0.002
+prop_sd_gamma = 0.007
 
 # inf_period <- 10 # Guess an infectious period for infectious curve starting point
 inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
@@ -301,7 +297,7 @@ inf_data2 <- cbind(timeframe, inf_data)
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and likelihood data
-write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop100k_b0.005_g0.08_95_loglik.csv", row.names = FALSE)
+write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop50_b2e-2_g7e-2_18_loglik.csv", row.names = FALSE)
 
 # Infectious curve data
-write.csv(data.frame(inf_data2), file = "mcmc_pop100k_b0.005_g0.08_95_infectious.csv", row.names = FALSE)
+write.csv(data.frame(inf_data2), file = "mcmc_pop50_b2e-2_g7e-2_18_infectious.csv", row.names = FALSE)
