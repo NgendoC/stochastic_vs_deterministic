@@ -12,15 +12,15 @@ times <- seq(0, end, by = timestep)
 
 # Initial population: N-1 susceptible, 1 infectious, 0 recovered
 init.values = c(
-  S = 100-1,
-  I = 1,
+  S = 1000-20,
+  I = 20,
   R = 0
 )
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 5e-3
-gamma <- 8e-2
+beta <- 0.08*5
+gamma <- 0.08
 
 ###############
 ## The model ##
@@ -30,7 +30,16 @@ gamma <- 8e-2
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-set.seed(7) # Good ones: 7, 14, 22, 30
+# set.seed(1)
+# Beta = 0.005, gamma = 0.08
+# Pop = 50: 35, 57, 95, 113, 227
+# Pop = 200: 2, 7, 8, 14, 20
+# Pop = 1000: 6, 8, 20, 27, 28
+
+# Beta = 0.05, gamma = 0.08
+# Pop = 50: 7, 10, 15, 18, 25
+# Pop = 200: 4, 7, 9, 15, 19
+# Pop = 1000: 6, 8, 27, 28, 30
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -44,14 +53,14 @@ for (time in times){
   } else{
     whole_time <- 1/timestep * time # makes time into the whole number that it corresponds to in the array
     
-    inf <- rbinom(1, size = data[whole_time,2], (1-(exp(-beta*data[whole_time,3]*timestep)))) # number who become infected in this timestep
-    rec <- rbinom(1, size = data[whole_time,3], (1-(exp(-gamma*timestep)))) # number who become recovered in this timestep
+    inf <- rbinom(1, size = data[whole_time,2], (1-(exp((-beta)*(data[whole_time,3]/N)*timestep)))) # number who become infected in this timestep
+    rec <- rbinom(1, size = data[whole_time,3], (1-(exp((-gamma)*timestep)))) # number who become recovered in this timestep
     
-    data[whole_time+1,2] <- data[whole_time,2] - inf # number of susceptibles at other times
+    data[whole_time+1,2] <- data[whole_time,2] - inf # number of susceptibles at next timestep
     
-    data[whole_time+1,3] <- data[whole_time,3]  + inf - rec # number of infecteds at other times
+    data[whole_time+1,3] <- data[whole_time,3]  + inf - rec # number of infecteds at next timestep
     
-    data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at other times
+    data[whole_time+1,4] <- data[whole_time,4] + rec # number of recovereds at next timestep
     
     data[whole_time+1,5] <- data[whole_time+1,3] - data[whole_time,3] + data[whole_time+1,4] - data[whole_time,4] # number of newly infected
     
@@ -83,7 +92,7 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 ## Save data ##
 ###############
 
-setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+setwd("/home/evelina/Development/stochastic_vs_deterministic")
 
 # Save SIR data 
-write.csv(run_stoch, file = "run_stoch.csv", row.names = FALSE)
+write.csv(run_stoch, file = "data_pop1000_b0.05_g0.08_30.csv", row.names = FALSE)
