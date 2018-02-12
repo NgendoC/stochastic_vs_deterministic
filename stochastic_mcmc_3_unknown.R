@@ -5,7 +5,7 @@
 ###############
 ## Read data ##
 ###############
-setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/")
 run_stoch <- read.csv("run_stoch.csv")
 
 ###########
@@ -14,17 +14,17 @@ run_stoch <- read.csv("run_stoch.csv")
 
 # Guesses for beta and gamma
 beta = 0.005
-gamma = 0.08
+gamma = 0.005
 
 # Proposal function SDs
-prop_sd_beta = 0.005
-prop_sd_gamma = 0.1
+prop_sd_beta = 0.002
+prop_sd_gamma = 0.007
 
 # inf_period <- 10 # Guess an infectious period for infectious curve starting point
 inf_period <- ceiling(1/gamma) # mean infectious period calculated from gamma
 
 # Number of runs
-iterations = 5 # How many iterations MCMC is running for
+iterations = 35 # How many iterations MCMC is running for
 divisor = 1 # How often runs are being saved
 
 #############################
@@ -74,7 +74,7 @@ bg_likelihood <- function(param){
   
   for (i in 1:nrow(run_stoch -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
-    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
+    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*(I[i]/N)*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
     
     # To deal with -Inf (i.e. log(0))
@@ -96,12 +96,12 @@ inf_likelihood <- function(param){
   gamma = as.numeric(param[2,2,1])
   I = as.numeric(param[,1,2]) # Infected
   new_I = as.numeric(param[,1,3]) # Newly infected
-
+  
   total = array(0, dim = (c(nrow(run_stoch))))
   
   for (i in 1:(nrow(run_stoch) -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
-    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
+    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*(I[i]/N)*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
     
     # To deal with -Inf (i.e. log(0))
@@ -147,22 +147,22 @@ inf_proposalfunction <- function(param){
   
   neighbour <- if (changed_I == 1){
     changed_I + 1
-    } else if (changed_I == nrow(run_stoch)){
-      changed_I - 1
-      } else{
-        changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
-        }
-
+  } else if (changed_I == nrow(run_stoch)){
+    changed_I - 1
+  } else{
+    changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
+  }
+  
   param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
   param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
   
   # Calculate total infectious curve from changed new_I values
   for (i in 1:nrow(run_stoch)){ 
     param[i,1,2] <- if(i == 1){
-    param[i,1,3] 
+      param[i,1,3] 
     } else{
       param[i-1,1,2] + param[i,1,3] - run_stoch$new_R[i]
-      }
+    }
   }
   return(param)
 }
@@ -172,7 +172,7 @@ proposalfunction <- function(param){
   param[1, 1, 1] = rnorm(1, mean = param[1, 1, 1], sd = prop_sd_beta) # beta proposal
   param[2, 1, 1] = rnorm(1, mean = param[2, 1, 1], sd = prop_sd_gamma) # gamma proposal
   return(param)
-  }
+}
 
 ##########
 ## MCMC ##
@@ -182,7 +182,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   divisor = divisor # the interval at which chain values are saved
   chain = array(dim = c(nrow(startvalue), (iterations/divisor), ncol(startvalue))) # Array for storing chain data
   temp_chain = array(dim = c(nrow(startvalue), 2, ncol(startvalue))) # Temporary array used for single iterations
-
+  
   chain[1,1,1] = startvalue[1,1] # beta
   chain[2,1,1] = startvalue[2,1] # gamma
   chain[,1,2] = startvalue[,2] # all infectious
@@ -250,7 +250,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       chain[,(i/divisor),] = temp_chain[,2,]
       chain[3,(i/divisor),1] = inf_likelihood(temp_chain[,,]) # saving the log-likelihood
     }    
-
+    
     # Re-set temporary chain for next iteration
     temp_chain[,1,] = temp_chain[,2,]
     
@@ -294,7 +294,7 @@ for (i in 1:nrow(inf_data)){
 }
 inf_data2 <- cbind(timeframe, inf_data)
 
-setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and likelihood data
 write.csv(data.frame(beta_gamma_loglik), file = "stoch_mcmc_beta_gamma_loglik_test.csv", row.names = FALSE)
