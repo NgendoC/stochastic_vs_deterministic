@@ -6,7 +6,7 @@
 ## Read data ##
 ###############
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-run_stoch <- read.csv("mcmc_pop200_b0.005_g0.08_2.csv")
+run_stoch <- read.csv("data_pop200_b0.005_g0.08_2.csv")
 
 ###########
 ## Input ##
