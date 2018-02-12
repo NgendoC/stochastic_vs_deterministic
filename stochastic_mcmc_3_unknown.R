@@ -74,6 +74,10 @@ bg_likelihood <- function(param){
   
   for (i in 1:nrow(run_stoch -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
+    if (is.na(new_I[i+1]) == T | S < 0 | I[i] < 0){
+      betalikelihood = -1000
+      gammalikelihood = -1000
+    } else{
     betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*(I[i]/N)*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
     
@@ -83,6 +87,7 @@ bg_likelihood <- function(param){
     }
     if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
       gammalikelihood = -1000
+    }
     }
     total[i] = (betalikelihood + gammalikelihood)
   }
@@ -101,6 +106,10 @@ inf_likelihood <- function(param){
   
   for (i in 1:(nrow(run_stoch) -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
+    if (is.na(new_I[i+1]) == T | S < 0 | I[i] < 0){
+      betalikelihood = -1000
+      gammalikelihood = -1000
+    } else{
     betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*(I[i]/N)*timestep))), log = T)
     gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
     
@@ -110,6 +119,7 @@ inf_likelihood <- function(param){
     }
     if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
       gammalikelihood = -1000
+    }
     }
     total[i] = (betalikelihood + gammalikelihood)
   }
@@ -141,20 +151,20 @@ bg_posterior <- function(param){
 # Proposal function for infectious
 inf_proposalfunction <- function(param){
   changed_I <- sample(nrow(run_stoch), 1)
-  inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
+  # inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
   
   inf <- sample(c(-1, 1), 1) # will the change at that timepoint be + or - n I
   
-  neighbour <- if (changed_I == 1){
-    changed_I + 1
-  } else if (changed_I == nrow(run_stoch)){
-    changed_I - 1
-  } else{
-    changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
-  }
+  # neighbour <- if (changed_I == 1){
+  #   changed_I + 1
+  # } else if (changed_I == nrow(run_stoch)){
+  #   changed_I - 1
+  # } else{
+  #   changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
+  # }
   
   param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
-  param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
+  # param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
   
   # Calculate total infectious curve from changed new_I values
   for (i in 1:nrow(run_stoch)){ 
@@ -270,7 +280,7 @@ startvalue[,2] <- run_stoch$guess_I # I guess
 startvalue[,3] <- run_stoch$guess_new_I # new I guess
 
 # Run the MCMC
-set.seed(4)
+# set.seed(4)
 chain <- run_metropolis_MCMC(startvalue, iterations)
 
 ########################################################################################################################
