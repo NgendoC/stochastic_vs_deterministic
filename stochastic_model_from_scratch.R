@@ -19,8 +19,8 @@ init.values = c(
 N = sum(init.values)
 
 # Beta & gammma
-beta <- 0.08*5
-gamma <- 0.08
+beta <- 0.75
+gamma <- 0.1
 
 ###############
 ## The model ##
@@ -30,7 +30,17 @@ gamma <- 0.08
 data <- array(0, dim =c(length(times), length(init.values)+3))
 data[,1] <- times # make first column the timesteps to make plotting easier later on
 
-# set.seed(1)
+set.seed(17)
+# R0 = 1.5 || Beta = 0.15, gamma = 0.1
+# Pop = 50: 7, 12, 13, 14, 18
+# Pop = 200: 14, 16, 18, 22, 30
+# Pop = 1000: 3, 14, 30, 35, 41
+
+# R0 = 7.5 || Beta = 0.75, gamma = 0.1
+# Pop = 50: 1, 4, 7, 10, 15
+# Pop = 200: 2, 7, 13, 15, 16
+# Pop = 1000: 1, 3, 7, 15, 17
+
 # Beta = 0.005, gamma = 0.08
 # Pop = 50: 35, 57, 95, 113, 227
 # Pop = 200: 2, 7, 8, 14, 20
@@ -40,6 +50,7 @@ data[,1] <- times # make first column the timesteps to make plotting easier late
 # Pop = 50: 7, 10, 15, 18, 25
 # Pop = 200: 4, 7, 9, 15, 19
 # Pop = 1000: 6, 8, 27, 28, 30
+
 
 # For loops for calculating the numbers susceptible, infected, and recovered at each timepoint
 for (time in times){
@@ -95,4 +106,4 @@ legend(60, 0.8*N, c("Susceptible", "Infected", "Recovered"), pch = 1, col = c("b
 setwd("/home/evelina/Development/stochastic_vs_deterministic")
 
 # Save SIR data 
-write.csv(run_stoch, file = "data_pop1000_b0.05_g0.08_30.csv", row.names = FALSE)
+write.csv(run_stoch, file = "data_pop1000_b0.75_g0.1_17.csv", row.names = FALSE)
