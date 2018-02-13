@@ -5,25 +5,25 @@
 #######################
 ## Required packages ##
 #######################
-#install.packages("deSolve")
-if (!require("deSolve")) install.packages("deSolve")
+# install.packages("deSolve")
+# if (!require("deSolve")) install.packages("deSolve")
 library("deSolve") #package for solving differential equations
 
 ###############
 ## Read data ##
 ###############
-# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-run_stoch <- read.csv("run_stoch.csv")
+setwd("/home/evelina/Development/stochastic_vs_deterministic")
+run_stoch <- read.csv("unfinished_epidemic_test.csv")
 
 ###########
 ## Input ##
 ###########
 
 # Starting point for parameters
-beta = 0.05 # 0.005
-gamma = 0.8 # 0.08
+beta = 0.2 # 0.005
+gamma = 0.05 # 0.08
 
-iterations = 1000 # how many runs for bootstraps
+iterations = 10 # how many runs for bootstraps
 
 #########################
 ## Deterministic model ##
@@ -50,8 +50,8 @@ sir <- function(time, state, param) {
   
   with(as.list(c(state, param)), {
     
-    dS <- -beta * S * I 
-    dI <- (beta * S * I) -(gamma * I)
+    dS <- -((beta * S * I)/N) 
+    dI <- ((beta * S * I)/N) -(gamma * I)
     dR <-  gamma * I
     
     return(list(c(dS, dI, dR)))
@@ -68,7 +68,7 @@ sse <- function(param){
   det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = param))
   model = det_sir[,4] # Recovered curve for deterministic model
   data = run_stoch[,4] # Recovered curve for stochastic model
-
+  
   diff_sq = array(dim = (c(length(nrow(run_stoch)))))
   
   for (i in 1:nrow(run_stoch)){
@@ -92,7 +92,7 @@ sse_bootstrap <- function(param, constant){
   for (i in 1:length(data_sample)){
     diff_sq[i] = (model[data_sample[i]] - data[data_sample[i]])^2
   }
-
+  
   return(sum(diff_sq))
 } 
 
@@ -145,4 +145,27 @@ for (i in 1:iterations){
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
-write.csv(data.frame(sse_data), file = "re_betagamma_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+# write.csv(data.frame(sse_data), file = "re_betagamma_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+
+# Plots 
+# par(mfrow = c(1,2))
+# hist(sse_data[2:nrow(sse_data),1],nclass=30, col="gray", main="RE beta seed 1", xlab="")
+# abline(v = sse_data[1,1], col = "red")
+# box()
+# hist(sse_data[2:nrow(sse_data),2],nclass=30, col="gray", main="RE gamma seed 1", xlab="")
+# abline(v = sse_data[1,2], col = "red")
+# box()
+# 
+# par(mfrow = c(1,1))
+# hist(sse_data[2:nrow(sse_data), 3],nclass=30, col="gray", main="RE seed 1", xlab="Residual Error")
+# abline(v = sse_data[1,3], col = "red")
+# box()
+# 
+# par(mfrow= c(1,1))
+# plot(run_stoch$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "Point estimate")
+#   for (i in 1:nrow(sse_data)){
+#     det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_data[i,1:2]))
+#     lines(det_sir$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+#   }
+#   lines(run_stoch$I, ylim = c(0, 50), type = "l", col = "red", lwd = 3)
+#   legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
