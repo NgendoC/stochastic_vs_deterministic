@@ -5,19 +5,20 @@
 ###############
 ## Read data ##
 ###############
-# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
-run_stoch <- read.csv("data_pop50_b0.05_g0.08_10.csv")
+
+# setwd("/home/evelina/Development/stochastic_vs_deterministic")
+run_stoch <- read.csv("data_pop200_b0.15_g0.1_14.csv")
 
 ###########
 ## Input ##
 ###########
 
 # Guesses for beta and gamma
-beta = 0.03
-gamma = 0.1
+beta = 0.2
+gamma = 0.05
 
 # Proposal function SDs
-prop_sd_beta = 0.05
+prop_sd_beta = 0.1
 prop_sd_gamma = 0.1
 
 # inf_period <- 10 # Guess an infectious period for infectious curve starting point
@@ -74,15 +75,20 @@ bg_likelihood <- function(param){
   
   for (i in 1:nrow(run_stoch -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
-    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
-    gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
-    
-    # To deal with -Inf (i.e. log(0))
-    if (is.na(new_I[i+1]) == F & betalikelihood == -Inf){
+    if (is.na(new_I[i+1]) == F & (S < 0 | I[i] < 0 | sum(new_I) > N)){
       betalikelihood = -1000
-    }
-    if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
       gammalikelihood = -1000
+    } else{
+      betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*(I[i]/N)*timestep))), log = T)
+      gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
+      
+      # To deal with -Inf (i.e. log(0))
+      if (is.na(new_I[i+1]) == F & betalikelihood == -Inf){
+        betalikelihood = -1000
+      }
+      if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
+        gammalikelihood = -1000
+      }
     }
     total[i] = (betalikelihood + gammalikelihood)
   }
@@ -101,15 +107,20 @@ inf_likelihood <- function(param){
   
   for (i in 1:(nrow(run_stoch) -1)){
     S = (N - I[i] - run_stoch$R[i]) # Susceptibles
-    betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*I[i]*timestep))), log = T)
-    gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
-    
-    # To deal with -Inf (i.e. log(0))
-    if (is.na(new_I[i+1]) == F & betalikelihood == -Inf){
+    if (is.na(new_I[i+1]) == F & (S < 0 | I[i] < 0  | sum(new_I) > N)){
       betalikelihood = -1000
-    }
-    if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
       gammalikelihood = -1000
+    } else{
+      betalikelihood = dbinom(new_I[i+1], S, (1-(exp(-beta*(I[i]/N)*timestep))), log = T)
+      gammalikelihood = dbinom(run_stoch$new_R[i+1], I[i], (1-(exp(-gamma*timestep))), log = T)
+      
+      # To deal with -Inf (i.e. log(0))
+      if (is.na(new_I[i+1]) == F & betalikelihood == -Inf){
+        betalikelihood = -1000
+      }
+      if (is.na(new_I[i+1]) == F & gammalikelihood == -Inf){
+        gammalikelihood = -1000
+      }
     }
     total[i] = (betalikelihood + gammalikelihood)
   }
@@ -143,18 +154,20 @@ inf_proposalfunction <- function(param){
   changed_I <- sample(nrow(run_stoch), 1)
   inf_list <- c(-1, 1) # used for choosing -1 or +1 randomly
   
-  inf <- sample(c(-1, 1), 1) # will the change at that timepoint be + or - n I
+  inf1 <- sample(c(1, 2), 1) # will the change at that timepoint be + or - n I
+  inf2 <- sample(c(1, 2), 1) # will the change at that timepoint be + or - n I
   
-  neighbour <- if (changed_I == 1){
-    changed_I + 1
-  } else if (changed_I == nrow(run_stoch)){
-    changed_I - 1
-  } else{
-    changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
-  }
+  # neighbour <- if (changed_I == 1){
+  #   sample(nrow(run_stoch), 1) # changed_I + 1
+  # } else if (changed_I == nrow(run_stoch)){
+  #   sample(nrow(run_stoch), 1) # changed_I - 1
+  # } else{
+  #   changed_I + sample(inf_list, 1) # will choose which neighbouring timepoint is also affected
+  # }
+  neighbour <- sample(nrow(run_stoch), 1)
   
-  param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf
-  param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf
+  param[changed_I, 1, 3] = param[changed_I, 1, 3] + inf1
+  param[neighbour, 1, 3] = param[neighbour, 1, 3] - inf2
   
   # Calculate total infectious curve from changed new_I values
   for (i in 1:nrow(run_stoch)){ 
@@ -195,7 +208,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     # Beta and gamma
     proposal = proposalfunction(temp_chain[,,]) # beta proposal and gamma proposal
     
-    if (proposal[1,1,1] < 0.0 & proposal[2,1,1] < 0.0 ){
+    if (proposal[1,1,1] < 0.0 & proposal[2,1,1] < 0.0){
       temp_chain[1:2,2,1] = temp_chain[1:2,1,1]
       
     } else if (proposal[1,1,1] < 0.0 & proposal[2,1,1] >= 0.0){
@@ -234,11 +247,11 @@ run_metropolis_MCMC <- function(startvalue, iterations){
       S[time] = (N - (inf_proposal[time,1,2] + run_stoch$R[time]))
     }
     
-    if(min(inf_proposal[,1,3]) < 0 | min(S) < 0){
+    if(min(inf_proposal[,1,3]) < 0 | min(S) < 0 | sum(inf_proposal[,1,3] > N)){
       temp_chain[,2,2:3] = temp_chain[,1,2:3]
     } else{
       inf_probab = inf_posterior(inf_proposal) - inf_posterior(temp_chain[,,])
-      if (log(runif(1)) < inf_probab){
+      if (log(runif(1)) < inf_probab | sum(inf_proposal[,2,3]) > N){
         temp_chain[,2,2:3] = inf_proposal[,1,2:3]
       } else{
         temp_chain[,2,2:3] = temp_chain[,1,2:3]
@@ -257,6 +270,11 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     # Print every nth iteration, to know how far along run is
     if (i%%(iterations/20) == 0 | i == 1) {
       print(i)
+      # plot(run_stoch$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "Seed 1")
+      #   lines(temp_chain[,1,2], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+      #   lines(run_stoch$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+      #   legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
+      
     }
   }
   return(chain)
@@ -276,6 +294,7 @@ chain <- run_metropolis_MCMC(startvalue, iterations)
 ########################################################################################################################
 
 ########################################################################################################################
+
 
 #################
 ## Saving data ##
@@ -297,7 +316,35 @@ inf_data2 <- cbind(timeframe, inf_data)
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and likelihood data
-write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop50_b0.05_g0.08_10_loglik.csv", row.names = FALSE)
+write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop200_b0.15_g0.1_14_loglik.csv", row.names = FALSE)
 
 # Infectious curve data
-write.csv(data.frame(inf_data2), file = "mcmc_pop50_b0.05_g0.08_10_infectious.csv", row.names = FALSE)
+write.csv(data.frame(inf_data2), file = "mcmc_pop200_b0.15_g0.1_14_infectious.csv", row.names = FALSE)
+
+# Plots
+# # See the MCMC traces
+# burnIn = 0.1 * (iterations/divisor)
+# plot(run_stoch$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "Seed 1")
+# for (i in burnIn:ncol(inf_data2)){
+#   lines(inf_data2[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+# }
+# lines(run_stoch$I, ylim = c(0, 50), type = "l", col = "red", lwd = 3)
+# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
+# 
+# # Log likelihood
+# plot(beta_gamma_loglik[,3], type = "l", main = "Chain values of log likelihood", xlab = "", ylab = "Log(likelihood)")
+# mtext("Iteration x1000",side=1,line=2)
+# plot(beta_gamma_loglik[-(1:burnIn),3], type = "l", main = "Zoomed in" , xlab = "", ylab = "Log(likelihood)")
+# mtext("(Iteration - burn-in) x1000",side=1,line=2)
+# 
+# # Beta and gamma
+# par(mfrow = c(2,2))
+# hist(beta_gamma_loglik[-(1:burnIn),1], nclass=30, col = "gray", main="MCMC beta seed 2", xlab = "Beta", ylab = "", xlim = c(0.06, 0.35))
+# abline(v = mean(beta_gamma_loglik[-(1:burnIn), 1]), col = "red")
+# box()
+# plot(beta_gamma_loglik[,1], type = "l", main = "Chain values of beta", xlab = "", ylab = "Beta values")
+# hist(beta_gamma_loglik[-(1:burnIn),2], nclass=30, col = "gray", main="MCMC gamma seed 2", xlab = "Gamma", ylab = "",  xlim = c(0.02, 0.25))
+# abline(v = mean(beta_gamma_loglik[-(1:burnIn),2]), col = "red")
+# box()
+# plot(beta_gamma_loglik[,2], type = "l", main = "Chain values of gamma", xlab = "", ylab = "Gamma values")
+# box()
