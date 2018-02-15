@@ -13,17 +13,18 @@ library("deSolve") #package for solving differential equations
 ## Read data ##
 ###############
 setwd("/home/evelina/Development/stochastic_vs_deterministic")
-run_stoch <- read.csv("unfinished_epidemic_test.csv")
+run_stoch <- read.csv("data_pop1000_b0.75_g0.1_1.csv")
 
 ###########
 ## Input ##
 ###########
 
 # Starting point for parameters
-beta = 0.2 # 0.005
-gamma = 0.05 # 0.08
+R0 <-3.0 # R0 = beta*N/gamma
+gamma <- 0.1
+beta <- R0*gamma/N
 
-iterations = 10 # how many runs for bootstraps
+iterations = 1000 # how many runs for bootstraps
 
 #########################
 ## Deterministic model ##
@@ -50,8 +51,8 @@ sir <- function(time, state, param) {
   
   with(as.list(c(state, param)), {
     
-    dS <- -((beta * S * I)/N) 
-    dI <- ((beta * S * I)/N) -(gamma * I)
+    dS <- -(beta * S * I) 
+    dI <- (beta * S * I) -(gamma * I)
     dR <-  gamma * I
     
     return(list(c(dS, dI, dR)))
@@ -128,9 +129,9 @@ for (i in 1:iterations){
   sse_bootstrap_data[i,1:2] = fit$par[1:2] # save beta and gamma values in array
   sse_bootstrap_data[i,3] = fit$value # save residual error
   
-  # if (i%%(iterations/10) == 0) {
-  #   print(i)
-  # }
+  if (i%%(iterations/10) == 0) {
+    print(i)
+  }
 }
 
 ########################################################################################################################
@@ -141,31 +142,44 @@ for (i in 1:iterations){
 ## Saving data ##
 #################
 
-# setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
+setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and residual error data
 sse_data <- rbind(sse_point_data, sse_bootstrap_data)
-# write.csv(data.frame(sse_data), file = "re_betagamma_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
+# write.csv(data.frame(sse_data), file = "re_pop1000_b0.75_g0.1_test.csv", row.names = FALSE) # point estimate, bootstrap and residual error data
 
-# Plots 
-# par(mfrow = c(1,2))
-# hist(sse_data[2:nrow(sse_data),1],nclass=30, col="gray", main="RE beta seed 1", xlab="")
-# abline(v = sse_data[1,1], col = "red")
-# box()
-# hist(sse_data[2:nrow(sse_data),2],nclass=30, col="gray", main="RE gamma seed 1", xlab="")
-# abline(v = sse_data[1,2], col = "red")
-# box()
-# 
-# par(mfrow = c(1,1))
-# hist(sse_data[2:nrow(sse_data), 3],nclass=30, col="gray", main="RE seed 1", xlab="Residual Error")
-# abline(v = sse_data[1,3], col = "red")
-# box()
-# 
-# par(mfrow= c(1,1))
-# plot(run_stoch$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "Point estimate")
-#   for (i in 1:nrow(sse_data)){
-#     det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_data[i,1:2]))
-#     lines(det_sir$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
-#   }
-#   lines(run_stoch$I, ylim = c(0, 50), type = "l", col = "red", lwd = 3)
-#   legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+# Plots
+par(mfrow = c(1,2))
+hist(sse_data[2:nrow(sse_data),1],nclass=30, col="gray", main="RE beta seed 1", xlab="")
+abline(v = sse_data[1,1], col = "red")
+box()
+hist(sse_data[2:nrow(sse_data),2],nclass=30, col="gray", main="RE gamma seed 1", xlab="")
+abline(v = sse_data[1,2], col = "red")
+box()
+
+par(mfrow = c(1,1))
+hist(sse_data[2:nrow(sse_data), 3],nclass=30, col="gray", main="RE seed 1", xlab="Residual Error")
+abline(v = sse_data[1,3], col = "red")
+box()
+
+par(mfrow= c(1,2))
+plot(run_stoch$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "Point estimate")
+  det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_data[1,1:2]))
+  lines(run_stoch$I, ylim = c(0, 50), type = "l", col = "red", lwd = 3)
+  lines(run_stoch$R, ylim = c(0, 50), type = "l", col = "orange", lwd = 3)
+  lines(det_sir$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 1)
+  lines(det_sir$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 1)
+  
+  
+  lines(run_stoch$I, ylim = c(0, 50), type = "l", col = "red", lwd = 3)
+  legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+  plot(run_stoch$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "Bootstrap")
+  lines(run_stoch$I, ylim = c(0, 50), type = "l", col = "red", lwd = 3)
+  lines(run_stoch$R, ylim = c(0, 50), type = "l", col = "orange", lwd = 3)  
+  for (i in 2:nrow(sse_data)){
+    det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_data[i,1:2]))
+    lines(det_sir$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+    lines(det_sir$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  }
+  legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+  
