@@ -7,7 +7,7 @@
 ###############
 
 # setwd("/home/evelina/Development/stochastic_vs_deterministic")
-run_stoch <- read.csv("data_pop200_R6_g0.15_6.csv")
+run_stoch <- read.csv("data_pop50_R6_g0.15_3.csv")
 
 ###########
 ## Input ##
@@ -299,10 +299,10 @@ inf_data2 <- cbind(timeframe, inf_data)
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and likelihood data
-write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop200_R6_g0.15_6_loglik.csv", row.names = FALSE)
+write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop50_R6_g0.15_3_loglik.csv", row.names = FALSE)
 
 # Infectious curve data
-write.csv(data.frame(inf_data2), file = "mcmc_pop200_R6_g0.15_6_infectious.csv", row.names = FALSE)
+write.csv(data.frame(inf_data2), file = "mcmc_pop50_R6_g0.15_3_infectious.csv", row.names = FALSE)
 
 # Plots
 # See the MCMC traces
