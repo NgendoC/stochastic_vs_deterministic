@@ -7,7 +7,7 @@
 ###############
 
 # setwd("/home/evelina/Development/stochastic_vs_deterministic")
-run_stoch <- read.csv("data_pop200_R6_g0.15_7.csv")
+run_stoch <- read.csv("data_pop50_R6_g0.15_4.csv")
 
 ###########
 ## Input ##
@@ -257,7 +257,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
     
     # Print every nth iteration, to know how far along run is
     if (i%%(iterations/20) == 0 | i == 1) {
-      print(c(i, "server 5"))
+      print(c(i, "server 4"))
     }
   }
   return(chain)
@@ -299,10 +299,10 @@ inf_data2 <- cbind(timeframe, inf_data)
 # setwd("C:/Users/Janetta Skarp/OneDrive - Imperial College London/MRes_BMR/Project_1/Work_folder/Data")
 
 # Beta, gamma, and likelihood data
-write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop200_R6_g0.15_7_loglik.csv", row.names = FALSE)
+write.csv(data.frame(beta_gamma_loglik), file = "mcmc_pop50_R6_g0.15_4_loglik.csv", row.names = FALSE)
 
 # Infectious curve data
-write.csv(data.frame(inf_data2), file = "mcmc_pop200_R6_g0.15_7_infectious.csv", row.names = FALSE)
+write.csv(data.frame(inf_data2), file = "mcmc_pop50_R6_g0.15_4_infectious.csv", row.names = FALSE)
 
 # Plots
 # See the MCMC traces
