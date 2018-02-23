@@ -294,9 +294,13 @@ newI_{i+1} &= dI_{i+1} - dI_{i} + R_{i+1} - R_{i}
 \subsection{The generated outbreaks}
 
 Six different outbreak scenarios were created: an outbreak with an $R_{0}$ of 1.5 and 6 for population sizes of 50, 200, and 1000 individuals. The initial proportion of infectious individuals at the beginning of each outbreak was the same for each population size. Five different outbreaks were constructed for each of the six scenarios. Figures 2 and 3 show the shapes for each generated outbreak.
+
+The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most outbreaks reaching their peak number of infected individuals at around 20 days (Figure 2). Outbreaks with an $R_{0}$ of 6 had a higher peak in the infectious curve than outbreaks with an $R_{0}$ of 1.5 though the peak is also at around 20 days (Figure 3). The variability in outbreak shape reduces with increasing population size for both outbreak strengths.
 \newline
 
-<<dataplot1, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", fig.height=4, fig.lp = "Figure", fig.cap="Data plot", fig=TRUE>>=
+\begin{figure}[h]
+\begin{center}
+<<dataplot1, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", height=13, width=17, fig.lp = "Figure", fig.cap="Data plot", fig=TRUE>>=
 # R0 = 1.5
 
 # setwd("/home/evelina/Development/stochastic_vs_deterministic/")
@@ -319,96 +323,111 @@ true_R1.5_pop1000_seed4 <- read.csv("data_pop1000_R1.5_g0.15_520.csv")
 true_R1.5_pop1000_seed5 <- read.csv("data_pop1000_R1.5_g0.15_784.csv")
 
 letter_place = 72 
-letter_size = 1
+letter_size = 3
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2
+
 # Plot for SIR model - R0 = 1.5
 # plot.new()
-par(mfrow = c(3,5), mar=c(5,4,0.2,0.2))
+par(mfrow = c(3,5), mar=c(5,5,0.2,0.2))
 # Pop = 50
 N = 50
 # Seed 1
-plot(x = true_R1.5_pop50_seed1$time, y = true_R1.5_pop50_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "Number susceptible/infected/recovered")
+plot(x = true_R1.5_pop50_seed1$time, y = true_R1.5_pop50_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop50_seed1$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop50_seed1$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "A", cex = letter_size)
 # Seed 2
-plot(x = true_R1.5_pop50_seed2$time, y = true_R1.5_pop50_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop50_seed2$time, y = true_R1.5_pop50_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop50_seed2$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop50_seed2$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "B", cex = letter_size)
 # Seed 3
-plot(x = true_R1.5_pop50_seed3$time, y = true_R1.5_pop50_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop50_seed3$time, y = true_R1.5_pop50_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop50_seed3$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop50_seed3$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "C", cex = letter_size)
 # Seed 4
-plot(x = true_R1.5_pop50_seed4$time, y = true_R1.5_pop50_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop50_seed4$time, y = true_R1.5_pop50_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop50_seed4$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop50_seed4$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "D", cex = letter_size)
 # Seed 5
-plot(x = true_R1.5_pop50_seed5$time, y = true_R1.5_pop50_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop50_seed5$time, y = true_R1.5_pop50_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop50_seed5$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop50_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "E", cex = letter_size)
 # Pop = 200
 N = 200
 # Seed 1
-plot(x = true_R1.5_pop200_seed1$time, y = true_R1.5_pop200_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "Number susceptible/infected/recovered")
+plot(x = true_R1.5_pop200_seed1$time, y = true_R1.5_pop200_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop200_seed1$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop200_seed1$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "F", cex = letter_size)
+mtext("Number susceptible/infected/recovered", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 2
-plot(x = true_R1.5_pop200_seed2$time, y = true_R1.5_pop200_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop200_seed2$time, y = true_R1.5_pop200_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop200_seed2$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop200_seed2$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "G", cex = letter_size)
 # Seed 3
-plot(x = true_R1.5_pop200_seed3$time, y = true_R1.5_pop200_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop200_seed3$time, y = true_R1.5_pop200_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop200_seed3$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop200_seed3$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "H", cex = letter_size)
 # Seed 4
-plot(x = true_R1.5_pop200_seed4$time, y = true_R1.5_pop200_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop200_seed4$time, y = true_R1.5_pop200_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop200_seed4$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop200_seed4$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "I", cex = letter_size)
 # Seed 5
-plot(x = true_R1.5_pop200_seed5$time, y = true_R1.5_pop200_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R1.5_pop200_seed5$time, y = true_R1.5_pop200_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop200_seed5$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop200_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "J", cex = letter_size)
 # Pop = 1000
 N = 1000
 # Seed 1
-plot(x = true_R1.5_pop1000_seed1$time, y = true_R1.5_pop1000_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "Number susceptible/infected/recovered")
+plot(x = true_R1.5_pop1000_seed1$time, y = true_R1.5_pop1000_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop1000_seed1$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop1000_seed1$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "K", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 2
-plot(x = true_R1.5_pop1000_seed2$time, y = true_R1.5_pop1000_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R1.5_pop1000_seed2$time, y = true_R1.5_pop1000_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop1000_seed2$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop1000_seed2$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "L", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 3
-plot(x = true_R1.5_pop1000_seed3$time, y = true_R1.5_pop1000_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R1.5_pop1000_seed3$time, y = true_R1.5_pop1000_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop1000_seed3$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop1000_seed3$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "M", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 4
-plot(x = true_R1.5_pop1000_seed4$time, y = true_R1.5_pop1000_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R1.5_pop1000_seed4$time, y = true_R1.5_pop1000_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop1000_seed4$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop1000_seed4$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "N", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 5
-plot(x = true_R1.5_pop1000_seed5$time, y = true_R1.5_pop1000_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R1.5_pop1000_seed5$time, y = true_R1.5_pop1000_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop1000_seed5$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R1.5_pop1000_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "O", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 @
+\caption{Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak generated with a stochastic SIR model with an $R_{0}$ of 1.5 and $\gamma$ of 0.15. Plots A-E have a population size of 50, plots F-J have a population size of 200, and plots K-O have a population size of 1000.}
+\end{center}
+\end{figure}
 
-\noindent Figure 2: Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak generated with a stochastic SIR model with an $R_{0}$ of 1.5 and $\gamma$ of 0.15. Plots A-E have a population size of 50, plots F-J have a population size of 200, and plots K-O have a population size of 1000.
+% \noindent Figure 2: Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak generated with a stochastic SIR model with an $R_{0}$ of 1.5 and $\gamma$ of 0.15. Plots A-E have a population size of 50, plots F-J have a population size of 200, and plots K-O have a population size of 1000.
 
-<<dataplot2, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", fig.height=4, fig.lp = "Figure", fig.cap="Data plot", fig=TRUE>>=
+\begin{figure}[h]
+\begin{center}
+<<dataplot2, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", height=13, width=17, fig.height=4, fig.lp = "Figure", fig.cap="Data plot", fig=TRUE>>=
 # R0 = 6
 
 true_R6_pop50_seed1 <- read.csv("data_pop50_R6_g0.15_1.csv")
@@ -429,96 +448,106 @@ true_R6_pop1000_seed3 <- read.csv("data_pop1000_R6_g0.15_13.csv")
 true_R6_pop1000_seed4 <- read.csv("data_pop1000_R6_g0.15_14.csv")
 true_R6_pop1000_seed5 <- read.csv("data_pop1000_R6_g0.15_15.csv")
 
+letter_place = 72 
+letter_size = 3
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2
+
 # Plot for SIR model - R0 = 6
 # plot.new()
-par(mfrow = c(3,5), mar=c(5,4,0.2,0.2))
+par(mfrow = c(3,5), mar=c(5,5,0.2,0.2))
 # Pop = 50
 N = 50
 # Seed 1
-plot(x = true_R6_pop50_seed1$time, y = true_R6_pop50_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "Number susceptible/infected/recovered")
+plot(x = true_R6_pop50_seed1$time, y = true_R6_pop50_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop50_seed1$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop50_seed1$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "A", cex = letter_size)
 # Seed 2
-plot(x = true_R6_pop50_seed2$time, y = true_R6_pop50_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop50_seed2$time, y = true_R6_pop50_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop50_seed2$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop50_seed2$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "B", cex = letter_size)
 # Seed 3
-plot(x = true_R6_pop50_seed3$time, y = true_R6_pop50_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop50_seed3$time, y = true_R6_pop50_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop50_seed3$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop50_seed3$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "C", cex = letter_size)
 # Seed 4
-plot(x = true_R6_pop50_seed4$time, y = true_R6_pop50_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop50_seed4$time, y = true_R6_pop50_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop50_seed4$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop50_seed4$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "D", cex = letter_size)
 # Seed 5
-plot(x = true_R6_pop50_seed5$time, y = true_R6_pop50_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop50_seed5$time, y = true_R6_pop50_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop50_seed5$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop50_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "E", cex = letter_size)
 # Pop = 200
 N = 200
 # Seed 1
-plot(x = true_R6_pop200_seed1$time, y = true_R6_pop200_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "Number susceptible/infected/recovered")
+plot(x = true_R6_pop200_seed1$time, y = true_R6_pop200_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop200_seed1$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop200_seed1$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "F", cex = letter_size)
+mtext("Number susceptible/infected/recovered", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 2
-plot(x = true_R6_pop200_seed2$time, y = true_R6_pop200_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop200_seed2$time, y = true_R6_pop200_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop200_seed2$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop200_seed2$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "G", cex = letter_size)
 # Seed 3
-plot(x = true_R6_pop200_seed3$time, y = true_R6_pop200_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop200_seed3$time, y = true_R6_pop200_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop200_seed3$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop200_seed3$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "H", cex = letter_size)
 # Seed 4
-plot(x = true_R6_pop200_seed4$time, y = true_R6_pop200_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop200_seed4$time, y = true_R6_pop200_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop200_seed4$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop200_seed4$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "I", cex = letter_size)
 # Seed 5
-plot(x = true_R6_pop200_seed5$time, y = true_R6_pop200_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "")
+plot(x = true_R6_pop200_seed5$time, y = true_R6_pop200_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop200_seed5$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop200_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "J", cex = letter_size)
 # Pop = 1000
 N = 1000
 # Seed 1
-plot(x = true_R6_pop1000_seed1$time, y = true_R6_pop1000_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "Number susceptible/infected/recovered")
+plot(x = true_R6_pop1000_seed1$time, y = true_R6_pop1000_seed1$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop1000_seed1$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop1000_seed1$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "K", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 2
-plot(x = true_R6_pop1000_seed2$time, y = true_R6_pop1000_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R6_pop1000_seed2$time, y = true_R6_pop1000_seed2$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop1000_seed2$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop1000_seed2$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "L", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 3
-plot(x = true_R6_pop1000_seed3$time, y = true_R6_pop1000_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R6_pop1000_seed3$time, y = true_R6_pop1000_seed3$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop1000_seed3$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop1000_seed3$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "M", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 4
-plot(x = true_R6_pop1000_seed4$time, y = true_R6_pop1000_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R6_pop1000_seed4$time, y = true_R6_pop1000_seed4$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop1000_seed4$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop1000_seed4$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "N", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 # Seed 5
-plot(x = true_R6_pop1000_seed5$time, y = true_R6_pop1000_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "Time", ylab = "")
+plot(x = true_R6_pop1000_seed5$time, y = true_R6_pop1000_seed5$I, type = "l", col = "red", ylim = c(0,N), xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop1000_seed5$S, type = "l", ylim = c(0,N)) # susceptible
 lines(true_R6_pop1000_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # recovered
 text(letter_place, 0.95*N, "O", cex = letter_size)
+mtext("Time", 1, line = 3, cex = yaxis_size)
 @
-
-\noindent Figure 3: Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak generated with a stochastic SIR model with an $R_{0}$ of 6 and $\gamma$ of 0.15. Plots A-E have a population size of 50, plots F-J have a population size of 200, and plots K-O have a population size of 1000.
-\newline
-
-The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most outbreaks reaching their peak number of infected individuals at around 20 days (Figure 2). Outbreaks with an $R_{0}$ of 6 had a higher peak in the infectious curve than outbreaks with an $R_{0}$ of 1.5 though the peak is also at around 20 days (Figure 3). The variability in outbreak shape reduces with increasing population size for both outbreak strengths.
+\caption{Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak generated with a stochastic SIR model with an $R_{0}$ of 6 and $\gamma$ of 0.15. Plots A-E have a population size of 50, plots F-J have a population size of 200, and plots K-O have a population size of 1000.}
+\end{center}
+\end{figure}
 
 %%%%%%%%%%
 \newpage
@@ -526,7 +555,7 @@ The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most ou
 
 For an $R_{0}$ of 1.5, the difference between the minimum and maximum observed $\beta$ and $\gamma$ values was often wider than the difference for an $R_{0}$ of 6 (Table 1, Table 2). This can also be seen in the exemplifying graphs, where the infectious and recovery curves for the point estimate and bootstrapped parameter values with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping (Figure 4). It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Figure 4D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level probability of becoming infected, while the residual error for the point estimate combinations rises with increasing population size (Table 1, Table 3). 
 
-<<dataplot3, cache=TRUE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+<<dataplot3, cache=TRUE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
 # RE example plots
 library("deSolve")
 
@@ -1503,7 +1532,7 @@ print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, c
 
 The traces for $\beta$ and $\gamma$ suggest that the MCMC has not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Figure 5, Figure 6). Additionally, the range of log-likelihoods is quite varying for different outbreaks within a given $R_{0}$ and population size (Table 7). This is because the likelihood function was set to return a value of -1000 if the suggested parameters fit the data point with a likelihood of 0, due to the computational difficulties associated with attempting to calculate $log(0)$.
 
-<<dataplot4, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+<<dataplot4, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
 # Beta posterior plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
@@ -1557,7 +1586,7 @@ text(iteration_place, 0.95*max(beta_yaxis1000), "F", cex = letter_size)
 \noindent Figure 5: Traces of the $\beta$ values throughout the MCMC. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000.
 \newline
 
-<<dataplot6, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+<<dataplot6, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
 # Beta and gamma posterior plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
@@ -1809,7 +1838,7 @@ print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, c
 
 The range of suggested infectious curves after the burn-in period in general overlaps with the true generated infectious curve (Figure 7). An exception for this is one of the unconverged MCMCs in Figure 7F, where the infectious curves made through data augmentation with the MCMC are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Figure 7A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Figure 7A-C and Figure 7D-F).
 
-<<dataplot5, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+<<dataplot5, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
 # Infectious curve plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_infectious.csv", sep=""))
