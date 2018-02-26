@@ -31,7 +31,15 @@
 \usepackage{natbib}
 \bibliographystyle{unsrtnat}
 
+% for creating a flow chart
+\usepackage{tikz} 
+\usetikzlibrary{shapes.geometric, arrows}
+\tikzstyle{sir} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!0]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
 \usepackage{multirow} % for combining rows in tables
+
+\usepackage{float} % for forcing figure placement
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Start of document %%
@@ -48,7 +56,7 @@
     \begin{center}
         \vspace*{4.5cm}
         
-        \textbf{Chance would be a fine thing: Comparing residual error and Markov Chain Monte Carlo methods for parameterisation and data augmentation}
+        \textbf{Comparing methods from deterministic and stochastic infectious disease modelling for parameter inference}
         
         \vspace{0.5cm}
         MRes Biomedical Research (Epidemiology, Evolution, and Control of Infectious Diseases Stream) Project 1
@@ -111,6 +119,7 @@ I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice 
 %%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
+
 \section{Table of Contents}
 \tableofcontents
 
@@ -144,8 +153,19 @@ MCMC: Markov Chain Monte Carlo
 Compartmental models have been used to model the movement of diseases in populations since their introduction to the field of epidemiology during the first half of the 20th century. Kermack and McKendrick were among the pioneers of this new method and in their joint paper published in 1927 they outlined how compartmental models could be used for infectious disease epidemiology \citep{Kermack1927}. As the name of the model suggests, a compartmental model splits the model population into different compartments depending on factors defined by the investigator, such as disease status or age group.     
 % Kermack and McKendrick 1927: http://rspa.royalsocietypublishing.org/content/royprsa/115/772/700.full.pdf
 
-[I will have a flow diagram of an SIR model here]
-% Add SIR figure here
+% SIR figure
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[node distance=5cm]
+\node (S) [sir] {S};
+\node (I) [sir, right of =S] {I};
+\node (R) [sir, right of=I] {R};
+\draw [arrow] (S) -- node[anchor=south] {$\beta S I$} (I);
+\draw [arrow] (I) -- node[anchor=south] {$\gamma I$} (R);
+\end{tikzpicture}
+\caption{Compartmental SIR model}
+\end{center}
+\end{figure}
 
 One commonly used compartmental model is the SIR model which consists of three compartments: susceptible, infected, and recovered. This type of SIR model is referred to as being closed, as there is no flow of individuals into the population or out of the population (i.e. births, deaths, or migration). For both a stochastic and deterministic SIR model, the population moves from the susceptible compartment to the infected compartment and from the infected compartment to the recovered compartment with some probability $\beta$ and $\gamma$, respectively (Figure). The deterministic model works in continuous time implying that the difference between timesteps is vanishingly small resulting in the flows between compartments being described as differential equations:
 \begin{align*}
@@ -168,7 +188,7 @@ R_{i+1} &= R_{i} + c{i}
 The number of individuals joining the infected compartment, $b_{i}$, or recovered compartment, $c_{i}$ at timestep $i$ can be chosen randomly from a binomial distribution: 
 \begin{align*}
 b_{i} &\sim Bin(S_{i}, 1 - e^{-\beta I_{i} dt}) \\
-c_{i} &\sim Bin(I_{i}, 1 - e^{-\gamma R_{i} dt})
+c_{i} &\sim Bin(I_{i}, 1 - e^{-\gamma dt})
 \end{align*}
 
 \noindent where $S_{i}$, $I_{i}$, and $R_{i}$ represent the number of susceptible, infected, and recovered individuals at time i respectively. The size of a timestep is referred to by $dt$. From this, the numbers of susceptible, infected, and recovered individuals at time $i+1$ could thus be calculated.
@@ -182,7 +202,7 @@ Though compartmental models are useful for infectious disease modelling, it shou
 
 %%%%%%%%%%
 
-\subsection{Inference and data augmentation for infectious disease models}
+\subsection{Inference for compartmental infectious disease models}
 % Base this section on papers discussed with Xavier
 
 The residual error (RE) method can be used for inference. This method is relies on the idea that a deterministic model can be used to describe the inherently stochastic reality. The aim of this method is to minimise the error of a model, calculated as the squared difference between the value obtained from the model and the true data value. This is done through optimisation, where starting values for parameters are set, a deterministic model is devised based on these chosen parameter values, the RE is calculated, and the process is repeated until the RE is at a minimum. Ultimately, the aim of using this method is to retain a point estimate for which gives the values of the parameters being inferred that when combined produce the lowest residual error, which would correspond to the best fit of the deterministic model to the incomplete data being fitted. Bootstrapping can be used to investigate the sensitivity of the best guess parameter combinations to slight changes in the data. This can be achieved by sampling with replacement from the data and repeating the optimisation process to reach the lowest RE as was done for the original dataset to obtain the point estimate.    
@@ -199,6 +219,7 @@ Stochastic methods, such as the MCMC, can be more difficult to implement than de
 % Find a couple of examples where the model used for the task may not have been the best?
 % May (2003) Uses and abuses of mathematics in biology : Complex HIV model lost to a less complex model because the assumptions it made were wrong 
 
+\subsection{Aims of this project}
 In this project, I compare the parameter estimates of stochastic and deterministic models under different population settings. The aim of this is to elucidate the conditions under which a deterministic model, such as the residual error method, might be used just as well as a stochastic one, such as the MCMC, if one is trying to quantify the range of values that a parameter might take.
 
 In light of the suggestion that deterministic parameterisation methods are quicker, one might ask if the two could be combined to distil the best of both methods. MCMC has been combined with a deterministic process, for example in a paper exploring public health responses to bioterrorism \citep{Elderd2006}. This method is also briefly explored in this project.
@@ -215,7 +236,7 @@ All data generation and analysis presented in this report was conducted on R, a 
 
 %%%%%%%%%%
 
-\subsection{Creating data for fitting}
+\subsection{Simulating data for fitting}
 
 I used a stochastic population-based closed compartmental SIR model, such as the one described in the introduction, to generate outbreaks with various basic reproduction numbers ($R_{0}$) in different-sized populations. 
 
@@ -234,7 +255,11 @@ I then created a closed population stochastic SIR model, as outlined in the intr
 
 \subsubsection{Residual error}
 
-I used the residual error method to infer the values of $\beta$ and $\gamma$ given the recovered curve from the generated data made by the stochastic model. Firstly, I constructed a deterministic SIR model with the aid of \textit{deSolve}, a differential equation solving R package (Soetaert et al., 2010). I then optimised the deterministic model's fit to the recovered curve of the generated data to receive a point estimate for the $\beta$ and $\gamma$ for each outbreak in addition the best-fit deterministic infectious curve.
+I used the residual error method to infer the values of $\beta$ and $\gamma$ given the recovered curve from the generated data made by the stochastic model. Firstly, I constructed a deterministic SIR model with the aid of \textit{deSolve}, a differential equation solving R package (Soetaert et al., 2010). I then optimised the deterministic model's fit to the recovered curve of the generated data to receive a point estimate for the $\beta$ and $\gamma$ for each outbreak in addition the best-fit deterministic infectious curve. The fit of the model during the optimisation process was calculated as the sum of the squared differences between the model, $d_{model}^i$, and observation, $d_{observation}^i$, for each timepoint $i$:
+
+\begin{align*}
+\displaystyle\sum_{i}(d_{model}^i - d_{observation}^i)^2
+\end{align*}
 
 I gauged the accuracy of the point estimate by bootstrapping. I achieved this by sampling timepoints with replacement from the original generated recovered curve for a given outbreak and optimising the deterministic model on that sampled curve. This would then bring into light whether there were any particular timepoints that might be driving the results of the optimisation process. 
 
@@ -253,7 +278,7 @@ I calculated the likelihood distribution as follows:
 
 \noindent where
 \begin{align*}
-p(b_{i}, c_{i} \mid \beta, \gamma) = Bin(b_{i}, S_{i} \mid 1-e^{-\beta I_{i} dt}) \times Bin(c_{i}, I_{i} \mid 1-e^{-\gamma R_{i} dt})
+p(b_{i}, c_{i} \mid \beta, \gamma) = Bin(b_{i} \mid S_{i}, 1-e^{-\beta I_{i} dt}) \times Bin(c_{i} \mid I_{i}, 1-e^{-\gamma dt})
 \end{align*}
 
 The prior distributions for $\beta$ and $\gamma$ were set to be uniform between the values of 0 and 100, implying that there was no original guess at the value that $\beta$ and $\gamma$ should take. The posterior distribution was then calculated as $likelihood \times prior$. When assembling the MCMC algorithm, the equations above were done in logarithmic form to avoid floating point inaccuracies.
@@ -266,7 +291,7 @@ For the generated data with an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.15, t
 
 %%%%%%%%%%
 
-\subsubsection{Markov Chain Monte Carlo with a deterministic process}
+\subsubsection{Markov Chain Monte Carlo with a partly deterministic process}
 
 I altered the stochastic MCMC I had previously created in the previous section to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ tested. I used the \textit{deSolve} package to construct the deterministic model (Soetaert et al., 2010). The number of infectious individuals from the output of the deterministic model was then rounded to the nearest integer for each time step to avoid partial individuals from being infected. The susceptible curve was devised from the known stochastic recovered curve, $R_{i}$ and the deterministic infectious curve, $I_{i}$ so that
 \begin{align*}
@@ -274,9 +299,9 @@ S_{i} &= N - I_{i} - R_{i}
 \end{align*}
 where $N$ represents the total population size.
 
-Similarly, the number of newly infected individuals, $newI$, for each time step $i$ was also affected by the deterministic infectious curve and the stochastic recovered curve:
+Similarly, the number of newly infected individuals, $b$, for each time step $i$ was also affected by the deterministic infectious curve, $I^{d}$, and the stochastic recovered curve:
 \begin{align*}
-newI_{i+1} &= dI_{i+1} - dI_{i} + R_{i+1} - R_{i}
+b_{i+1} &= I_{i+1}^{d} - I_{i}^{d} + R_{i+1} - R_{i}
 \end{align*}
 
 %%%%%%%%%%
@@ -291,7 +316,7 @@ newI_{i+1} &= dI_{i+1} - dI_{i} + R_{i+1} - R_{i}
 
 %%%%%%%%%%
 
-\subsection{The generated outbreaks}
+\subsection{The simulated outbreaks}
 
 Six different outbreak scenarios were created: an outbreak with an $R_{0}$ of 1.5 and 6 for population sizes of 50, 200, and 1000 individuals. The initial proportion of infectious individuals at the beginning of each outbreak was the same for each population size. Five different outbreaks were constructed for each of the six scenarios. Figures 2 and 3 show the shapes for each generated outbreak.
 
@@ -555,7 +580,9 @@ mtext("Time", 1, line = 3, cex = yaxis_size)
 
 For an $R_{0}$ of 1.5, the difference between the minimum and maximum observed $\beta$ and $\gamma$ values was often wider than the difference for an $R_{0}$ of 6 (Table 1, Table 2). This can also be seen in the exemplifying graphs, where the infectious and recovery curves for the point estimate and bootstrapped parameter values with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping (Figure 4). It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Figure 4D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level probability of becoming infected, while the residual error for the point estimate combinations rises with increasing population size (Table 1, Table 3). 
 
-<<dataplot3, cache=TRUE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+\begin{figure}
+\begin{center}
+<<dataplot3, cache=TRUE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
 # RE example plots
 library("deSolve")
 
@@ -607,12 +634,15 @@ N = sum(init.values)
 det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_data[1:2]))
 }
 
-letter_size = 1
+letter_size = 3
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
 
-par(mfrow = c(2, 3))
+par(mfrow = c(2, 3), mar=c(5,6.5,0.4,0.2))
 # R = 1.5, Pop = 50
 N = 50
-plot(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected/recovered")
+plot(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
   lines(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
   lines(true_R1.5_pop50_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop50_seed1)){
@@ -626,10 +656,11 @@ for (i in 1){
   lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "A", cex = letter_size)
+mtext("Number infected/recovered", 2, line = 4, cex = yaxis_size, outer = FALSE)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 # R = 1.5, Pop = 200
 N = 200
-plot(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected/recovered")
+plot(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R1.5_pop200_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop200_seed1)){
@@ -646,7 +677,7 @@ text(10, 0.95*N, "B", cex = letter_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 # R = 1.5, Pop = 1000
 N = 1000
-plot(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected/recovered")
+plot(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R1.5_pop1000_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop1000_seed1)){
@@ -663,7 +694,7 @@ text(10, 0.95*N, "C", cex = letter_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 # R = 6, Pop = 50
 N = 50
-plot(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected/recovered")
+plot(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R6_pop50_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop50_seed1)){
@@ -677,10 +708,12 @@ for (i in 1){
   lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "D", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+mtext("Number infected/recovered", 2, line = 4, cex = yaxis_size, outer = FALSE)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 # R = 6, Pop = 200
 N = 200
-plot(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected/recovered")
+plot(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R6_pop200_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop200_seed1)){
@@ -694,10 +727,11 @@ for (i in 1){
   lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "E", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 # R = 6, Pop = 1000
 N = 1000
-plot(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected/recovered")
+plot(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
 lines(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R6_pop1000_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R6_pop1000_seed1)){
@@ -711,10 +745,12 @@ for (i in 1){
   lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "F", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 @
-
-\noindent Figure 4: Comparing the true infected and recovered curves to those constructed from the point estimates and bootstrapping of the RE method. The number of individuals in a population infected (red line) or recovered (orange line) in the true dataset. The black dotted lines refer to the deterministic infectious and recovered curves based for $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic and recovered curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000. 
+\caption{Comparing the true infected and recovered curves to those constructed from the point estimates and bootstrapping of the RE method. The number of individuals in a population infected (red line) or recovered (orange line) in the true dataset. The black dotted lines refer to the deterministic infectious and recovered curves based for $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic and recovered curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000.}
+\end{center}
+\end{figure}
 
 <<RE_result_table_beta, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making Residual Error table
@@ -860,7 +896,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(RE_beta_results_table) <- c("1.5", ".","..","...","....","6","-","--","---","----")
+rownames(RE_beta_results_table) <- c("1.5", ".", "..", "...", "....","6", "-", "--", "---", "----")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -1176,36 +1212,10 @@ addtorow <- list()
 addtorow$pos <- list(0, 0)
 addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
 
-tab <- xtable(RE_results_table, caption = "Residual error values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
+tab <- xtable(RE_results_table, digits = 0, caption = "Residual error values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
 align(tab) <- "l|lll|lll|lll"
 print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
-% Make table for results
-% \begin{center}
-% \begin{tabular}{ ||p{1cm}|p{1.5cm}|p{2.5cm}|p{1.5cm}|p{2.5cm}|p{1.5cm}|p{2.5cm}|| } 
-%  \hline
-%  % Title
-%  \multirow{2}{1cm}{$R_{0}$} & \multicolumn{2}{|c|}{$N = 50$} & \multicolumn{2}{|c|}{$N = 200$} & \multicolumn{2}{|c||}{$N = 1000$} \\
-%  \cline{2-7}
-%  & P.E. & range & P.E. & range & P.E. & range \\
-%  \hline
-%  % R0 = 1.5
-%  \multirow{5}{1cm}{1.5} & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  \hline
-%  % R0 = 6
-%  \multirow{5}{1cm}{6} & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  & pe & r & pe & r & pe & r \\
-%  \hline
-% \end{tabular}
-% \end{center}
 
 \begin{itemize}
   \item Heatmaps for each population size to show interplay between beta, gamma, and RE
@@ -1214,7 +1224,7 @@ print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, c
 %%%%%%%%%%
 
 \newpage
-\subsection{Stochastic Markov Chain Monte Carlo}
+\subsection{Markov Chain Monte Carlo}
 
 In general, the minimum and maximum $\beta$ and $\gamma$ values were wider when estimated through MCMC (Table 4, Table 5).
 
@@ -1367,7 +1377,7 @@ rownames(mcmc_beta_results_table) <- c("1.5", ".","..","...","....","6","-","--"
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & mean & min & max & mean & min & max & mean & min & max \\\\\n")
 
 tab <- xtable(mcmc_beta_results_table, digits=-1, caption = "Beta values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum value of gamma observed after burn-in during MCMC, max: maximum value of gamma observed after burn-in during MCMC") 
 align(tab) <- "l|lll|lll|lll"
@@ -1523,7 +1533,7 @@ rownames(mcmc_results_table) <- c("1.5", ".","..","...","....","6","-","--","---
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & mean & min & max & mean & min & max & mean & min & max \\\\\n")
 
 tab <- xtable(mcmc_results_table, caption = "Gamma values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum value of gamma observed after burn-in during MCMC, max: maximum value of gamma observed after burn-in during MCMC") 
 align(tab) <- "l|lll|lll|lll"
@@ -1531,8 +1541,9 @@ print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, c
 @
 
 The traces for $\beta$ and $\gamma$ suggest that the MCMC has not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Figure 5, Figure 6). Additionally, the range of log-likelihoods is quite varying for different outbreaks within a given $R_{0}$ and population size (Table 7). This is because the likelihood function was set to return a value of -1000 if the suggested parameters fit the data point with a likelihood of 0, due to the computational difficulties associated with attempting to calculate $log(0)$.
-
-<<dataplot4, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+\begin{figure}
+\begin{center}
+<<dataplot4, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=19, fig.cap="Data plot", fig=TRUE>>=
 # Beta posterior plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
@@ -1542,51 +1553,55 @@ mcmc_R6_pop50_seed1 <- read.csv(paste(dir,"mcmc_pop50_R6_g0.15_2_loglik.csv", se
 mcmc_R6_pop200_seed1 <- read.csv(paste(dir,"mcmc_pop200_R6_g0.15_6_loglik.csv", sep=""))
 mcmc_R6_pop1000_seed1 <- read.csv(paste(dir,"mcmc_pop1000_R6_g0.15_11_loglik.csv", sep=""))
 
-letter_size = 1
+letter_size = 3
 iteration_place = 3400
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
 
-par(mfrow = c(2,3))
+par(mfrow = c(2,3), mar=c(5,6.5,1.5,1))
 
 burnIn = ((3500000/1000)/100)*23 # 23% burn-in
 beta_yaxis50 = c(0, 0.025)
 beta_yaxis200 = c(0, 0.007)
 beta_yaxis1000 = c(0, 0.001)
 # Seed 1, Pop size 50
-plot(mcmc_R1.5_pop50_seed1$beta, type = "l", main = "", xlab = "Iteration x1000", ylab = "Beta value", ylim = beta_yaxis50)
+plot(mcmc_R1.5_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50, cex.axis = number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis50), "A", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
-plot(mcmc_R1.5_pop200_seed1$beta, type = "l", main = "", xlab = "Iteration x1000", ylab = "Beta value", ylim = beta_yaxis200)
+plot(mcmc_R1.5_pop200_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis200, cex.axis = number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis200), "B", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
 # Seed 1, Pop size 1000
-plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "Iteration x1000", ylab = "Beta value", ylim = beta_yaxis1000)
+plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000, cex.axis = number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis1000), "C", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
 # Seed 1, Pop size 50
-plot(mcmc_R6_pop50_seed1$beta, type = "l", main = "", xlab = "Iteration x1000", ylab = "Beta value", ylim = beta_yaxis50)
+plot(mcmc_R6_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50, cex.axis = number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis50), "D", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 200
-plot(mcmc_R6_pop200_seed1$beta, type = "l", main = "", xlab = "Iteration x1000", ylab = "Beta value", ylim = beta_yaxis200)
+plot(mcmc_R6_pop200_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis200, cex.axis = number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis200), "E", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 1000
-plot(mcmc_R6_pop1000_seed1$beta, type = "l", main = "", xlab = "Iteration x1000", ylab = "Beta value", ylim = beta_yaxis1000)
+plot(mcmc_R6_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000, cex.axis = number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis1000), "F", cex = letter_size)
-  # smtext("Iteration x1000",side=1,line=2)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
 @
+\caption{Traces of the $\beta$ values throughout the MCMC. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000.}
+\end{center}
+\end{figure}
 
-\noindent Figure 5: Traces of the $\beta$ values throughout the MCMC. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000.
-\newline
-
-<<dataplot6, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+\begin{figure}
+\begin{center}
+<<dataplot6, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", height=13, width=19, fig.cap="Data plot", fig=TRUE>>=
 # Beta and gamma posterior plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
@@ -1596,10 +1611,13 @@ mcmc_R6_pop50_seed1 <- read.csv(paste(dir,"mcmc_pop50_R6_g0.15_2_loglik.csv", se
 mcmc_R6_pop200_seed1 <- read.csv(paste(dir,"mcmc_pop200_R6_g0.15_6_loglik.csv", sep=""))
 mcmc_R6_pop1000_seed1 <- read.csv(paste(dir,"mcmc_pop1000_R6_g0.15_11_loglik.csv", sep=""))
 
-letter_size = 1
+letter_size = 3
 iteration_place = 3400
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
 
-par(mfrow = c(2,3))
+par(mfrow = c(2,3), mar=c(5,6.5,1.5,1))
 
 burnIn = ((3500000/1000)/100)*23 # 23% burn-in
 gamma_yaxis50 = c(0, 0.35)
@@ -1607,38 +1625,38 @@ gamma_yaxis200 = c(0, 0.25)
 gamma_yaxis1000 = c(0, 0.15)
 
 # Seed 1, Pop size 50
-plot(mcmc_R1.5_pop50_seed1$gamma, type = "l", main = "", xlab = "Iteration x1000", ylab = "Gamma value", ylim = gamma_yaxis50)
+plot(mcmc_R1.5_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis50), "A", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
-plot(mcmc_R1.5_pop200_seed1$gamma, type = "l", main = "", xlab = "Iteration x1000", ylab = "Gamma value", ylim = gamma_yaxis200)
+plot(mcmc_R1.5_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis200), "B", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
 # Seed 1, Pop size 1000
-plot(mcmc_R1.5_pop1000_seed1$gamma, type = "l", main = "", xlab = "Iteration x1000", ylab = "Gamma value", ylim = gamma_yaxis1000)
+plot(mcmc_R1.5_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis1000), "C", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
 # Seed 1, Pop size 50
-plot(mcmc_R6_pop50_seed1$gamma, type = "l", main = "", xlab = "Iteration x1000", ylab = "Gamma value", ylim = gamma_yaxis50)
+plot(mcmc_R6_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis50), "D", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
-plot(mcmc_R6_pop200_seed1$gamma, type = "l", main = "", xlab = "Iteration x1000", ylab = "Gamma value", ylim = gamma_yaxis200)
+plot(mcmc_R6_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis200), "E", cex = letter_size)
-  # mtext("Iteration x1000",side=1,line=2)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 1000
-plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "Iteration x1000", ylab = "Gamma value", ylim = gamma_yaxis1000)
+plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis1000), "F", cex = letter_size)
-  # smtext("Iteration x1000",side=1,line=2)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
 @
-
-\noindent Figure 6: Traces of the $\gamma$ values throughout the MCMC. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000. 
+\caption{Traces of the $\gamma$ values throughout the MCMC. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000. }
+\end{center}
+\end{figure}
 
 <<dataplot4, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
 # Log likelihood plots
@@ -1829,16 +1847,18 @@ rownames(mcmc_results_table) <- c("1.5", ".","..","...","....","6","-","--","---
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & mean & min & max & mean & min & max & mean & min & max \\\\\n")
 
-tab <- xtable(mcmc_results_table, caption = "Log(likelihood) values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum log(likelihood) after burn-in during MCMC, max: maximum log(likelihood) observed after burn-in during MCMC") 
+tab <- xtable(mcmc_results_table, digits = 0, caption = "Log(likelihood) values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum log(likelihood) after burn-in during MCMC, max: maximum log(likelihood) observed after burn-in during MCMC") 
 align(tab) <- "l|lll|lll|lll"
 print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
 
 The range of suggested infectious curves after the burn-in period in general overlaps with the true generated infectious curve (Figure 7). An exception for this is one of the unconverged MCMCs in Figure 7F, where the infectious curves made through data augmentation with the MCMC are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Figure 7A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Figure 7A-C and Figure 7D-F).
 
-<<dataplot5, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
+\begin{figure}
+\begin{center}
+<<dataplot5, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
 # Infectious curve plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_infectious.csv", sep=""))
@@ -1859,9 +1879,14 @@ par(mfrow = c(2,3))
 
 burnIn = ((3500000/1000)/100)*23 # 23% burn-in
 
-letter_size = 1
+letter_size = 3
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
+
+par(mfrow = c(2, 3), mar=c(5,6.5,0.4,0.2))
+
 # Pop size = 50
-par(mfrow = c(2,3))
 N = 50
 timestep_diff <- nrow(mcmc_R1.5_pop50_seed1) - nrow(true_R1.5_pop50_seed1)
 zero_array <- array(0, dim = c(timestep_diff, ncol(true_R1.5_pop50_seed1)))
@@ -1869,13 +1894,13 @@ colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 true_R1.5_pop50_seed1 <- rbind(zero_array, true_R1.5_pop50_seed1)
 true_R1.5_pop50_seed1$time <- mcmc_R1.5_pop50_seed1[,1]
 
-plot(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "")
+plot(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
 for (i in burnIn:ncol(mcmc_R1.5_pop50_seed1)){
-  lines(mcmc_R1.5_pop50_seed1[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(mcmc_R1.5_pop50_seed1[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
 }
 lines(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "A", cex = letter_size)
-# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
+mtext("Number infected", 2, line = 4, cex = yaxis_size, outer = FALSE)
 # Pop size 200
 N = 200
 timestep_diff <- nrow(mcmc_R1.5_pop200_seed1) - nrow(true_R1.5_pop200_seed1)
@@ -1884,13 +1909,12 @@ colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 true_R1.5_pop200_seed1 <- rbind(zero_array, true_R1.5_pop200_seed1)
 true_R1.5_pop200_seed1$time <- mcmc_R1.5_pop200_seed1[,1]
 
-plot(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "")
+plot(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
 for (i in burnIn:ncol(mcmc_R1.5_pop200_seed1)){
-  lines(mcmc_R1.5_pop200_seed1[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(mcmc_R1.5_pop200_seed1[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
 }
 lines(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "B", cex = letter_size)
-# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
 # Pop size 1000
 N = 1000
 timestep_diff <- nrow(mcmc_R1.5_pop1000_seed1) - nrow(true_R1.5_pop1000_seed1)
@@ -1899,13 +1923,12 @@ colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 true_R1.5_pop1000_seed1 <- rbind(zero_array, true_R1.5_pop1000_seed1)
 true_R1.5_pop1000_seed1$time <- mcmc_R1.5_pop1000_seed1[,1]
 
-plot(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "")
+plot(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
 for (i in burnIn:ncol(mcmc_R1.5_pop1000_seed1)){
-  lines(mcmc_R1.5_pop1000_seed1[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(mcmc_R1.5_pop1000_seed1[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
 }
 lines(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "C", cex = letter_size)
-# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
 # Pop size 50
 N = 50
 timestep_diff <- nrow(mcmc_R6_pop50_seed1) - nrow(true_R6_pop50_seed1)
@@ -1914,13 +1937,14 @@ colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 true_R6_pop50_seed1 <- rbind(zero_array, true_R6_pop50_seed1)
 true_R6_pop50_seed1$time <- mcmc_R6_pop50_seed1[,1]
 
-plot(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "")
+plot(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
 for (i in burnIn:ncol(mcmc_R6_pop50_seed1)){
-  lines(mcmc_R6_pop50_seed1[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(mcmc_R6_pop50_seed1[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
 }
 lines(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "D", cex = letter_size)
-# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+mtext("Number infected", 2, line = 4, cex = yaxis_size, outer = FALSE)
 # Pop size 200
 N = 200
 timestep_diff <- nrow(mcmc_R6_pop200_seed1) - nrow(true_R6_pop200_seed1)
@@ -1929,13 +1953,13 @@ colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 true_R6_pop200_seed1 <- rbind(zero_array, true_R6_pop200_seed1)
 true_R6_pop200_seed1$time <- mcmc_R6_pop200_seed1[,1]
 
-plot(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "")
+plot(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
 for (i in burnIn:ncol(mcmc_R6_pop200_seed1)){
-  lines(mcmc_R6_pop200_seed1[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(mcmc_R6_pop200_seed1[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
 }
 lines(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "E", cex = letter_size)
-# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
 # Pop size 1000
 N = 1000
 timestep_diff <- nrow(mcmc_R6_pop1000_seed1) - nrow(true_R6_pop1000_seed1)
@@ -1944,16 +1968,17 @@ colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
 true_R6_pop1000_seed1 <- rbind(zero_array, true_R6_pop1000_seed1)
 true_R6_pop1000_seed1$time <- mcmc_R6_pop1000_seed1[,1]
 
-plot(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "Timestep", ylab = "Number of individuals infected", main = "")
+plot(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
 for (i in burnIn:ncol(mcmc_R6_pop1000_seed1)){
-  lines(mcmc_R6_pop1000_seed1[,i], type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(mcmc_R6_pop1000_seed1[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
 }
 lines(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "F", cex = letter_size)
-# legend(100, 0.8*N, c("True infected", "MCMC infected"), pch = 1, col = c("red", "black"), bty = "n")
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
 @
-
-\noindent Figure 7: Comparing the infectious curves of the MCMC to the true curve. The red line depicts the number of individuals in a population infected in the true dataset. The black dotted lines refer to the post-burn-in period infectious curves used by the MCMC. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000. 
+\caption{Comparing the infectious curves of the MCMC to the true curve. The red line depicts the number of individuals in a population infected in the true dataset. The grey dotted lines refer to the post-burn-in period infectious curves used by the MCMC. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000.}
+\end{center}
+\end{figure}
 
 % Plot: Histograms comparing RE and MCMC beta and gamma for 6 example scenarios
 <<dataplot7, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.width=6, fig.cap="Data plot", fig=TRUE>>=
@@ -2019,7 +2044,7 @@ box()
 
 %%%%%%%%%%
 
-\subsection{Markov Chain Monte Carlo with deterministic process}
+\subsection{Markov Chain Monte Carlo with a partly deterministic process}
 \begin{itemize}
   \item Just introduced as a novel method that I did some testing on
   \item Show beta and gamma output for some runs? Maybe just the ones that I made the figures for the other two methods with? i.e. 6 runs instead of all 30
@@ -2034,7 +2059,7 @@ box()
 % 5-10 pages
 
 %%%%%%%%%%
-
+\subsection{Summary of findings}
 Comments on differences in $\beta$ and $\gamma$ estimates between RE and MCMC:
 \begin{itemize}
   \item Larger population size --> less stochasticity in data --> RE should be performing increasingly better. We don't see this for the $R_{0}$ of 1.5, but arguably do for the $R_{0}$ of 6.
@@ -2044,6 +2069,7 @@ Comments on differences in $\beta$ and $\gamma$ estimates between RE and MCMC:
   \item Discuss the difference in running time: RE - about 20 minutes, MCMC - over 20h
 \end{itemize}
 
+\subsection{Open questions for discussion}
 When is it OK to use a deterministic compartmental model?
 \begin{itemize}
   \item RE method's RE is bigger with bigger population sizes because difference between n. recovered in model and n. recovered in data is scaled up
@@ -2051,7 +2077,7 @@ When is it OK to use a deterministic compartmental model?
   \item RE may be a viable option for larger $R_{0}$?
 \end{itemize}
 
-Limitations
+\subsection{Limitations}
 \begin{itemize}
   \item Only looked at one type of compartmental model
   \item The compartmental model I looked at was very simple - no spatial modelling etc. Though at this point I could argue that if the aim is to do something like spatial modelling, one must use stochastic processes so the question of "Which modelling method do I use?" does not need to be asked.
