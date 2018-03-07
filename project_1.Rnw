@@ -41,12 +41,15 @@
 
 \usepackage{float} % for forcing figure placement
 
+\usepackage{fontspec}
+
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Start of document %%
 %%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
+\setmainfont[Ligatures=TeX]{Verdana}
 
 %%%%%%%%%%%
 %% Title %%
@@ -54,12 +57,16 @@
 
 \begin{titlepage}
     \begin{center}
-        \vspace*{4.5cm}
+        \vspace*{2.5cm}
         
         \textbf{Comparing methods from deterministic and stochastic infectious disease modelling for parameter inference}
         
         \vspace{0.5cm}
-        MRes Biomedical Research (Epidemiology, Evolution, and Control of Infectious Diseases Stream) Project 1
+        Project 1
+        
+        MRes Biomedical Research 
+        
+        Epidemiology, Evolution, and Control of Infectious Diseases Stream 
         
         \vspace{0.5cm}
         
@@ -223,6 +230,7 @@ Stochastic methods, such as the MCMC, can be more difficult to implement than de
 % Find a couple of examples where the model used for the task may not have been the best?
 % May (2003) Uses and abuses of mathematics in biology : Complex HIV model lost to a less complex model because the assumptions it made were wrong 
 
+\newpage
 \subsection{Aims of this project}
 In this project, I compare the parameter estimates of stochastic and deterministic models under different population settings. The aim of this is to elucidate the conditions under which a deterministic model, such as the residual error method, might be used just as well as a stochastic one, such as the MCMC, if one is trying to quantify the range of values that a parameter might take.
 
@@ -323,8 +331,6 @@ b_{i+1} &= I_{i+1}^{d} - I_{i}^{d} + R_{i+1} - R_{i}
 \subsection{The simulated outbreaks}
 
 Six different outbreak scenarios were created: an outbreak with an $R_{0}$ of 1.5 and 6 for population sizes of 50, 200, and 1000 individuals. The initial proportion of infectious individuals at the beginning of each outbreak was the same for each population size. Five different outbreaks were constructed for each of the six scenarios. Figures 2 and 3 show the shapes for each generated outbreak.
-
-The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most outbreaks reaching their peak number of infected individuals at around 20 days (Figure 2). Outbreaks with an $R_{0}$ of 6 had a higher peak in the infectious curve than outbreaks with an $R_{0}$ of 1.5 though the peak is also at around 20 days (Figure 3). The variability in outbreak shape reduces with increasing population size for both outbreak strengths.
 \newline
 
 \begin{figure}[h]
@@ -452,7 +458,8 @@ mtext("Time", 1, line = 3, cex = yaxis_size)
 \end{center}
 \end{figure}
 
-% \noindent Figure 2: Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak generated with a stochastic SIR model with an $R_{0}$ of 1.5 and $\gamma$ of 0.15. Plots A-E have a population size of 50, plots F-J have a population size of 200, and plots K-O have a population size of 1000.
+The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most outbreaks reaching their peak number of infected individuals at around 20 days (Figure 2). Outbreaks with an $R_{0}$ of 6 had a higher peak in the infectious curve than outbreaks with an $R_{0}$ of 1.5 though the peak is also at around 20 days (Figure 3). The variability in outbreak shape reduces with increasing population size for both outbreak severity.
+\newline
 
 \begin{figure}[h]
 \begin{center}
@@ -578,15 +585,50 @@ mtext("Time", 1, line = 3, cex = yaxis_size)
 \end{center}
 \end{figure}
 
+Not all simulations resulted in a continued outbreak for the lower $R_{0}$, but went extinct early on. For example, over half of the the simulated outbreaks for population size of 50 and $R_{0}$ of 1.5 resulted in fewer than 10\% of the population (5 individuals) becoming infected (Fig. 4). These non-starters were removed from further analysis as the values of $\beta$ and $\gamma$ would not be interesting to infer from outbreaks that went extinct very early on. Stochastic extinction early on during an outbreak became less common with increasing population size (Fig. 4).
+
+\begin{figure}[h]
+\begin{center}
+<<outbreakhistogram, cache=TRUE, echo=FALSE, eval=TRUE, dpi=100, height=8, width=6, fig.cap="Data plot", fig=TRUE>>=
+par(mfrow = c(3,1), mar=c(5,6.5,0.4,0.2))
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/"
+
+letter_size = 1.5
+
+outbreak_size <- read.csv(paste(dir, "pop50_R1.5_outbreaksize.csv", sep=""))
+outbreak_size <- unlist(outbreak_size)
+hist(outbreak_size, nclass=30, col = "gray", main="", xlab = "Outbreak size", xlim = c(0, 50), ylim = c(0, 500))
+box()
+text(0.97*50, 0.92*500, "A", cex = letter_size)
+
+
+outbreak_size <- read.csv(paste(dir, "pop200_R1.5_outbreaksize.csv", sep=""))
+outbreak_size <- unlist(outbreak_size)
+
+hist(outbreak_size, nclass=30, col = "gray", main="", xlab = "Outbreak size", xlim = c(0, 200), ylim = c(0, 80))
+box()
+text(0.97*200, 0.92*80, "B", cex = letter_size)
+
+outbreak_size <- read.csv(paste(dir, "pop1000_R1.5_outbreaksize.csv", sep=""))
+outbreak_size <- unlist(outbreak_size)
+
+hist(outbreak_size, nclass=30, col = "gray", main="", xlab = "Outbreak size", xlim = c(0, 1000), ylim = c(0, 170))
+box()
+text(0.97*1000, 0.92*170, "C", cex = letter_size)
+@
+\caption{Histograms showing the distribution of total outbreak sizes for 1000 simulations with an $R_{0}$ of 1.5 and a population size of 50 (A), 200 (B), and 1000 (C).}
+\end{center}
+\end{figure}
+
 %%%%%%%%%%
 \newpage
 \subsection{Residual error}
 
-For an $R_{0}$ of 1.5, the difference between the minimum and maximum observed $\beta$ and $\gamma$ values was often wider than the difference for an $R_{0}$ of 6 (Table 1, Table 2). This can also be seen in the exemplifying graphs, where the infectious and recovery curves for the point estimate and bootstrapped parameter values with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping (Figure 4). It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Figure 4D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level probability of becoming infected, while the residual error for the point estimate combinations rises with increasing population size (Table 1, Table 3). 
+For an $R_{0}$ of 1.5, the difference between the minimum and maximum observed $\beta$ and $\gamma$ values was often wider than the difference for an $R_{0}$ of 6 (Table 1, Table 2). This can also be seen in the exemplifying graphs (Fig. 4), where the infectious and recovery curves for the point estimate and bootstrapped parameter values with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping. It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Figure 4D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level probability of becoming infected (Table 1). 
 
-\begin{figure}
+\begin{figure}[!h]
 \begin{center}
-<<dataplot3, cache=TRUE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
+<<dataplot3, cache=TRUE, echo=FALSE, eval=FALSE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
 # RE example plots
 library("deSolve")
 
@@ -651,13 +693,13 @@ plot(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = 
   lines(true_R1.5_pop50_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop50_seed1)){
   sir_data <- pre_sir(true_R1.5_pop50_seed1, re_R1.5_pop50_seed1[i,])
-  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
-  lines(sir_data$R, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$I, type = "l", lty = 2, col = "gray60", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$R, type = "l", lty = 3, col = "gray85", xlab = " ", ylab = " ", lwd = 0.5)
 }
 for (i in 1){
   sir_data <- pre_sir(true_R1.5_pop50_seed1, re_R1.5_pop50_seed1[i,])
   lines(sir_data$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
-  lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
+  lines(sir_data$R, type = "l", lty = 3, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "A", cex = letter_size)
 mtext("Number infected/recovered", 2, line = 4, cex = yaxis_size, outer = FALSE)
@@ -669,13 +711,13 @@ lines(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3
 lines(true_R1.5_pop200_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop200_seed1)){
   sir_data <- pre_sir(true_R1.5_pop200_seed1, re_R1.5_pop200_seed1[i,])
-  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
-  lines(sir_data$R, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$I, type = "l", lty = 2, col = "gray50", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$R, type = "l", lty = 3, col = "gray80", xlab = " ", ylab = " ", lwd = 0.5)
 }
 for (i in 1){
   sir_data <- pre_sir(true_R1.5_pop200_seed1, re_R1.5_pop200_seed1[i,])
   lines(sir_data$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
-  lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
+  lines(sir_data$R, type = "l", lty = 3, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "B", cex = letter_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
@@ -686,13 +728,13 @@ lines(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 
 lines(true_R1.5_pop1000_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop1000_seed1)){
   sir_data <- pre_sir(true_R1.5_pop1000_seed1, re_R1.5_pop1000_seed1[i,])
-  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
-  lines(sir_data$R, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$I, type = "l", lty = 2, col = "gray50", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$R, type = "l", lty = 3, col = "gray80", xlab = " ", ylab = " ", lwd = 0.5)
 }
 for (i in 1){
   sir_data <- pre_sir(true_R1.5_pop1000_seed1, re_R1.5_pop1000_seed1[i,])
   lines(sir_data$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
-  lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
+  lines(sir_data$R, type = "l", lty = 3, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "C", cex = letter_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
@@ -703,13 +745,13 @@ lines(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R6_pop50_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop50_seed1)){
   sir_data <- pre_sir(true_R6_pop50_seed1, re_R6_pop50_seed1[i,])
-  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
-  lines(sir_data$R, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$I, type = "l", lty = 2, col = "gray50", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$R, type = "l", lty = 3, col = "gray80", xlab = " ", ylab = " ", lwd = 0.5)
 }
 for (i in 1){
   sir_data <- pre_sir(true_R6_pop50_seed1, re_R6_pop50_seed1[i,])
   lines(sir_data$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
-  lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
+  lines(sir_data$R, type = "l", lty = 3, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "D", cex = letter_size)
 mtext("Timestep", 1, line = 4, cex = yaxis_size)
@@ -722,13 +764,13 @@ lines(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R6_pop200_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R1.5_pop200_seed1)){
   sir_data <- pre_sir(true_R6_pop200_seed1, re_R6_pop200_seed1[i,])
-  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
-  lines(sir_data$R, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$I, type = "l", lty = 2, col = "gray50", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$R, type = "l", lty = 3, col = "gray80", xlab = " ", ylab = " ", lwd = 0.5)
 }
 for (i in 1){
   sir_data <- pre_sir(true_R6_pop200_seed1, re_R6_pop200_seed1[i,])
   lines(sir_data$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
-  lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
+  lines(sir_data$R, type = "l", lty = 3, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "E", cex = letter_size)
 mtext("Timestep", 1, line = 4, cex = yaxis_size)
@@ -740,25 +782,453 @@ lines(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 lines(true_R6_pop1000_seed1$R, ylim = c(0, N), type = "l", col = "orange", lwd = 3)
 for (i in 2:nrow(re_R6_pop1000_seed1)){
   sir_data <- pre_sir(true_R6_pop1000_seed1, re_R6_pop1000_seed1[i,])
-  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
-  lines(sir_data$R, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$I, type = "l", lty = 2, col = "gray50", xlab = " ", ylab = " ", lwd = 0.5)
+  lines(sir_data$R, type = "l", lty = 3, col = "gray80", xlab = " ", ylab = " ", lwd = 0.5)
 }
 for (i in 1){
   sir_data <- pre_sir(true_R6_pop1000_seed1, re_R6_pop1000_seed1[i,])
   lines(sir_data$I, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
-  lines(sir_data$R, type = "l", lty = 2, col = "black", xlab = " ", ylab = " ", lwd = 2)
+  lines(sir_data$R, type = "l", lty = 3, col = "black", xlab = " ", ylab = " ", lwd = 2)
 }
 text(10, 0.95*N, "F", cex = letter_size)
 mtext("Timestep", 1, line = 4, cex = yaxis_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 @
-\caption{Comparing the true infected and recovered curves to those constructed from the point estimates and bootstrapping of the RE method. The number of individuals in a population infected (red line) or recovered (orange line) in the true dataset. The black dotted lines refer to the deterministic infectious and recovered curves based for $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic and recovered curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000.}
+\caption{Comparing the true infected and recovered curves to those constructed from the point estimates and bootstrapping of the RE method. The number of individuals in a population infected (red line) or recovered (orange line) in the true dataset. The black lines refer to the deterministic infectious (dashed) and recovered (dotted) curves based on the $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic infectious (dark grey) and recovered (light grey) curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000.}
 \end{center}
 \end{figure}
 
-<<RE_result_table_beta, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+
+<<RE_result_table_50, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making MCMC table
+
+results_table <- array(NA, dim =c(12,7))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+seed1 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_14.csv", sep=""))
+seed2 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_22.csv", sep=""))
+seed3 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_40.csv", sep=""))
+seed4 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_43.csv", sep=""))
+seed5 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_95.csv", sep=""))
+
+results_table[2,1] <- 1
+results_table[3,1] <- 2
+results_table[4,1] <- 3
+results_table[5,1] <- 4
+results_table[6,1] <- 5
+
+results_table[8,1] <- 1
+results_table[9,1] <- 2
+results_table[10,1] <- 3
+results_table[11,1] <- 4
+results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+results_table[1,2] <- (1.5 * 0.15) / 50
+results_table[2,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[2:1001], c(0.025, 0.975))
+results_table[2,3] <- intervals[1]
+results_table[2,4] <- intervals[2]
+results_table[3,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[2:1001], c(0.025, 0.975))
+results_table[3,3] <- intervals[1]
+results_table[3,4] <- intervals[2]
+results_table[4,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[2:1001], c(0.025, 0.975))
+results_table[4,3] <- intervals[1]
+results_table[4,4] <- intervals[2]
+results_table[5,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[2:1001], c(0.025, 0.975))
+results_table[5,3] <- intervals[1]
+results_table[5,4] <- intervals[2]
+results_table[6,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[2:1001], c(0.025, 0.975))
+results_table[6,3] <- intervals[1]
+results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+results_table[1,5] <- 0.15
+results_table[2,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[2:1001], c(0.025, 0.975))
+results_table[2,6] <- intervals[1]
+results_table[2,7] <- intervals[2]
+results_table[3,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[2:1001], c(0.025, 0.975))
+results_table[3,6] <- intervals[1]
+results_table[3,7] <- intervals[2]
+results_table[4,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[2:1001], c(0.025, 0.975))
+results_table[4,6] <- intervals[1]
+results_table[4,7] <- intervals[2]
+results_table[5,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[2:1001], c(0.025, 0.975))
+results_table[5,6] <- intervals[1]
+results_table[5,7] <- intervals[2]
+results_table[6,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[2:1001], c(0.025, 0.975))
+results_table[6,6] <- intervals[1]
+results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+seed1 <- read.csv(paste(dir, "re_pop50_R6_g0.15_1.csv", sep =""))
+seed2 <- read.csv(paste(dir, "re_pop50_R6_g0.15_2.csv", sep =""))
+seed3 <- read.csv(paste(dir, "re_pop50_R6_g0.15_3.csv", sep =""))
+seed4 <- read.csv(paste(dir, "re_pop50_R6_g0.15_4.csv", sep =""))
+seed5 <- read.csv(paste(dir, "re_pop50_R6_g0.15_5.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+results_table[7,2] <- (6 * 0.15) / 50
+results_table[8,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[2:1001], c(0.025, 0.975))
+results_table[8,3] <- intervals[1]
+results_table[8,4] <- intervals[2]
+results_table[9,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[2:1001], c(0.025, 0.975))
+results_table[9,3] <- intervals[1]
+results_table[9,4] <- intervals[2]
+results_table[10,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[2:1001], c(0.025, 0.975))
+results_table[10,3] <- intervals[1]
+results_table[10,4] <- intervals[2]
+results_table[11,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[2:1001], c(0.025, 0.975))
+results_table[11,3] <- intervals[1]
+results_table[11,4] <- intervals[2]
+results_table[12,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[2:1001], c(0.025, 0.975))
+results_table[12,3] <- intervals[1]
+results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+results_table[7,5] <- 0.15
+results_table[8,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[2:1001], c(0.025, 0.975))
+results_table[8,6] <- intervals[1]
+results_table[8,7] <- intervals[2]
+results_table[9,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[2:1001], c(0.025, 0.975))
+results_table[9,6] <- intervals[1]
+results_table[9,7] <- intervals[2]
+results_table[10,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[2:1001], c(0.025, 0.975))
+results_table[10,6] <- intervals[1]
+results_table[10,7] <- intervals[2]
+results_table[11,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[2:1001], c(0.025, 0.975))
+results_table[11,6] <- intervals[1]
+results_table[11,7] <- intervals[2]
+results_table[12,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[2:1001], c(0.025, 0.975))
+results_table[12,6] <- intervals[1]
+results_table[12,7] <- intervals[2]
+
+##############################
 # Making Residual Error table
-RE_beta_results_table <- array(NA, dim =c(10,9))
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 50. min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+<<RE_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making MCMC table
+
+results_table <- array(NA, dim =c(12,7))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+seed1 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_81.csv", sep=""))
+seed2 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_93.csv", sep=""))
+seed3 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_102.csv", sep=""))
+seed4 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_202.csv", sep=""))
+seed5 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_246.csv", sep=""))
+
+results_table[2,1] <- 1
+results_table[3,1] <- 2
+results_table[4,1] <- 3
+results_table[5,1] <- 4
+results_table[6,1] <- 5
+
+results_table[8,1] <- 1
+results_table[9,1] <- 2
+results_table[10,1] <- 3
+results_table[11,1] <- 4
+results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+results_table[1,2] <- (1.5 * 0.15) / 200
+results_table[2,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[2:1001], c(0.025, 0.975))
+results_table[2,3] <- intervals[1]
+results_table[2,4] <- intervals[2]
+results_table[3,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[2:1001], c(0.025, 0.975))
+results_table[3,3] <- intervals[1]
+results_table[3,4] <- intervals[2]
+results_table[4,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[2:1001], c(0.025, 0.975))
+results_table[4,3] <- intervals[1]
+results_table[4,4] <- intervals[2]
+results_table[5,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[2:1001], c(0.025, 0.975))
+results_table[5,3] <- intervals[1]
+results_table[5,4] <- intervals[2]
+results_table[6,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[2:1001], c(0.025, 0.975))
+results_table[6,3] <- intervals[1]
+results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+results_table[1,5] <- 0.15
+results_table[2,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[2:1001], c(0.025, 0.975))
+results_table[2,6] <- intervals[1]
+results_table[2,7] <- intervals[2]
+results_table[3,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[2:1001], c(0.025, 0.975))
+results_table[3,6] <- intervals[1]
+results_table[3,7] <- intervals[2]
+results_table[4,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[2:1001], c(0.025, 0.975))
+results_table[4,6] <- intervals[1]
+results_table[4,7] <- intervals[2]
+results_table[5,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[2:1001], c(0.025, 0.975))
+results_table[5,6] <- intervals[1]
+results_table[5,7] <- intervals[2]
+results_table[6,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[2:1001], c(0.025, 0.975))
+results_table[6,6] <- intervals[1]
+results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+seed1 <- read.csv(paste(dir, "re_pop200_R6_g0.15_6.csv", sep =""))
+seed2 <- read.csv(paste(dir, "re_pop200_R6_g0.15_7.csv", sep =""))
+seed3 <- read.csv(paste(dir, "re_pop200_R6_g0.15_8.csv", sep =""))
+seed4 <- read.csv(paste(dir, "re_pop200_R6_g0.15_9.csv", sep =""))
+seed5 <- read.csv(paste(dir, "re_pop200_R6_g0.15_10.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+results_table[7,2] <- (6 * 0.15) / 200
+results_table[8,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[2:1001], c(0.025, 0.975))
+results_table[8,3] <- intervals[1]
+results_table[8,4] <- intervals[2]
+results_table[9,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[2:1001], c(0.025, 0.975))
+results_table[9,3] <- intervals[1]
+results_table[9,4] <- intervals[2]
+results_table[10,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[2:1001], c(0.025, 0.975))
+results_table[10,3] <- intervals[1]
+results_table[10,4] <- intervals[2]
+results_table[11,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[2:1001], c(0.025, 0.975))
+results_table[11,3] <- intervals[1]
+results_table[11,4] <- intervals[2]
+results_table[12,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[2:1001], c(0.025, 0.975))
+results_table[12,3] <- intervals[1]
+results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+results_table[7,5] <- 0.15
+results_table[8,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[2:1001], c(0.025, 0.975))
+results_table[8,6] <- intervals[1]
+results_table[8,7] <- intervals[2]
+results_table[9,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[2:1001], c(0.025, 0.975))
+results_table[9,6] <- intervals[1]
+results_table[9,7] <- intervals[2]
+results_table[10,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[2:1001], c(0.025, 0.975))
+results_table[10,6] <- intervals[1]
+results_table[10,7] <- intervals[2]
+results_table[11,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[2:1001], c(0.025, 0.975))
+results_table[11,6] <- intervals[1]
+results_table[11,7] <- intervals[2]
+results_table[12,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[2:1001], c(0.025, 0.975))
+results_table[12,6] <- intervals[1]
+results_table[12,7] <- intervals[2]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 200. min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+<<RE_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making MCMC table
+
+results_table <- array(NA, dim =c(12,7))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+seed1 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_177.csv", sep=""))
+seed2 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_246.csv", sep=""))
+seed3 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_469.csv", sep=""))
+seed4 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_520.csv", sep=""))
+seed5 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_784.csv", sep=""))
+
+results_table[2,1] <- 1
+results_table[3,1] <- 2
+results_table[4,1] <- 3
+results_table[5,1] <- 4
+results_table[6,1] <- 5
+
+results_table[8,1] <- 1
+results_table[9,1] <- 2
+results_table[10,1] <- 3
+results_table[11,1] <- 4
+results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+results_table[1,2] <- (1.5 * 0.15) / 1000
+results_table[2,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[2:1001], c(0.025, 0.975))
+results_table[2,3] <- intervals[1]
+results_table[2,4] <- intervals[2]
+results_table[3,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[2:1001], c(0.025, 0.975))
+results_table[3,3] <- intervals[1]
+results_table[3,4] <- intervals[2]
+results_table[4,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[2:1001], c(0.025, 0.975))
+results_table[4,3] <- intervals[1]
+results_table[4,4] <- intervals[2]
+results_table[5,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[2:1001], c(0.025, 0.975))
+results_table[5,3] <- intervals[1]
+results_table[5,4] <- intervals[2]
+results_table[6,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[2:1001], c(0.025, 0.975))
+results_table[6,3] <- intervals[1]
+results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+results_table[1,5] <- 0.15
+results_table[2,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[2:1001], c(0.025, 0.975))
+results_table[2,6] <- intervals[1]
+results_table[2,7] <- intervals[2]
+results_table[3,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[2:1001], c(0.025, 0.975))
+results_table[3,6] <- intervals[1]
+results_table[3,7] <- intervals[2]
+results_table[4,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[2:1001], c(0.025, 0.975))
+results_table[4,6] <- intervals[1]
+results_table[4,7] <- intervals[2]
+results_table[5,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[2:1001], c(0.025, 0.975))
+results_table[5,6] <- intervals[1]
+results_table[5,7] <- intervals[2]
+results_table[6,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[2:1001], c(0.025, 0.975))
+results_table[6,6] <- intervals[1]
+results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+seed1 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_11.csv", sep =""))
+seed2 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_12.csv", sep =""))
+seed3 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_13.csv", sep =""))
+seed4 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_14.csv", sep =""))
+seed5 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_15.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+results_table[7,2] <- (6 * 0.15) / 1000
+results_table[8,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[2:1001], c(0.025, 0.975))
+results_table[8,3] <- intervals[1]
+results_table[8,4] <- intervals[2]
+results_table[9,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[2:1001], c(0.025, 0.975))
+results_table[9,3] <- intervals[1]
+results_table[9,4] <- intervals[2]
+results_table[10,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[2:1001], c(0.025, 0.975))
+results_table[10,3] <- intervals[1]
+results_table[10,4] <- intervals[2]
+results_table[11,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[2:1001], c(0.025, 0.975))
+results_table[11,3] <- intervals[1]
+results_table[11,4] <- intervals[2]
+results_table[12,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[2:1001], c(0.025, 0.975))
+results_table[12,3] <- intervals[1]
+results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+results_table[7,5] <- 0.15
+results_table[8,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[2:1001], c(0.025, 0.975))
+results_table[8,6] <- intervals[1]
+results_table[8,7] <- intervals[2]
+results_table[9,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[2:1001], c(0.025, 0.975))
+results_table[9,6] <- intervals[1]
+results_table[9,7] <- intervals[2]
+results_table[10,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[2:1001], c(0.025, 0.975))
+results_table[10,6] <- intervals[1]
+results_table[10,7] <- intervals[2]
+results_table[11,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[2:1001], c(0.025, 0.975))
+results_table[11,6] <- intervals[1]
+results_table[11,7] <- intervals[2]
+results_table[12,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[2:1001], c(0.025, 0.975))
+results_table[12,6] <- intervals[1]
+results_table[12,7] <- intervals[2]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+% Discarded beta and gamma tables
+<<RE_result_table_beta, cache=FALSE, echo=FALSE, eval=FALSE, results=tex>>=
+# Making Residual Error table
+RE_beta_results_table <- array(NA, dim =c(12,10))
 
 # setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
@@ -780,53 +1250,76 @@ re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_520.csv", sep =""
 re_pop1000_seed5 <- read.csv(paste(dir,"re_pop1000_R1.5_g0.15_784.csv", sep =""))
 
 # Pop = 50, R0 = 1.5
-RE_beta_results_table[1,1] <- re_pop50_seed1$beta[1]
-RE_beta_results_table[1,2] <- min(re_pop50_seed1$beta)
-RE_beta_results_table[1,3] <- max(re_pop50_seed1$beta)
-RE_beta_results_table[2,1] <- re_pop50_seed2$beta[1]
-RE_beta_results_table[2,2] <- min(re_pop50_seed2$beta)
-RE_beta_results_table[2,3] <- max(re_pop50_seed2$beta)
-RE_beta_results_table[3,1] <- re_pop50_seed3$beta[1]
-RE_beta_results_table[3,2] <- min(re_pop50_seed3$beta)
-RE_beta_results_table[3,3] <- max(re_pop50_seed3$beta)
-RE_beta_results_table[4,1] <- re_pop50_seed4$beta[1]
-RE_beta_results_table[4,2] <- min(re_pop50_seed4$beta)
-RE_beta_results_table[4,3] <- max(re_pop50_seed4$beta)
-RE_beta_results_table[5,1] <- re_pop50_seed5$beta[1]
-RE_beta_results_table[5,2] <- min(re_pop50_seed5$beta)
-RE_beta_results_table[5,3] <- max(re_pop50_seed5$beta)
+RE_beta_results_table[2,1] <- 1
+RE_beta_results_table[3,1] <- 2
+RE_beta_results_table[4,1] <- 3
+RE_beta_results_table[5,1] <- 4
+RE_beta_results_table[6,1] <- 5
+RE_beta_results_table[1,2] <- (1.5 * 0.15) / 50
+RE_beta_results_table[2,2] <- re_pop50_seed1$beta[1]
+sorted <- sort(re_pop50_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[2,3] <- sorted[25]
+RE_beta_results_table[2,4] <- sorted[975]
+RE_beta_results_table[3,2] <- re_pop50_seed2$beta[1]
+sorted <- sort(re_pop50_seed2$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[3,3] <- sorted[25]
+RE_beta_results_table[3,4] <- sorted[975]
+RE_beta_results_table[4,2] <- re_pop50_seed3$beta[1]
+sorted <- sort(re_pop50_seed3$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[4,3] <- sorted[25]
+RE_beta_results_table[4,4] <- sorted[975]
+RE_beta_results_table[5,2] <- re_pop50_seed4$beta[1]
+sorted <- sort(re_pop50_seed4$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[5,3] <- sorted[25]
+RE_beta_results_table[5,4] <- sorted[975]
+RE_beta_results_table[6,2] <- re_pop50_seed5$beta[1]
+sorted <- sort(re_pop50_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[6,3] <- sorted[25]
+RE_beta_results_table[6,4] <- sorted[975]
 # Pop = 200, R0 = 1.5
-RE_beta_results_table[1,4] <- re_pop200_seed1$beta[1]
-RE_beta_results_table[1,5] <- min(re_pop200_seed1$beta)
-RE_beta_results_table[1,6] <- max(re_pop200_seed1$beta)
-RE_beta_results_table[2,4] <- re_pop200_seed2$beta[1]
-RE_beta_results_table[2,5] <- min(re_pop200_seed2$beta)
-RE_beta_results_table[2,6] <- max(re_pop200_seed2$beta)
-RE_beta_results_table[3,4] <- re_pop200_seed3$beta[1]
-RE_beta_results_table[3,5] <- min(re_pop200_seed3$beta)
-RE_beta_results_table[3,6] <- max(re_pop200_seed3$beta)
-RE_beta_results_table[4,4] <- re_pop200_seed4$beta[1]
-RE_beta_results_table[4,5] <- min(re_pop200_seed4$beta)
-RE_beta_results_table[4,6] <- max(re_pop200_seed4$beta)
-RE_beta_results_table[5,4] <- re_pop200_seed5$beta[1]
-RE_beta_results_table[5,5] <- min(re_pop200_seed5$beta)
-RE_beta_results_table[5,6] <- max(re_pop200_seed5$beta)
+RE_beta_results_table[1,5] <- (1.5 * 0.15) / 200
+RE_beta_results_table[2,5] <- re_pop200_seed1$beta[1]
+sorted <- sort(re_pop200_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[2,6] <- sorted[25]
+RE_beta_results_table[2,7] <- sorted[975]
+RE_beta_results_table[3,5] <- re_pop200_seed2$beta[1]
+sorted <- sort(re_pop200_seed2$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[3,6] <- sorted[25]
+RE_beta_results_table[3,7] <- sorted[975]
+RE_beta_results_table[4,5] <- re_pop200_seed3$beta[1]
+sorted <- sort(re_pop200_seed3$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[4,6] <- sorted[25]
+RE_beta_results_table[4,7] <- sorted[975]
+RE_beta_results_table[5,5] <- re_pop200_seed4$beta[1]
+sorted <- sort(re_pop200_seed4$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[5,6] <- sorted[25]
+RE_beta_results_table[5,7] <- sorted[975]
+RE_beta_results_table[6,5] <- re_pop200_seed5$beta[1]
+sorted <- sort(re_pop200_seed5$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[6,6] <- sorted[25]
+RE_beta_results_table[6,7] <- sorted[975]
 # Pop = 1000, R0 = 1.5
-RE_beta_results_table[1,7] <- re_pop1000_seed1$beta[1]
-RE_beta_results_table[1,8] <- min(re_pop1000_seed1$beta)
-RE_beta_results_table[1,9] <- max(re_pop1000_seed1$beta)
-RE_beta_results_table[2,7] <- re_pop1000_seed2$beta[1]
-RE_beta_results_table[2,8] <- min(re_pop1000_seed2$beta)
-RE_beta_results_table[2,9] <- max(re_pop1000_seed2$beta)
-RE_beta_results_table[3,7] <- re_pop1000_seed3$beta[1]
-RE_beta_results_table[3,8] <- min(re_pop1000_seed3$beta)
-RE_beta_results_table[3,9] <- max(re_pop1000_seed3$beta)
-RE_beta_results_table[4,7] <- re_pop1000_seed4$beta[1]
-RE_beta_results_table[4,8] <- min(re_pop1000_seed4$beta)
-RE_beta_results_table[4,9] <- max(re_pop1000_seed4$beta)
-RE_beta_results_table[5,7] <- re_pop1000_seed5$beta[1]
-RE_beta_results_table[5,8] <- min(re_pop1000_seed5$beta)
-RE_beta_results_table[5,9] <- max(re_pop1000_seed5$beta)
+RE_beta_results_table[1,8] <- (1.5 * 0.15) / 1000
+RE_beta_results_table[2,8] <- re_pop1000_seed1$beta[1]
+sorted <- sort(re_pop1000_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[2,9] <- sorted[25]
+RE_beta_results_table[2,10] <- sorted[975]
+RE_beta_results_table[3,8] <- re_pop1000_seed2$beta[1]
+sorted <- sort(re_pop1000_seed2$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[3,9] <- sorted[25]
+RE_beta_results_table[3,10] <- sorted[975]
+RE_beta_results_table[4,8] <- re_pop1000_seed3$beta[1]
+sorted <- sort(re_pop1000_seed3$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[4,9] <- sorted[25]
+RE_beta_results_table[4,10] <- sorted[975]
+RE_beta_results_table[5,8] <- re_pop1000_seed4$beta[1]
+sorted <- sort(re_pop1000_seed4$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[5,9] <- sorted[25]
+RE_beta_results_table[5,10] <- sorted[975]
+RE_beta_results_table[6,8] <- re_pop1000_seed5$beta[1]
+sorted <- sort(re_pop1000_seed5$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[6,9] <- sorted[25]
+RE_beta_results_table[6,10] <- sorted[975]
 
 # R0 = 6 Gamma = 0.15
 re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R6_g0.15_1.csv", sep =""))
@@ -845,54 +1338,77 @@ re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_13.csv", sep =""))
 re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_14.csv", sep =""))
 re_pop1000_seed5 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_15.csv", sep =""))
 
-# Pop = 50, R0 = 1.5
-RE_beta_results_table[6,1] <- re_pop50_seed1$beta[1]
-RE_beta_results_table[6,2] <- min(re_pop50_seed1$beta)
-RE_beta_results_table[6,3] <- max(re_pop50_seed1$beta)
-RE_beta_results_table[7,1] <- re_pop50_seed2$beta[1]
-RE_beta_results_table[7,2] <- min(re_pop50_seed2$beta)
-RE_beta_results_table[7,3] <- max(re_pop50_seed2$beta)
-RE_beta_results_table[8,1] <- re_pop50_seed3$beta[1]
-RE_beta_results_table[8,2] <- min(re_pop50_seed3$beta)
-RE_beta_results_table[8,3] <- max(re_pop50_seed3$beta)
-RE_beta_results_table[9,1] <- re_pop50_seed4$beta[1]
-RE_beta_results_table[9,2] <- min(re_pop50_seed4$beta)
-RE_beta_results_table[9,3] <- max(re_pop50_seed4$beta)
-RE_beta_results_table[10,1] <- re_pop50_seed5$beta[1]
-RE_beta_results_table[10,2] <- min(re_pop50_seed5$beta)
-RE_beta_results_table[10,3] <- max(re_pop50_seed5$beta)
-# Pop = 200, R0 = 1.5
-RE_beta_results_table[6,4] <- re_pop200_seed1$beta[1]
-RE_beta_results_table[6,5] <- min(re_pop200_seed1$beta)
-RE_beta_results_table[6,6] <- max(re_pop200_seed1$beta)
-RE_beta_results_table[7,4] <- re_pop200_seed2$beta[1]
-RE_beta_results_table[7,5] <- min(re_pop200_seed2$beta)
-RE_beta_results_table[7,6] <- max(re_pop200_seed2$beta)
-RE_beta_results_table[8,4] <- re_pop200_seed3$beta[1]
-RE_beta_results_table[8,5] <- min(re_pop200_seed3$beta)
-RE_beta_results_table[8,6] <- max(re_pop200_seed3$beta)
-RE_beta_results_table[9,4] <- re_pop200_seed4$beta[1]
-RE_beta_results_table[9,5] <- min(re_pop200_seed4$beta)
-RE_beta_results_table[9,6] <- max(re_pop200_seed4$beta)
-RE_beta_results_table[10,4] <- re_pop200_seed5$beta[1]
-RE_beta_results_table[10,5] <- min(re_pop200_seed5$beta)
-RE_beta_results_table[10,6] <- max(re_pop200_seed5$beta)
-# Pop = 1000, R0 = 1.5
-RE_beta_results_table[6,7] <- re_pop1000_seed1$beta[1]
-RE_beta_results_table[6,8] <- min(re_pop1000_seed1$beta)
-RE_beta_results_table[6,9] <- max(re_pop1000_seed1$beta)
-RE_beta_results_table[7,7] <- re_pop1000_seed2$beta[1]
-RE_beta_results_table[7,8] <- min(re_pop1000_seed2$beta)
-RE_beta_results_table[7,9] <- max(re_pop1000_seed2$beta)
-RE_beta_results_table[8,7] <- re_pop1000_seed3$beta[1]
-RE_beta_results_table[8,8] <- min(re_pop1000_seed3$beta)
-RE_beta_results_table[8,9] <- max(re_pop1000_seed3$beta)
-RE_beta_results_table[9,7] <- re_pop1000_seed4$beta[1]
-RE_beta_results_table[9,8] <- min(re_pop1000_seed4$beta)
-RE_beta_results_table[9,9] <- max(re_pop1000_seed4$beta)
-RE_beta_results_table[10,7] <- re_pop1000_seed5$beta[1]
-RE_beta_results_table[10,8] <- min(re_pop1000_seed5$beta)
-RE_beta_results_table[10,9] <- max(re_pop1000_seed5$beta)
+# Pop = 50, R0 = 6
+RE_beta_results_table[8,1] <- 1
+RE_beta_results_table[9,1] <- 2
+RE_beta_results_table[10,1] <- 3
+RE_beta_results_table[11,1] <- 4
+RE_beta_results_table[12,1] <- 5
+RE_beta_results_table[7,2] <- (6 * 0.15) / 50
+RE_beta_results_table[8,2] <- re_pop50_seed1$beta[1]
+sorted <- sort(re_pop50_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[8,3] <- sorted[25]
+RE_beta_results_table[8,4] <- sorted[975]
+RE_beta_results_table[9,2] <- re_pop50_seed2$beta[1]
+sorted <- sort(re_pop50_seed2$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[9,3] <- sorted[25]
+RE_beta_results_table[9,4] <- sorted[975]
+RE_beta_results_table[10,2] <- re_pop50_seed3$beta[1]
+sorted <- sort(re_pop50_seed3$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[10,3] <- sorted[25]
+RE_beta_results_table[10,4] <- sorted[975]
+RE_beta_results_table[11,2] <- re_pop50_seed4$beta[1]
+sorted <- sort(re_pop50_seed4$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[11,3] <- sorted[25]
+RE_beta_results_table[11,4] <- sorted[975]
+RE_beta_results_table[12,2] <- re_pop50_seed5$beta[1]
+sorted <- sort(re_pop50_seed5$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[12,3] <- sorted[25]
+RE_beta_results_table[12,4] <- sorted[975]
+# Pop = 200, R0 = 6
+RE_beta_results_table[7,5] <- (6 * 0.15) / 200
+RE_beta_results_table[8,5] <- re_pop200_seed1$beta[1]
+sorted <- sort(re_pop200_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[8,6] <- sorted[25]
+RE_beta_results_table[8,7] <- sorted[975]
+RE_beta_results_table[9,5] <- re_pop200_seed2$beta[1]
+sorted <- sort(re_pop200_seed2$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[9,6] <- sorted[25]
+RE_beta_results_table[9,7] <- sorted[975]
+RE_beta_results_table[10,5] <- re_pop200_seed3$beta[1]
+sorted <- sort(re_pop200_seed3$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[10,6] <- sorted[25]
+RE_beta_results_table[10,7] <- sorted[975]
+RE_beta_results_table[11,5] <- re_pop200_seed4$beta[1]
+sorted <- sort(re_pop200_seed4$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[11,6] <- sorted[25]
+RE_beta_results_table[11,7] <- sorted[975]
+RE_beta_results_table[12,5] <- re_pop200_seed5$beta[1]
+sorted <- sort(re_pop200_seed5$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[12,6] <- sorted[25]
+RE_beta_results_table[12,7] <- sorted[975]
+# Pop = 1000, R0 = 6
+RE_beta_results_table[7,8] <- (6 * 0.15) / 1000
+RE_beta_results_table[8,8] <- re_pop1000_seed1$beta[1]
+sorted <- sort(re_pop1000_seed1$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[8,9] <- sorted[25]
+RE_beta_results_table[8,10] <- sorted[975]
+RE_beta_results_table[9,8] <- re_pop1000_seed2$beta[1]
+sorted <- sort(re_pop1000_seed2$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[9,9] <- sorted[25]
+RE_beta_results_table[9,10] <- sorted[975]
+RE_beta_results_table[10,8] <- re_pop1000_seed3$beta[1]
+sorted <- sort(re_pop1000_seed3$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[10,9] <- sorted[25]
+RE_beta_results_table[10,10] <- sorted[975]
+RE_beta_results_table[11,8] <- re_pop1000_seed4$beta[1]
+sorted <- sort(re_pop1000_seed4$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[11,9] <- sorted[25]
+RE_beta_results_table[11,10] <- sorted[975]
+RE_beta_results_table[12,8] <- re_pop1000_seed5$beta[1]
+sorted <- sort(re_pop1000_seed5$beta[2:1001], decreasing=FALSE)
+RE_beta_results_table[12,9] <- sorted[25]
+RE_beta_results_table[12,10] <- sorted[975]
 
 ##############################
 # Making Residual Error table
@@ -900,20 +1416,19 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(RE_beta_results_table) <- c("1.5", ".", "..", "...", "....","6", "-", "--", "---", "----")
+rownames(RE_beta_results_table) <- c("1.5", ".", "..", "...", "....", ".....","6", "-", "--", "---", "----", "-----")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{ }  & \\multicolumn{3}{l}{N = 50}  & \\multicolumn{3}{l}{N = 200} & \\multicolumn{3}{l}{N = 1000} \\\\\n", "$R_{0}$ & sim  & PE & min & max & PE & min & max & PE & min & max \\\\\n")
 
-tab <- xtable(RE_beta_results_table, digits=-1, caption = "Beta values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
-align(tab) <- "l|lll|lll|lll"
-print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+tab <- xtable(RE_beta_results_table, digits= c(1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1), table.placement="!h", caption = "$\\beta$ values for the RE inference method for each outbreak of a given population size N and $R_{0}$ of 1.5 or 6. PE: point estimate; min: lower bound of 95\\% interval obtained through bootstrapping, max: upper bound of 95\\% interval obtained through bootstrapping") 
+align(tab) <- "lllllllllll"
+print(tab, hline.after=c(-1,0,12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
-<<RE_result_table_gamma, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+<<RE_result_table_gamma, cache=FALSE, echo=FALSE, eval=FALSE, results=tex>>=
 # Making Residual Error table
-RE_results_table <- array(NA, dim =c(10,9))
+RE_results_table <- array(NA, dim =c(12,10))
 
 # setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
@@ -933,55 +1448,80 @@ re_pop1000_seed2 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_246.csv", sep =""
 re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_469.csv", sep =""))
 re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_520.csv", sep =""))
 re_pop1000_seed5 <- read.csv(paste(dir,"re_pop1000_R1.5_g0.15_784.csv", sep =""))
+gamma <- 0.15
 
 # Pop = 50, R0 = 1.5
-RE_results_table[1,1] <- re_pop50_seed1$gamma[1]
-RE_results_table[1,2] <- min(re_pop50_seed1$gamma)
-RE_results_table[1,3] <- max(re_pop50_seed1$gamma)
-RE_results_table[2,1] <- re_pop50_seed2$gamma[1]
-RE_results_table[2,2] <- min(re_pop50_seed2$gamma)
-RE_results_table[2,3] <- max(re_pop50_seed2$gamma)
-RE_results_table[3,1] <- re_pop50_seed3$gamma[1]
-RE_results_table[3,2] <- min(re_pop50_seed3$gamma)
-RE_results_table[3,3] <- max(re_pop50_seed3$gamma)
-RE_results_table[4,1] <- re_pop50_seed4$gamma[1]
-RE_results_table[4,2] <- min(re_pop50_seed4$gamma)
-RE_results_table[4,3] <- max(re_pop50_seed4$gamma)
-RE_results_table[5,1] <- re_pop50_seed5$gamma[1]
-RE_results_table[5,2] <- min(re_pop50_seed5$gamma)
-RE_results_table[5,3] <- max(re_pop50_seed5$gamma)
+RE_results_table[1,1] <- 0
+RE_results_table[2,1] <- 1
+RE_results_table[3,1] <- 2
+RE_results_table[4,1] <- 3
+RE_results_table[5,1] <- 4
+RE_results_table[6,1] <- 5
+RE_results_table[1,2] <- gamma
+RE_results_table[2,2] <- re_pop50_seed1$gamma[1]
+sorted <- sort(re_pop50_seed1$gamma[2:1001], decreasing=FALSE)
+RE_results_table[2,3] <- sorted[25]
+RE_results_table[2,4] <- sorted[975]
+RE_results_table[3,2] <- re_pop50_seed2$gamma[1]
+sorted <- sort(re_pop50_seed2$gamma[2:1001], decreasing=FALSE)
+RE_results_table[3,3] <- sorted[25]
+RE_results_table[3,4] <- sorted[975]
+RE_results_table[4,2] <- re_pop50_seed3$gamma[1]
+sorted <- sort(re_pop50_seed3$gamma[2:1001], decreasing=FALSE)
+RE_results_table[4,3] <- sorted[25]
+RE_results_table[4,4] <- sorted[975]
+RE_results_table[5,2] <- re_pop50_seed4$gamma[1]
+sorted <- sort(re_pop50_seed4$gamma[2:1001], decreasing=FALSE)
+RE_results_table[5,3] <- sorted[25]
+RE_results_table[5,4] <- sorted[975]
+RE_results_table[6,2] <- re_pop50_seed5$gamma[1]
+sorted <- sort(re_pop50_seed5$gamma[2:1001], decreasing=FALSE)
+RE_results_table[6,3] <- sorted[25]
+RE_results_table[6,4] <- sorted[975]
 # Pop = 200, R0 = 1.5
-RE_results_table[1,4] <- re_pop200_seed1$gamma[1]
-RE_results_table[1,5] <- min(re_pop200_seed1$gamma)
-RE_results_table[1,6] <- max(re_pop200_seed1$gamma)
-RE_results_table[2,4] <- re_pop200_seed2$gamma[1]
-RE_results_table[2,5] <- min(re_pop200_seed2$gamma)
-RE_results_table[2,6] <- max(re_pop200_seed2$gamma)
-RE_results_table[3,4] <- re_pop200_seed3$gamma[1]
-RE_results_table[3,5] <- min(re_pop200_seed3$gamma)
-RE_results_table[3,6] <- max(re_pop200_seed3$gamma)
-RE_results_table[4,4] <- re_pop200_seed4$gamma[1]
-RE_results_table[4,5] <- min(re_pop200_seed4$gamma)
-RE_results_table[4,6] <- max(re_pop200_seed4$gamma)
-RE_results_table[5,4] <- re_pop200_seed5$gamma[1]
-RE_results_table[5,5] <- min(re_pop200_seed5$gamma)
-RE_results_table[5,6] <- max(re_pop200_seed5$gamma)
+RE_results_table[1,5] <- gamma
+RE_results_table[2,5] <- re_pop200_seed1$gamma[1]
+sorted <- sort(re_pop200_seed1$gamma[2:1001], decreasing=FALSE)
+RE_results_table[2,6] <- sorted[25]
+RE_results_table[2,7] <- sorted[975]
+RE_results_table[3,5] <- re_pop200_seed2$gamma[1]
+sorted <- sort(re_pop200_seed2$gamma[2:1001], decreasing=FALSE)
+RE_results_table[3,6] <- sorted[25]
+RE_results_table[3,7] <- sorted[975]
+RE_results_table[4,5] <- re_pop200_seed3$gamma[1]
+sorted <- sort(re_pop200_seed3$gamma[2:1001], decreasing=FALSE)
+RE_results_table[4,6] <- sorted[25]
+RE_results_table[4,7] <- sorted[975]
+RE_results_table[5,5] <- re_pop200_seed4$gamma[1]
+sorted <- sort(re_pop200_seed4$gamma[2:1001], decreasing=FALSE)
+RE_results_table[5,6] <- sorted[25]
+RE_results_table[5,7] <- sorted[975]
+RE_results_table[6,5] <- re_pop200_seed5$gamma[1]
+sorted <- sort(re_pop200_seed5$gamma[2:1001], decreasing=FALSE)
+RE_results_table[6,6] <- sorted[25]
+RE_results_table[6,7] <- sorted[975]
 # Pop = 1000, R0 = 1.5
-RE_results_table[1,7] <- re_pop1000_seed1$gamma[1]
-RE_results_table[1,8] <- min(re_pop1000_seed1$gamma)
-RE_results_table[1,9] <- max(re_pop1000_seed1$gamma)
-RE_results_table[2,7] <- re_pop1000_seed2$gamma[1]
-RE_results_table[2,8] <- min(re_pop1000_seed2$gamma)
-RE_results_table[2,9] <- max(re_pop1000_seed2$gamma)
-RE_results_table[3,7] <- re_pop1000_seed3$gamma[1]
-RE_results_table[3,8] <- min(re_pop1000_seed3$gamma)
-RE_results_table[3,9] <- max(re_pop1000_seed3$gamma)
-RE_results_table[4,7] <- re_pop1000_seed4$gamma[1]
-RE_results_table[4,8] <- min(re_pop1000_seed4$gamma)
-RE_results_table[4,9] <- max(re_pop1000_seed4$gamma)
-RE_results_table[5,7] <- re_pop1000_seed5$gamma[1]
-RE_results_table[5,8] <- min(re_pop1000_seed5$gamma)
-RE_results_table[5,9] <- max(re_pop1000_seed5$gamma)
+RE_results_table[1,8] <- gamma
+RE_results_table[2,8] <- re_pop1000_seed1$gamma[1]
+sorted <- sort(re_pop1000_seed1$gamma[2:1001], decreasing=FALSE)
+RE_results_table[2,9] <- sorted[25]
+RE_results_table[2,10] <- sorted[975]
+RE_results_table[3,8] <- re_pop1000_seed2$gamma[1]
+sorted <- sort(re_pop1000_seed2$gamma[2:1001], decreasing=FALSE)
+RE_results_table[3,9] <- sorted[25]
+RE_results_table[3,10] <- sorted[975]
+RE_results_table[4,8] <- re_pop1000_seed3$gamma[1]
+sorted <- sort(re_pop1000_seed3$gamma[2:1001], decreasing=FALSE)
+RE_results_table[4,9] <- sorted[25]
+RE_results_table[4,10] <- sorted[975]
+RE_results_table[5,8] <- re_pop1000_seed4$gamma[1]
+sorted <- sort(re_pop1000_seed4$gamma[2:1001], decreasing=FALSE)
+RE_results_table[5,9] <- sorted[25]
+RE_results_table[5,10] <- sorted[975]
+RE_results_table[6,8] <- re_pop1000_seed5$gamma[1]
+sorted <- sort(re_pop1000_seed5$gamma[2:1001], decreasing=FALSE)
+RE_results_table[6,9] <- sorted[25]
+RE_results_table[6,10] <- sorted[975]
 
 # R0 = 6 Gamma = 0.15
 re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R6_g0.15_1.csv", sep =""))
@@ -1000,54 +1540,78 @@ re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_13.csv", sep =""))
 re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_14.csv", sep =""))
 re_pop1000_seed5 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_15.csv", sep =""))
 
-# Pop = 50, R0 = 1.5
-RE_results_table[6,1] <- re_pop50_seed1$gamma[1]
-RE_results_table[6,2] <- min(re_pop50_seed1$gamma)
-RE_results_table[6,3] <- max(re_pop50_seed1$gamma)
-RE_results_table[7,1] <- re_pop50_seed2$gamma[1]
-RE_results_table[7,2] <- min(re_pop50_seed2$gamma)
-RE_results_table[7,3] <- max(re_pop50_seed2$gamma)
-RE_results_table[8,1] <- re_pop50_seed3$gamma[1]
-RE_results_table[8,2] <- min(re_pop50_seed3$gamma)
-RE_results_table[8,3] <- max(re_pop50_seed3$gamma)
-RE_results_table[9,1] <- re_pop50_seed4$gamma[1]
-RE_results_table[9,2] <- min(re_pop50_seed4$gamma)
-RE_results_table[9,3] <- max(re_pop50_seed4$gamma)
-RE_results_table[10,1] <- re_pop50_seed5$gamma[1]
-RE_results_table[10,2] <- min(re_pop50_seed5$gamma)
-RE_results_table[10,3] <- max(re_pop50_seed5$gamma)
+# Pop = 50, R0 = 6
+RE_results_table[7,1] <- 0
+RE_results_table[8,1] <- 1
+RE_results_table[9,1] <- 2
+RE_results_table[10,1] <- 3
+RE_results_table[11,1] <- 4
+RE_results_table[12,1] <- 5
+RE_results_table[7,2] <- gamma
+RE_results_table[8,2] <- re_pop50_seed1$gamma[1]
+sorted <- sort(re_pop50_seed1$gamma[2:1001], decreasing=FALSE)
+RE_results_table[8,3] <- sorted[25]
+RE_results_table[8,4] <- sorted[975]
+RE_results_table[9,2] <- re_pop50_seed2$gamma[1]
+sorted <- sort(re_pop50_seed2$gamma[2:1001], decreasing=FALSE)
+RE_results_table[9,3] <- sorted[25]
+RE_results_table[9,4] <- sorted[975]
+RE_results_table[10,2] <- re_pop50_seed3$gamma[1]
+sorted <- sort(re_pop50_seed3$gamma[2:1001], decreasing=FALSE)
+RE_results_table[10,3] <- sorted[25]
+RE_results_table[10,4] <- sorted[975]
+RE_results_table[11,2] <- re_pop50_seed4$gamma[1]
+sorted <- sort(re_pop50_seed4$gamma[2:1001], decreasing=FALSE)
+RE_results_table[11,3] <- sorted[25]
+RE_results_table[11,4] <- sorted[975]
+RE_results_table[12,2] <- re_pop50_seed5$gamma[1]
+sorted <- sort(re_pop50_seed5$gamma[2:1001], decreasing=FALSE)
+RE_results_table[12,3] <- sorted[25]
+RE_results_table[12,4] <- sorted[975]
 # Pop = 200, R0 = 1.5
-RE_results_table[6,4] <- re_pop200_seed1$gamma[1]
-RE_results_table[6,5] <- min(re_pop200_seed1$gamma)
-RE_results_table[6,6] <- max(re_pop200_seed1$gamma)
-RE_results_table[7,4] <- re_pop200_seed2$gamma[1]
-RE_results_table[7,5] <- min(re_pop200_seed2$gamma)
-RE_results_table[7,6] <- max(re_pop200_seed2$gamma)
-RE_results_table[8,4] <- re_pop200_seed3$gamma[1]
-RE_results_table[8,5] <- min(re_pop200_seed3$gamma)
-RE_results_table[8,6] <- max(re_pop200_seed3$gamma)
-RE_results_table[9,4] <- re_pop200_seed4$gamma[1]
-RE_results_table[9,5] <- min(re_pop200_seed4$gamma)
-RE_results_table[9,6] <- max(re_pop200_seed4$gamma)
-RE_results_table[10,4] <- re_pop200_seed5$gamma[1]
-RE_results_table[10,5] <- min(re_pop200_seed5$gamma)
-RE_results_table[10,6] <- max(re_pop200_seed5$gamma)
+RE_results_table[7,5] <- gamma
+RE_results_table[8,5] <- re_pop200_seed1$gamma[1]
+sorted <- sort(re_pop200_seed1$gamma[2:1001], decreasing=FALSE)
+RE_results_table[8,6] <- sorted[25]
+RE_results_table[8,7] <- sorted[975]
+RE_results_table[9,5] <- re_pop200_seed2$gamma[1]
+sorted <- sort(re_pop200_seed2$gamma[2:1001], decreasing=FALSE)
+RE_results_table[9,6] <- sorted[25]
+RE_results_table[9,7] <- sorted[975]
+RE_results_table[10,5] <- re_pop200_seed3$gamma[1]
+sorted <- sort(re_pop200_seed3$gamma[2:1001], decreasing=FALSE)
+RE_results_table[10,6] <- sorted[25]
+RE_results_table[10,7] <- sorted[975]
+RE_results_table[11,5] <- re_pop200_seed4$gamma[1]
+sorted <- sort(re_pop200_seed4$gamma[2:1001], decreasing=FALSE)
+RE_results_table[11,6] <- sorted[25]
+RE_results_table[11,7] <- sorted[975]
+RE_results_table[12,5] <- re_pop200_seed5$gamma[1]
+sorted <- sort(re_pop200_seed5$gamma[2:1001], decreasing=FALSE)
+RE_results_table[12,6] <- sorted[25]
+RE_results_table[12,7] <- sorted[975]
 # Pop = 1000, R0 = 1.5
-RE_results_table[6,7] <- re_pop1000_seed1$gamma[1]
-RE_results_table[6,8] <- min(re_pop1000_seed1$gamma)
-RE_results_table[6,9] <- max(re_pop1000_seed1$gamma)
-RE_results_table[7,7] <- re_pop1000_seed2$gamma[1]
-RE_results_table[7,8] <- min(re_pop1000_seed2$gamma)
-RE_results_table[7,9] <- max(re_pop1000_seed2$gamma)
-RE_results_table[8,7] <- re_pop1000_seed3$gamma[1]
-RE_results_table[8,8] <- min(re_pop1000_seed3$gamma)
-RE_results_table[8,9] <- max(re_pop1000_seed3$gamma)
-RE_results_table[9,7] <- re_pop1000_seed4$gamma[1]
-RE_results_table[9,8] <- min(re_pop1000_seed4$gamma)
-RE_results_table[9,9] <- max(re_pop1000_seed4$gamma)
-RE_results_table[10,7] <- re_pop1000_seed5$gamma[1]
-RE_results_table[10,8] <- min(re_pop1000_seed5$gamma)
-RE_results_table[10,9] <- max(re_pop1000_seed5$gamma)
+RE_results_table[7,8] <- gamma
+RE_results_table[8,8] <- re_pop1000_seed1$gamma[1]
+sorted <- sort(re_pop1000_seed1$gamma[2:1001], decreasing=FALSE)
+RE_results_table[8,9] <- sorted[25]
+RE_results_table[8,10] <- sorted[975]
+RE_results_table[9,8] <- re_pop1000_seed2$gamma[1]
+sorted <- sort(re_pop1000_seed2$gamma[2:1001], decreasing=FALSE)
+RE_results_table[9,9] <- sorted[25]
+RE_results_table[9,10] <- sorted[975]
+RE_results_table[10,8] <- re_pop1000_seed3$gamma[1]
+sorted <- sort(re_pop1000_seed3$gamma[2:1001], decreasing=FALSE)
+RE_results_table[10,9] <- sorted[25]
+RE_results_table[10,10] <- sorted[975]
+RE_results_table[11,8] <- re_pop1000_seed4$gamma[1]
+sorted <- sort(re_pop1000_seed4$gamma[2:1001], decreasing=FALSE)
+RE_results_table[11,9] <- sorted[25]
+RE_results_table[11,10] <- sorted[975]
+RE_results_table[12,8] <- re_pop1000_seed5$gamma[1]
+sorted <- sort(re_pop1000_seed5$gamma[2:1001], decreasing=FALSE)
+RE_results_table[12,9] <- sorted[25]
+RE_results_table[12,10] <- sorted[975]
 
 ##############################
 # Making Residual Error table
@@ -1055,20 +1619,88 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(RE_results_table) <- c("1.5", ".","..","...","....","6","-","--","---","----")
+rownames(RE_results_table) <- c("1.5", ".","..","...","....", ".....","6","-","--","---","----", "-----")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{c}{ }  & \\multicolumn{3}{l}{N = 50}  & \\multicolumn{3}{l}{N = 200} & \\multicolumn{3}{l}{N = 1000} \\\\\n", "$R_{0}$ & sim & PE & min & max & PE & min & max & PE & min & max \\\\\n")
 
-tab <- xtable(RE_results_table, caption = "Gamma values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
-align(tab) <- "l|lll|lll|lll"
-print(tab, hline.after=c(0, 5), comment = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+tab <- xtable(RE_results_table, table.placement="H", digits = c(1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2), caption = "$\\gamma$ values for the RE inference method for each outbreak of a given population size N and $R_{0}$ of 1.5 or 6. PE: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
+
+align(tab) <- "lllllllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
+
+Table 1 shows that when comparing the output of the residual error method to the parameter values used to generate the simulations that the RE method was being fit to, it can be seen that the residual error method consistently overestimates the values that $\beta$ might take for all population sizes when $R_{0}$ is 1.5 and consistently underestimates $\beta$ values when $R_{0}$ is 6.
+
+The inferred values of $\gamma$, on the other hand, include the true value used for the generating the simulations more often than with $\beta$, though levels of success vary with $R_{0}$ and population size (Table 2). When $R_{0}$ is 6, the inferred 95\% interval for $\gamma$ includes the true value of 0.15 for all five simulations for the population size of 1000, and twice respectively for the population sizes of 50 and 200 (Table 2). For the smaller $R_{0}$ of 1.5, the true $\gamma$ value is included in the 95\% interval three times for the population size of 1000, once for the 200 member population, and zero times for the population size of 50 (Table 2). Whether the $\gamma$ ranges that did not include the true $\gamma$ value are over- or underestimating can vary even within a given $R_{0}$ and population size. For the population size of 50 for both $R_{0}$s, the 95\% intervals both over- and underestimate the ranges of values $\gamma$ may take. For the population size of 200, $\gamma$ is always overestimated when $R_{0}$ is 6, but is both over- and underestimated when $R_{0}$ is 1.5. When $R_{0}$ is 1.5 and the population size is 1000, the $\gamma$ values are overestimated.   
+
+The heatmap in Figure X shows the REs for different combinations of $\beta$ and $\gamma$ when optimising to the recovery curve of simulation 1 with population size 200 and $R_{0}$ of 1.5. The trend suggests that $\beta$ and $\gamma$ are positively correlated, implying that the REs are remain lower as $\beta$ and $\gamma$. Similar trends in the relationship between $\beta$ and $\gamma$ are observed for the other 29 outbreaks.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{heatmap_writeup}
+\caption{Heatmap showing squared error for different $\beta$ and $\gamma$ combinations}
+\end{center}
+\end{figure}
+<<heatmap, cache=TRUE, echo=FALSE, eval=FALSE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
+library("plotly") #package for solving differential equations
+
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/"
+
+heatmap <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_81_heatmap.csv", sep=""))
+for (i in 1:nrow(heatmap)){
+  if (heatmap[i,3] > 5000){
+    heatmap[i,3] = 5000
+  }
+}
+
+matrix_heatmap <- xtabs(RE~beta+gamma, data=heatmap)
+
+beta <- seq(min(heatmap$beta), max(heatmap$beta), by = ((max(heatmap$beta)-min(heatmap$beta))/nrow(matrix_heatmap)))
+gamma <- seq(min(heatmap$gamma), max(heatmap$gamma), by = ((max(heatmap$gamma)-min(heatmap$gamma))/nrow(matrix_heatmap)))
+
+tick_beta <- list(
+  autotick = FALSE,
+  ticks = "outside",
+  tick0 = min(heatmap$beta),
+  dtick = ((max(heatmap$beta)-min(heatmap$beta))/nrow(matrix_heatmap)),
+  ticklen = 5,
+  tickwidth = 2,
+  tickcolor = toRGB("blue")
+)
+
+tick_gamma <- list(
+  autotick = FALSE,
+  ticks = "outside",
+  tick0 = min(heatmap$gamma),
+  dtick = ((max(heatmap$gamma)-min(heatmap$gamma))/nrow(matrix_heatmap)),
+  tickangle = 45,
+  ticklen = 5,
+  tickwidth = 2,
+  tickcolor = toRGB("blue")
+)
+
+m <- list(
+  l = 100,
+  r = 5,
+  b = 80,
+  t = 5,
+  pad = 4
+)
+
+plot_heatmap <- plot_ly(z = matrix_heatmap, x = ~gamma, y = ~beta, colors = colorRamp(c("yellow","darkorange2","orangered","red","maroon","magenta4","blue", "navy", "midnightblue")), type = "heatmap") %>%
+  layout(xaxis = tick_gamma, yaxis = tick_beta, margin = m)
+# plot_heatmap
+heatmap_png <- export(plot_heatmap, file = "plot_heatmap.png")
+heatmap_png
+@
+
+The sum of squared differences between the model and the true recovery curve increases with population size (Table 3). Additionally, the sum of squared differences for the point estimates tend to be lower for the higher $R_{0}$ than the lower $R_{0}$ for the populations (Table 3). 
 
 <<RE_result_table_RE, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making Residual Error table
-RE_results_table <- array(NA, dim =c(10,9))
+RE_results_table <- array(NA, dim =c(10,5))
 
 # setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
@@ -1090,53 +1722,28 @@ re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_520.csv", sep =""
 re_pop1000_seed5 <- read.csv(paste(dir,"re_pop1000_R1.5_g0.15_784.csv", sep =""))
 
 # Pop = 50, R0 = 1.5
-RE_results_table[1,1] <- re_pop50_seed1$RE[1]
-RE_results_table[1,2] <- min(re_pop50_seed1$RE)
-RE_results_table[1,3] <- max(re_pop50_seed1$RE)
-RE_results_table[2,1] <- re_pop50_seed2$RE[1]
-RE_results_table[2,2] <- min(re_pop50_seed2$RE)
-RE_results_table[2,3] <- max(re_pop50_seed2$RE)
-RE_results_table[3,1] <- re_pop50_seed3$RE[1]
-RE_results_table[3,2] <- min(re_pop50_seed3$RE)
-RE_results_table[3,3] <- max(re_pop50_seed3$RE)
-RE_results_table[4,1] <- re_pop50_seed4$RE[1]
-RE_results_table[4,2] <- min(re_pop50_seed4$RE)
-RE_results_table[4,3] <- max(re_pop50_seed4$RE)
-RE_results_table[5,1] <- re_pop50_seed5$RE[1]
-RE_results_table[5,2] <- min(re_pop50_seed5$RE)
-RE_results_table[5,3] <- max(re_pop50_seed5$RE)
+RE_results_table[1,1] <- 1
+RE_results_table[2,1] <- 2
+RE_results_table[3,1] <- 3
+RE_results_table[4,1] <- 4
+RE_results_table[5,1] <- 5
+RE_results_table[1,2] <- re_pop50_seed1$RE[1]
+RE_results_table[2,2] <- re_pop50_seed2$RE[1]
+RE_results_table[3,2] <- re_pop50_seed3$RE[1]
+RE_results_table[4,2] <- re_pop50_seed4$RE[1]
+RE_results_table[5,2] <- re_pop50_seed5$RE[1]
 # Pop = 200, R0 = 1.5
-RE_results_table[1,4] <- re_pop200_seed1$RE[1]
-RE_results_table[1,5] <- min(re_pop200_seed1$RE)
-RE_results_table[1,6] <- max(re_pop200_seed1$RE)
-RE_results_table[2,4] <- re_pop200_seed2$RE[1]
-RE_results_table[2,5] <- min(re_pop200_seed2$RE)
-RE_results_table[2,6] <- max(re_pop200_seed2$RE)
-RE_results_table[3,4] <- re_pop200_seed3$RE[1]
-RE_results_table[3,5] <- min(re_pop200_seed3$RE)
-RE_results_table[3,6] <- max(re_pop200_seed3$RE)
-RE_results_table[4,4] <- re_pop200_seed4$RE[1]
-RE_results_table[4,5] <- min(re_pop200_seed4$RE)
-RE_results_table[4,6] <- max(re_pop200_seed4$RE)
-RE_results_table[5,4] <- re_pop200_seed5$RE[1]
-RE_results_table[5,5] <- min(re_pop200_seed5$RE)
-RE_results_table[5,6] <- max(re_pop200_seed5$RE)
+RE_results_table[1,3] <- re_pop200_seed1$RE[1]
+RE_results_table[2,3] <- re_pop200_seed2$RE[1]
+RE_results_table[3,3] <- re_pop200_seed3$RE[1]
+RE_results_table[4,3] <- re_pop200_seed4$RE[1]
+RE_results_table[5,3] <- re_pop200_seed5$RE[1]
 # Pop = 1000, R0 = 1.5
-RE_results_table[1,7] <- re_pop1000_seed1$RE[1]
-RE_results_table[1,8] <- min(re_pop1000_seed1$RE)
-RE_results_table[1,9] <- max(re_pop1000_seed1$RE)
-RE_results_table[2,7] <- re_pop1000_seed2$RE[1]
-RE_results_table[2,8] <- min(re_pop1000_seed2$RE)
-RE_results_table[2,9] <- max(re_pop1000_seed2$RE)
-RE_results_table[3,7] <- re_pop1000_seed3$RE[1]
-RE_results_table[3,8] <- min(re_pop1000_seed3$RE)
-RE_results_table[3,9] <- max(re_pop1000_seed3$RE)
-RE_results_table[4,7] <- re_pop1000_seed4$RE[1]
-RE_results_table[4,8] <- min(re_pop1000_seed4$RE)
-RE_results_table[4,9] <- max(re_pop1000_seed4$RE)
-RE_results_table[5,7] <- re_pop1000_seed5$RE[1]
-RE_results_table[5,8] <- min(re_pop1000_seed5$RE)
-RE_results_table[5,9] <- max(re_pop1000_seed5$RE)
+RE_results_table[1,4] <- re_pop1000_seed1$RE[1]
+RE_results_table[2,4] <- re_pop1000_seed2$RE[1]
+RE_results_table[3,4] <- re_pop1000_seed3$RE[1]
+RE_results_table[4,4] <- re_pop1000_seed4$RE[1]
+RE_results_table[5,4] <- re_pop1000_seed5$RE[1]
 
 # R0 = 6 Gamma = 0.15
 re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R6_g0.15_1.csv", sep =""))
@@ -1155,54 +1762,29 @@ re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_13.csv", sep =""))
 re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_14.csv", sep =""))
 re_pop1000_seed5 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_15.csv", sep =""))
 
+RE_results_table[6,1] <- 1
+RE_results_table[7,1] <- 2
+RE_results_table[8,1] <- 3
+RE_results_table[9,1] <- 4
+RE_results_table[10,1] <- 5
 # Pop = 50, R0 = 1.5
-RE_results_table[6,1] <- re_pop50_seed1$RE[1]
-RE_results_table[6,2] <- min(re_pop50_seed1$RE)
-RE_results_table[6,3] <- max(re_pop50_seed1$RE)
-RE_results_table[7,1] <- re_pop50_seed2$RE[1]
-RE_results_table[7,2] <- min(re_pop50_seed2$RE)
-RE_results_table[7,3] <- max(re_pop50_seed2$RE)
-RE_results_table[8,1] <- re_pop50_seed3$RE[1]
-RE_results_table[8,2] <- min(re_pop50_seed3$RE)
-RE_results_table[8,3] <- max(re_pop50_seed3$RE)
-RE_results_table[9,1] <- re_pop50_seed4$RE[1]
-RE_results_table[9,2] <- min(re_pop50_seed4$RE)
-RE_results_table[9,3] <- max(re_pop50_seed4$RE)
-RE_results_table[10,1] <- re_pop50_seed5$RE[1]
-RE_results_table[10,2] <- min(re_pop50_seed5$RE)
-RE_results_table[10,3] <- max(re_pop50_seed5$RE)
+RE_results_table[6,2] <- re_pop50_seed1$RE[1]
+RE_results_table[7,2] <- re_pop50_seed2$RE[1]
+RE_results_table[8,2] <- re_pop50_seed3$RE[1]
+RE_results_table[9,2] <- re_pop50_seed4$RE[1]
+RE_results_table[10,2] <- re_pop50_seed5$RE[1]
 # Pop = 200, R0 = 1.5
-RE_results_table[6,4] <- re_pop200_seed1$RE[1]
-RE_results_table[6,5] <- min(re_pop200_seed1$RE)
-RE_results_table[6,6] <- max(re_pop200_seed1$RE)
-RE_results_table[7,4] <- re_pop200_seed2$RE[1]
-RE_results_table[7,5] <- min(re_pop200_seed2$RE)
-RE_results_table[7,6] <- max(re_pop200_seed2$RE)
-RE_results_table[8,4] <- re_pop200_seed3$RE[1]
-RE_results_table[8,5] <- min(re_pop200_seed3$RE)
-RE_results_table[8,6] <- max(re_pop200_seed3$RE)
-RE_results_table[9,4] <- re_pop200_seed4$RE[1]
-RE_results_table[9,5] <- min(re_pop200_seed4$RE)
-RE_results_table[9,6] <- max(re_pop200_seed4$RE)
-RE_results_table[10,4] <- re_pop200_seed5$RE[1]
-RE_results_table[10,5] <- min(re_pop200_seed5$RE)
-RE_results_table[10,6] <- max(re_pop200_seed5$RE)
+RE_results_table[6,3] <- re_pop200_seed1$RE[1]
+RE_results_table[7,3] <- re_pop200_seed2$RE[1]
+RE_results_table[8,3] <- re_pop200_seed3$RE[1]
+RE_results_table[9,3] <- re_pop200_seed4$RE[1]
+RE_results_table[10,3] <- re_pop200_seed5$RE[1]
 # Pop = 1000, R0 = 1.5
-RE_results_table[6,7] <- re_pop1000_seed1$RE[1]
-RE_results_table[6,8] <- min(re_pop1000_seed1$RE)
-RE_results_table[6,9] <- max(re_pop1000_seed1$RE)
-RE_results_table[7,7] <- re_pop1000_seed2$RE[1]
-RE_results_table[7,8] <- min(re_pop1000_seed2$RE)
-RE_results_table[7,9] <- max(re_pop1000_seed2$RE)
-RE_results_table[8,7] <- re_pop1000_seed3$RE[1]
-RE_results_table[8,8] <- min(re_pop1000_seed3$RE)
-RE_results_table[8,9] <- max(re_pop1000_seed3$RE)
-RE_results_table[9,7] <- re_pop1000_seed4$RE[1]
-RE_results_table[9,8] <- min(re_pop1000_seed4$RE)
-RE_results_table[9,9] <- max(re_pop1000_seed4$RE)
-RE_results_table[10,7] <- re_pop1000_seed5$RE[1]
-RE_results_table[10,8] <- min(re_pop1000_seed5$RE)
-RE_results_table[10,9] <- max(re_pop1000_seed5$RE)
+RE_results_table[6,4] <- re_pop1000_seed1$RE[1]
+RE_results_table[7,4] <- re_pop1000_seed2$RE[1]
+RE_results_table[8,4] <- re_pop1000_seed3$RE[1]
+RE_results_table[9,4] <- re_pop1000_seed4$RE[1]
+RE_results_table[10,4] <- re_pop1000_seed5$RE[1]
 
 ##############################
 # Making Residual Error table
@@ -1214,27 +1796,462 @@ rownames(RE_results_table) <- c("1.5", ".","..","...","....","6","-","--","---",
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & P.E. & min & max & P.E. & min & max & P.E. & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{c}{}  & \\multicolumn{1}{c}{N = 50}  & \\multicolumn{1}{c}{N = 200} & \\multicolumn{1}{c}{N = 1000} \\\\\n", "$R_{0}$ & sim & PE & PE & PE \\\\\n")
 
 tab <- xtable(RE_results_table, digits = 0, caption = "Residual error values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
-align(tab) <- "l|lll|lll|lll"
-print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+align(tab) <- "llllll"
+print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
-\begin{itemize}
-  \item Heatmaps for each population size to show interplay between beta, gamma, and RE
-\end{itemize}
 
 %%%%%%%%%%
 
 \newpage
 \subsection{Markov Chain Monte Carlo}
 
-In general, the minimum and maximum $\beta$ and $\gamma$ values were wider when estimated through MCMC (Table 4, Table 5).
+A MCMC approach was also taken to infer the values that $\beta$ and $\gamma$ might take when given the recovery curve from the simulated outbreak. The MCMC with 3.5 million iterations took between 20 and 25 hours to run to completion while the MCMC with 17.5 iterations took over 120 hours (5 days) to run to completion.
 
-<<MCMC_result_table_beta, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+The 95\% credible interval for $\beta$ for the 3.5 million iteration MCMC runs includes the true value for all outbreak simulations in all cases excepting for three outbreaks in the combination of population size 1000 and $R_{0}$ of 6 (Table 4). For $R_{0}$ of 1.5 and population size 50 and 200, the mean of the post-burn-in $\beta$ values is above the true number. For the same $R_{0}$ and a population size of 1000, the mean is either equal to, or slightly less than the true value. For outbreaks where $R_{0}$ is 6 and the population size is 50 and 200, the post-burn-in mean is on either side of the true value, while for a population size of 1000, the mean is consistently below the true value of 0.00090.
+
+<<MCMC_result_table_50, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
-mcmc_beta_results_table <- array(NA, dim =c(10,9))
+burnIn <- 3500 * 0.23
+results_table <- array(NA, dim =c(12,7))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
+seed2 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_22_loglik.csv", sep=""))
+seed3 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_40_loglik.csv", sep=""))
+seed4 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_43_loglik.csv", sep=""))
+seed5 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_95_loglik.csv", sep=""))
+
+# results_table[1,1] <- "ref"
+results_table[2,1] <- 1
+results_table[3,1] <- 2
+results_table[4,1] <- 3
+results_table[5,1] <- 4
+results_table[6,1] <- 5
+
+# results_table[7,1] <- "ref"
+results_table[8,1] <- 1
+results_table[9,1] <- 2
+results_table[10,1] <- 3
+results_table[11,1] <- 4
+results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+results_table[1,2] <- (1.5 * 0.15) / 50
+results_table[2,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[2,3] <- intervals[1]
+results_table[2,4] <- intervals[2]
+results_table[3,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[3,3] <- intervals[1]
+results_table[3,4] <- intervals[2]
+results_table[4,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[4,3] <- intervals[1]
+results_table[4,4] <- intervals[2]
+results_table[5,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[5,3] <- intervals[1]
+results_table[5,4] <- intervals[2]
+results_table[6,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[6,3] <- intervals[1]
+results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+results_table[1,5] <- 0.15
+results_table[2,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[2,6] <- intervals[1]
+results_table[2,7] <- intervals[2]
+results_table[3,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[3,6] <- intervals[1]
+results_table[3,7] <- intervals[2]
+results_table[4,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[4,6] <- intervals[1]
+results_table[4,7] <- intervals[2]
+results_table[5,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[5,6] <- intervals[1]
+results_table[5,7] <- intervals[2]
+results_table[6,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[6,6] <- intervals[1]
+results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+seed1 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_1_loglik.csv", sep =""))
+seed2 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_2_loglik.csv", sep =""))
+seed3 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_3_loglik.csv", sep =""))
+seed4 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_4_loglik.csv", sep =""))
+seed5 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_5_loglik.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+results_table[7,2] <- (6 * 0.15) / 50
+results_table[8,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[8,3] <- intervals[1]
+results_table[8,4] <- intervals[2]
+results_table[9,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[9,3] <- intervals[1]
+results_table[9,4] <- intervals[2]
+results_table[10,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[10,3] <- intervals[1]
+results_table[10,4] <- intervals[2]
+results_table[11,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[11,3] <- intervals[1]
+results_table[11,4] <- intervals[2]
+results_table[12,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[12,3] <- intervals[1]
+results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+results_table[7,5] <- 0.15
+results_table[8,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[8,6] <- intervals[1]
+results_table[8,7] <- intervals[2]
+results_table[9,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[9,6] <- intervals[1]
+results_table[9,7] <- intervals[2]
+results_table[10,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[10,6] <- intervals[1]
+results_table[10,7] <- intervals[2]
+results_table[11,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[11,6] <- intervals[1]
+results_table[11,7] <- intervals[2]
+results_table[12,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[12,6] <- intervals[1]
+results_table[12,7] <- intervals[2]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 3.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 50. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% cedible interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+<<MCMC_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making MCMC table
+burnIn <- 3500 * 0.23
+results_table <- array(NA, dim =c(12,7))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+seed1 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
+seed2 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_93_loglik.csv", sep=""))
+seed3 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_102_loglik.csv", sep=""))
+seed4 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_202_loglik.csv", sep=""))
+seed5 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_246_loglik.csv", sep=""))
+
+# results_table[1,1] <- "ref"
+results_table[2,1] <- 1
+results_table[3,1] <- 2
+results_table[4,1] <- 3
+results_table[5,1] <- 4
+results_table[6,1] <- 5
+
+# results_table[7,1] <- "ref"
+results_table[8,1] <- 1
+results_table[9,1] <- 2
+results_table[10,1] <- 3
+results_table[11,1] <- 4
+results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+results_table[1,2] <- (1.5 * 0.15) / 200
+results_table[2,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[2,3] <- intervals[1]
+results_table[2,4] <- intervals[2]
+results_table[3,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[3,3] <- intervals[1]
+results_table[3,4] <- intervals[2]
+results_table[4,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[4,3] <- intervals[1]
+results_table[4,4] <- intervals[2]
+results_table[5,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[5,3] <- intervals[1]
+results_table[5,4] <- intervals[2]
+results_table[6,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[6,3] <- intervals[1]
+results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+results_table[1,5] <- 0.15
+results_table[2,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[2,6] <- intervals[1]
+results_table[2,7] <- intervals[2]
+results_table[3,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[3,6] <- intervals[1]
+results_table[3,7] <- intervals[2]
+results_table[4,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[4,6] <- intervals[1]
+results_table[4,7] <- intervals[2]
+results_table[5,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[5,6] <- intervals[1]
+results_table[5,7] <- intervals[2]
+results_table[6,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[6,6] <- intervals[1]
+results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+seed1 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_6_loglik.csv", sep =""))
+seed2 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_7_loglik.csv", sep =""))
+seed3 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_8_loglik.csv", sep =""))
+seed4 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_9_loglik.csv", sep =""))
+seed5 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_10_loglik.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+results_table[7,2] <- (6 * 0.15) / 200
+results_table[8,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[8,3] <- intervals[1]
+results_table[8,4] <- intervals[2]
+results_table[9,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[9,3] <- intervals[1]
+results_table[9,4] <- intervals[2]
+results_table[10,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[10,3] <- intervals[1]
+results_table[10,4] <- intervals[2]
+results_table[11,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[11,3] <- intervals[1]
+results_table[11,4] <- intervals[2]
+results_table[12,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[12,3] <- intervals[1]
+results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+results_table[7,5] <- 0.15
+results_table[8,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[8,6] <- intervals[1]
+results_table[8,7] <- intervals[2]
+results_table[9,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[9,6] <- intervals[1]
+results_table[9,7] <- intervals[2]
+results_table[10,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[10,6] <- intervals[1]
+results_table[10,7] <- intervals[2]
+results_table[11,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[11,6] <- intervals[1]
+results_table[11,7] <- intervals[2]
+results_table[12,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[12,6] <- intervals[1]
+results_table[12,7] <- intervals[2]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 3.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 200. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% cedible interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+<<MCMC_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making MCMC table
+burnIn <- 3500 * 0.23
+results_table <- array(NA, dim =c(12,7))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+seed1 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_177_loglik.csv", sep=""))
+seed2 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_246_loglik.csv", sep=""))
+seed3 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_469_loglik.csv", sep=""))
+seed4 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_520_loglik.csv", sep=""))
+seed5 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_784_loglik.csv", sep=""))
+
+# results_table[1,1] <- "ref"
+results_table[2,1] <- 1
+results_table[3,1] <- 2
+results_table[4,1] <- 3
+results_table[5,1] <- 4
+results_table[6,1] <- 5
+
+# results_table[7,1] <- "ref"
+results_table[8,1] <- 1
+results_table[9,1] <- 2
+results_table[10,1] <- 3
+results_table[11,1] <- 4
+results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+results_table[1,2] <- (1.5 * 0.15) / 1000
+results_table[2,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[2,3] <- intervals[1]
+results_table[2,4] <- intervals[2]
+results_table[3,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[3,3] <- intervals[1]
+results_table[3,4] <- intervals[2]
+results_table[4,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[4,3] <- intervals[1]
+results_table[4,4] <- intervals[2]
+results_table[5,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[5,3] <- intervals[1]
+results_table[5,4] <- intervals[2]
+results_table[6,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[6,3] <- intervals[1]
+results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+results_table[1,5] <- 0.15
+results_table[2,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[2,6] <- intervals[1]
+results_table[2,7] <- intervals[2]
+results_table[3,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[3,6] <- intervals[1]
+results_table[3,7] <- intervals[2]
+results_table[4,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[4,6] <- intervals[1]
+results_table[4,7] <- intervals[2]
+results_table[5,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[5,6] <- intervals[1]
+results_table[5,7] <- intervals[2]
+results_table[6,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[6,6] <- intervals[1]
+results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+seed1 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_11_loglik.csv", sep =""))
+seed2 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_12_loglik.csv", sep =""))
+seed3 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_13_loglik.csv", sep =""))
+seed4 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_14_loglik.csv", sep =""))
+seed5 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_15_loglik.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+results_table[7,2] <- (6 * 0.15) / 1000
+results_table[8,2] <- seed1$beta[1]
+intervals <- quantile(seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[8,3] <- intervals[1]
+results_table[8,4] <- intervals[2]
+results_table[9,2] <- seed2$beta[1]
+intervals <- quantile(seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[9,3] <- intervals[1]
+results_table[9,4] <- intervals[2]
+results_table[10,2] <- seed3$beta[1]
+intervals <- quantile(seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[10,3] <- intervals[1]
+results_table[10,4] <- intervals[2]
+results_table[11,2] <- seed4$beta[1]
+intervals <- quantile(seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[11,3] <- intervals[1]
+results_table[11,4] <- intervals[2]
+results_table[12,2] <- seed5$beta[1]
+intervals <- quantile(seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+results_table[12,3] <- intervals[1]
+results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+results_table[7,5] <- 0.15
+results_table[8,5] <- seed1$gamma[1]
+intervals <- quantile(seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[8,6] <- intervals[1]
+results_table[8,7] <- intervals[2]
+results_table[9,5] <- seed2$gamma[1]
+intervals <- quantile(seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[9,6] <- intervals[1]
+results_table[9,7] <- intervals[2]
+results_table[10,5] <- seed3$gamma[1]
+intervals <- quantile(seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[10,6] <- intervals[1]
+results_table[10,7] <- intervals[2]
+results_table[11,5] <- seed4$gamma[1]
+intervals <- quantile(seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[11,6] <- intervals[1]
+results_table[11,7] <- intervals[2]
+results_table[12,5] <- seed5$gamma[1]
+intervals <- quantile(seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+results_table[12,6] <- intervals[1]
+results_table[12,7] <- intervals[2]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 3.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% cedible interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+For $\gamma$, the 95\% credible interval often includes the true value though there are more exceptions than with $\beta$ (Table 5). All credible intervals include the true value of $\gamma$ for population size 50 with an $R_{0}$ of 6, and for all of the outbreak scenarios where population size is 200 (Table 5). For population size 50 and $R_{0}$ of 1.5, the fifth simulation does not include the true $\gamma$ value. When it comes to the outbreaks where population size is 1000, the true $\gamma$ value is not included in the 95\% credible interval. None of the outbreaks with a population size of 1000 and an $R_{0}$ of 6 include the true value in their credible intervals as the intervals are consistently below the true value. A similar situation is seen in the outbreaks where the population size is 1000 and $R_{0}$ is 1.5 where simulations 1 and 5 have credible intervals that are below the true $\gamma$ value of 0.15, though the other three simulations' credible intervals do include 0.15. For population sizes of 50 and 200 for both $R_{0}$s, the mean $\gamma$ values for simulations vary between above and below 0.15. For a population size of 1000, the mean estimated $\gamma$ value is below 0.15 for all 10 outbreaks (Table 5).
+
+% Retired beta and gamma tables
+<<MCMC_result_table_beta, cache=FALSE, echo=FALSE, eval=FALSE, results=tex>>=
+# Making MCMC table
+library("coda")
+
+mcmc_beta_results_table <- array(NA, dim =c(12,10))
 burnIn = ((3500000/1000)/100)*23 # 23% burn-in
 
 # setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
@@ -1256,54 +2273,84 @@ mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_469_loglik.cs
 mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_520_loglik.csv", sep =""))
 mcmc_pop1000_seed5 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_784_loglik.csv", sep =""))
 
+mcmc_beta_results_table[2,1] <- 1
+mcmc_beta_results_table[3,1] <- 2
+mcmc_beta_results_table[4,1] <- 3
+mcmc_beta_results_table[5,1] <- 4
+mcmc_beta_results_table[6,1] <- 5
+
+mcmc_beta_results_table[8,1] <- 1
+mcmc_beta_results_table[9,1] <- 2
+mcmc_beta_results_table[10,1] <- 3
+mcmc_beta_results_table[11,1] <- 4
+mcmc_beta_results_table[12,1] <- 5
+
 # Pop = 50, R0 = 1.5
-mcmc_beta_results_table[1,1] <- mean(mcmc_pop50_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[1,2] <- min(mcmc_pop50_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[1,3] <- max(mcmc_pop50_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,1] <- mean(mcmc_pop50_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,2] <- min(mcmc_pop50_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,3] <- max(mcmc_pop50_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,1] <- mean(mcmc_pop50_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,2] <- min(mcmc_pop50_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,3] <- max(mcmc_pop50_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,1] <- mean(mcmc_pop50_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,2] <- min(mcmc_pop50_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,3] <- max(mcmc_pop50_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,1] <- mean(mcmc_pop50_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,2] <- min(mcmc_pop50_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,3] <- max(mcmc_pop50_seed5$beta[-(1:burnIn)])
+mcmc_beta_results_table[1,2] <- (1.5 * 0.15) / 50
+mcmc_beta_results_table[2,2] <- mean(mcmc_pop50_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[2,3] <- intervals[1]
+mcmc_beta_results_table[2,4] <- intervals[2]
+mcmc_beta_results_table[3,2] <- mean(mcmc_pop50_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[3,3] <- intervals[1]
+mcmc_beta_results_table[3,4] <- intervals[2]
+mcmc_beta_results_table[4,2] <- mean(mcmc_pop50_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[4,3] <- intervals[1]
+mcmc_beta_results_table[4,4] <- intervals[2]
+mcmc_beta_results_table[5,2] <- mean(mcmc_pop50_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[5,3] <- intervals[1]
+mcmc_beta_results_table[5,4] <- intervals[2]
+mcmc_beta_results_table[6,2] <- mean(mcmc_pop50_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[6,3] <- intervals[1]
+mcmc_beta_results_table[6,4] <- intervals[2]
 # Pop = 200, R0 = 1.5
-mcmc_beta_results_table[1,4] <- mean(mcmc_pop200_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[1,5] <- min(mcmc_pop200_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[1,6] <- max(mcmc_pop200_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,4] <- mean(mcmc_pop200_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,5] <- min(mcmc_pop200_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,6] <- max(mcmc_pop200_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,4] <- mean(mcmc_pop200_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,5] <- min(mcmc_pop200_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,6] <- max(mcmc_pop200_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,4] <- mean(mcmc_pop200_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,5] <- min(mcmc_pop200_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,6] <- max(mcmc_pop200_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,4] <- mean(mcmc_pop200_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,5] <- min(mcmc_pop200_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,6] <- max(mcmc_pop200_seed5$beta[-(1:burnIn)])
+mcmc_beta_results_table[1,5] <- (1.5 * 0.15) / 200
+mcmc_beta_results_table[2,5] <- mean(mcmc_pop200_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[2,6] <- intervals[1]
+mcmc_beta_results_table[2,7] <- intervals[2]
+mcmc_beta_results_table[3,5] <- mean(mcmc_pop200_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[3,6] <- intervals[1]
+mcmc_beta_results_table[3,7] <- intervals[2]
+mcmc_beta_results_table[4,5] <- mean(mcmc_pop200_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[4,6] <- intervals[1]
+mcmc_beta_results_table[4,7] <- intervals[2]
+mcmc_beta_results_table[5,5] <- mean(mcmc_pop200_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[5,6] <- intervals[1]
+mcmc_beta_results_table[5,7] <- intervals[2]
+mcmc_beta_results_table[6,5] <- mean(mcmc_pop200_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[6,6] <- intervals[1]
+mcmc_beta_results_table[6,7] <- intervals[2]
 # Pop = 1000, R0 = 1.5
-mcmc_beta_results_table[1,7] <- mean(mcmc_pop1000_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[1,8] <- min(mcmc_pop1000_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[1,9] <- max(mcmc_pop1000_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,7] <- mean(mcmc_pop1000_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,8] <- min(mcmc_pop1000_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[2,9] <- max(mcmc_pop1000_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,7] <- mean(mcmc_pop1000_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,8] <- min(mcmc_pop1000_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[3,9] <- max(mcmc_pop1000_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,7] <- mean(mcmc_pop1000_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,8] <- min(mcmc_pop1000_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[4,9] <- max(mcmc_pop1000_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,7] <- mean(mcmc_pop1000_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,8] <- min(mcmc_pop1000_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[5,9] <- max(mcmc_pop1000_seed5$beta[-(1:burnIn)])
+mcmc_beta_results_table[1,8] <- (1.5 * 0.15) / 1000
+mcmc_beta_results_table[2,8] <- mean(mcmc_pop1000_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[2,9] <- intervals[1]
+mcmc_beta_results_table[2,10] <- intervals[2]
+mcmc_beta_results_table[3,8] <- mean(mcmc_pop1000_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[3,9] <- intervals[1]
+mcmc_beta_results_table[3,10] <- intervals[2]
+mcmc_beta_results_table[4,8] <- mean(mcmc_pop1000_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[4,9] <- intervals[1]
+mcmc_beta_results_table[4,10] <- intervals[2]
+mcmc_beta_results_table[5,8] <- mean(mcmc_pop1000_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[5,9] <- intervals[1]
+mcmc_beta_results_table[5,10] <- intervals[2]
+mcmc_beta_results_table[6,8] <- mean(mcmc_pop1000_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[6,9] <- intervals[1]
+mcmc_beta_results_table[6,10] <- intervals[2]
 
 # R0 = 6 Gamma = 0.15
 mcmc_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_1_loglik.csv", sep =""))
@@ -1323,53 +2370,71 @@ mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_14_loglik.csv",
 mcmc_pop1000_seed5 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_15_loglik.csv", sep =""))
 
 # Pop = 50, R0 = 1.5
-mcmc_beta_results_table[6,1] <- mean(mcmc_pop50_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[6,2] <- min(mcmc_pop50_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[6,3] <- max(mcmc_pop50_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,1] <- mean(mcmc_pop50_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,2] <- min(mcmc_pop50_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,3] <- max(mcmc_pop50_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,1] <- mean(mcmc_pop50_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,2] <- min(mcmc_pop50_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,3] <- max(mcmc_pop50_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,1] <- mean(mcmc_pop50_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,2] <- min(mcmc_pop50_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,3] <- max(mcmc_pop50_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,1] <- mean(mcmc_pop50_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,2] <- min(mcmc_pop50_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,3] <- max(mcmc_pop50_seed5$beta[-(1:burnIn)])
+mcmc_beta_results_table[7,2] <- (6 * 0.15) / 50
+mcmc_beta_results_table[8,2] <- mean(mcmc_pop50_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[8,3] <- intervals[1]
+mcmc_beta_results_table[8,4] <- intervals[2]
+mcmc_beta_results_table[9,2] <- mean(mcmc_pop50_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[9,3] <- intervals[1]
+mcmc_beta_results_table[9,4] <- intervals[2]
+mcmc_beta_results_table[10,2] <- mean(mcmc_pop50_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[10,3] <- intervals[1]
+mcmc_beta_results_table[10,4] <- intervals[2]
+mcmc_beta_results_table[11,2] <- mean(mcmc_pop50_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[11,3] <- intervals[1]
+mcmc_beta_results_table[11,4] <- intervals[2]
+mcmc_beta_results_table[12,2] <- mean(mcmc_pop50_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[12,3] <- intervals[1]
+mcmc_beta_results_table[12,4] <- intervals[2]
 # Pop = 200, R0 = 1.5
-mcmc_beta_results_table[6,4] <- mean(mcmc_pop200_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[6,5] <- min(mcmc_pop200_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[6,6] <- max(mcmc_pop200_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,4] <- mean(mcmc_pop200_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,5] <- min(mcmc_pop200_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,6] <- max(mcmc_pop200_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,4] <- mean(mcmc_pop200_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,5] <- min(mcmc_pop200_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,6] <- max(mcmc_pop200_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,4] <- mean(mcmc_pop200_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,5] <- min(mcmc_pop200_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,6] <- max(mcmc_pop200_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,4] <- mean(mcmc_pop200_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,5] <- min(mcmc_pop200_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,6] <- max(mcmc_pop200_seed5$beta[-(1:burnIn)])
+mcmc_beta_results_table[7,5] <- (6 * 0.15) / 200
+mcmc_beta_results_table[8,5] <- mean(mcmc_pop200_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[8,6] <- intervals[1]
+mcmc_beta_results_table[8,7] <- intervals[2]
+mcmc_beta_results_table[9,5] <- mean(mcmc_pop200_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[9,6] <- intervals[1]
+mcmc_beta_results_table[9,7] <- intervals[2]
+mcmc_beta_results_table[10,5] <- mean(mcmc_pop200_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[10,6] <- intervals[1]
+mcmc_beta_results_table[10,7] <- intervals[2]
+mcmc_beta_results_table[11,5] <- mean(mcmc_pop200_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[11,6] <- intervals[1]
+mcmc_beta_results_table[11,7] <- intervals[2]
+mcmc_beta_results_table[12,5] <- mean(mcmc_pop200_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[12,6] <- intervals[1]
+mcmc_beta_results_table[12,7] <- intervals[2]
 # Pop = 1000, R0 = 1.5
-mcmc_beta_results_table[6,7] <- mean(mcmc_pop1000_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[6,8] <- min(mcmc_pop1000_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[6,9] <- max(mcmc_pop1000_seed1$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,7] <- mean(mcmc_pop1000_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,8] <- min(mcmc_pop1000_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[7,9] <- max(mcmc_pop1000_seed2$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,7] <- mean(mcmc_pop1000_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,8] <- min(mcmc_pop1000_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[8,9] <- max(mcmc_pop1000_seed3$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,7] <- mean(mcmc_pop1000_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,8] <- min(mcmc_pop1000_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[9,9] <- max(mcmc_pop1000_seed4$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,7] <- mean(mcmc_pop1000_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,8] <- min(mcmc_pop1000_seed5$beta[-(1:burnIn)])
-mcmc_beta_results_table[10,9] <- max(mcmc_pop1000_seed5$beta[-(1:burnIn)])
+mcmc_beta_results_table[7,8] <- (6 * 0.15) / 1000
+mcmc_beta_results_table[8,8] <- mean(mcmc_pop1000_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[8,9] <- intervals[1]
+mcmc_beta_results_table[8,10] <- intervals[2]
+mcmc_beta_results_table[9,8] <- mean(mcmc_pop1000_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[9,9] <- intervals[1]
+mcmc_beta_results_table[9,10] <- intervals[2]
+mcmc_beta_results_table[10,8] <- mean(mcmc_pop1000_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[10,9] <- intervals[1]
+mcmc_beta_results_table[10,10] <- intervals[2]
+mcmc_beta_results_table[11,8] <- mean(mcmc_pop1000_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[11,9] <- intervals[1]
+mcmc_beta_results_table[11,10] <- intervals[2]
+mcmc_beta_results_table[12,8] <- mean(mcmc_pop1000_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[12,9] <- intervals[1]
+mcmc_beta_results_table[12,10] <- intervals[2]
 
 ##############################
 # Making Residual Error table
@@ -1377,21 +2442,35 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(mcmc_beta_results_table) <- c("1.5", ".","..","...","....","6","-","--","---","----")
+rownames(mcmc_beta_results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & mean & min & max & mean & min & max & mean & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{}  & \\multicolumn{3}{l}{N = 50}  & \\multicolumn{3}{l}{N = 200} & \\multicolumn{3}{l}{N = 1000} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max & mean & min & max \\\\\n")
 
-tab <- xtable(mcmc_beta_results_table, digits=-1, caption = "Beta values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum value of gamma observed after burn-in during MCMC, max: maximum value of gamma observed after burn-in during MCMC") 
-align(tab) <- "l|lll|lll|lll"
-print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+tab <- xtable(mcmc_beta_results_table, digits= c(1, 0, 4, 4, 4, 4, 4, 4, 5, 5, 5), caption = "Beta values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum value of gamma observed after burn-in during MCMC, max: maximum value of gamma observed after burn-in during MCMC") 
+align(tab) <- "lllllllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
-<<MCMC_result_table_gamma, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+<<MCMC_result_table_gamma, cache=FALSE, echo=FALSE, eval=FALSE, results=tex>>=
 # Making Residual Error table
-mcmc_results_table <- array(NA, dim =c(10,9))
+library("coda")
+
+mcmc_results_table <- array(NA, dim =c(12,10))
 burnIn = ((3500000/1000)/100)*23 # 23% burn-in
+gamma = 0.15
+
+mcmc_results_table[2,1] <- 1
+mcmc_results_table[3,1] <- 2
+mcmc_results_table[4,1] <- 3
+mcmc_results_table[5,1] <- 4
+mcmc_results_table[6,1] <- 5
+
+mcmc_results_table[8,1] <- 1
+mcmc_results_table[9,1] <- 2
+mcmc_results_table[10,1] <- 3
+mcmc_results_table[11,1] <- 4
+mcmc_results_table[12,1] <- 5
 
 # setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
@@ -1413,53 +2492,71 @@ mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_520_loglik.cs
 mcmc_pop1000_seed5 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_784_loglik.csv", sep =""))
 
 # Pop = 50, R0 = 1.5
-mcmc_results_table[1,1] <- mean(mcmc_pop50_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[1,2] <- min(mcmc_pop50_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[1,3] <- max(mcmc_pop50_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[2,1] <- mean(mcmc_pop50_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[2,2] <- min(mcmc_pop50_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[2,3] <- max(mcmc_pop50_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[3,1] <- mean(mcmc_pop50_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[3,2] <- min(mcmc_pop50_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[3,3] <- max(mcmc_pop50_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[4,1] <- mean(mcmc_pop50_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[4,2] <- min(mcmc_pop50_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[4,3] <- max(mcmc_pop50_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[5,1] <- mean(mcmc_pop50_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[5,2] <- min(mcmc_pop50_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[5,3] <- max(mcmc_pop50_seed5$gamma[-(1:burnIn)])
+mcmc_results_table[1,2] <- gamma
+mcmc_results_table[2,2] <- mean(mcmc_pop50_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[2,3] <- intervals[1]
+mcmc_results_table[2,4] <- intervals[2]
+mcmc_results_table[3,2] <- mean(mcmc_pop50_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[3,3] <- intervals[1]
+mcmc_results_table[3,4] <- intervals[2]
+mcmc_results_table[4,2] <- mean(mcmc_pop50_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[4,3] <- intervals[1]
+mcmc_results_table[4,4] <- intervals[2]
+mcmc_results_table[5,2] <- mean(mcmc_pop50_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[5,3] <- intervals[1]
+mcmc_results_table[5,4] <- intervals[2]
+mcmc_results_table[6,2] <- mean(mcmc_pop50_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[6,3] <- intervals[1]
+mcmc_results_table[6,4] <- intervals[2]
 # Pop = 200, R0 = 1.5
-mcmc_results_table[1,4] <- mean(mcmc_pop200_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[1,5] <- min(mcmc_pop200_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[1,6] <- max(mcmc_pop200_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[2,4] <- mean(mcmc_pop200_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[2,5] <- min(mcmc_pop200_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[2,6] <- max(mcmc_pop200_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[3,4] <- mean(mcmc_pop200_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[3,5] <- min(mcmc_pop200_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[3,6] <- max(mcmc_pop200_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[4,4] <- mean(mcmc_pop200_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[4,5] <- min(mcmc_pop200_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[4,6] <- max(mcmc_pop200_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[5,4] <- mean(mcmc_pop200_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[5,5] <- min(mcmc_pop200_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[5,6] <- max(mcmc_pop200_seed5$gamma[-(1:burnIn)])
+mcmc_results_table[1,5] <- gamma
+mcmc_results_table[2,5] <- mean(mcmc_pop200_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[2,6] <- intervals[1]
+mcmc_results_table[2,7] <- intervals[2]
+mcmc_results_table[3,5] <- mean(mcmc_pop200_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[3,6] <- intervals[1]
+mcmc_results_table[3,7] <- intervals[2]
+mcmc_results_table[4,5] <- mean(mcmc_pop200_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[4,6] <- intervals[1]
+mcmc_results_table[4,7] <- intervals[2]
+mcmc_results_table[5,5] <- mean(mcmc_pop200_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[5,6] <- intervals[1]
+mcmc_results_table[5,7] <- intervals[2]
+mcmc_results_table[6,5] <- mean(mcmc_pop200_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[6,6] <- intervals[1]
+mcmc_results_table[6,7] <- intervals[2]
 # Pop = 1000, R0 = 1.5
-mcmc_results_table[1,7] <- mean(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[1,8] <- min(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[1,9] <- max(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[2,7] <- mean(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[2,8] <- min(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[2,9] <- max(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[3,7] <- mean(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[3,8] <- min(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[3,9] <- max(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[4,7] <- mean(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[4,8] <- min(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[4,9] <- max(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[5,7] <- mean(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[5,8] <- min(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[5,9] <- max(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
+mcmc_results_table[1,8] <- gamma
+mcmc_results_table[2,8] <- mean(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[2,9] <- intervals[1]
+mcmc_results_table[2,10] <- intervals[2]
+mcmc_results_table[3,8] <- mean(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[3,9] <- intervals[1]
+mcmc_results_table[3,10] <- intervals[2]
+mcmc_results_table[4,8] <- mean(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[4,9] <- intervals[1]
+mcmc_results_table[4,10] <- intervals[2]
+mcmc_results_table[5,8] <- mean(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[5,9] <- intervals[1]
+mcmc_results_table[5,10] <- intervals[2]
+mcmc_results_table[6,8] <- mean(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[6,9] <- intervals[1]
+mcmc_results_table[6,10] <- intervals[2]
 
 # R0 = 6 Gamma = 0.15
 mcmc_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_1_loglik.csv", sep =""))
@@ -1478,54 +2575,72 @@ mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_13_loglik.csv",
 mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_14_loglik.csv", sep =""))
 mcmc_pop1000_seed5 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_15_loglik.csv", sep =""))
 
-# Pop = 50, R0 = 1.5
-mcmc_results_table[6,1] <- mean(mcmc_pop50_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[6,2] <- min(mcmc_pop50_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[6,3] <- max(mcmc_pop50_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[7,1] <- mean(mcmc_pop50_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[7,2] <- min(mcmc_pop50_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[7,3] <- max(mcmc_pop50_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[8,1] <- mean(mcmc_pop50_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[8,2] <- min(mcmc_pop50_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[8,3] <- max(mcmc_pop50_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[9,1] <- mean(mcmc_pop50_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[9,2] <- min(mcmc_pop50_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[9,3] <- max(mcmc_pop50_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[10,1] <- mean(mcmc_pop50_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[10,2] <- min(mcmc_pop50_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[10,3] <- max(mcmc_pop50_seed5$gamma[-(1:burnIn)])
-# Pop = 200, R0 = 1.5
-mcmc_results_table[6,4] <- mean(mcmc_pop200_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[6,5] <- min(mcmc_pop200_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[6,6] <- max(mcmc_pop200_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[7,4] <- mean(mcmc_pop200_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[7,5] <- min(mcmc_pop200_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[7,6] <- max(mcmc_pop200_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[8,4] <- mean(mcmc_pop200_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[8,5] <- min(mcmc_pop200_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[8,6] <- max(mcmc_pop200_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[9,4] <- mean(mcmc_pop200_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[9,5] <- min(mcmc_pop200_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[9,6] <- max(mcmc_pop200_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[10,4] <- mean(mcmc_pop200_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[10,5] <- min(mcmc_pop200_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[10,6] <- max(mcmc_pop200_seed5$gamma[-(1:burnIn)])
-# Pop = 1000, R0 = 1.5
-mcmc_results_table[6,7] <- mean(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[6,8] <- min(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[6,9] <- max(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
-mcmc_results_table[7,7] <- mean(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[7,8] <- min(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[7,9] <- max(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
-mcmc_results_table[8,7] <- mean(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[8,8] <- min(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[8,9] <- max(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
-mcmc_results_table[9,7] <- mean(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[9,8] <- min(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[9,9] <- max(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
-mcmc_results_table[10,7] <- mean(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[10,8] <- min(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
-mcmc_results_table[10,9] <- max(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
+# Pop = 50, R0 = 6
+mcmc_results_table[7,2] <- gamma
+mcmc_results_table[8,2] <- mean(mcmc_pop50_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[8,3] <- intervals[1]
+mcmc_results_table[8,4] <- intervals[2]
+mcmc_results_table[9,2] <- mean(mcmc_pop50_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[9,3] <- intervals[1]
+mcmc_results_table[9,4] <- intervals[2]
+mcmc_results_table[10,2] <- mean(mcmc_pop50_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[10,3] <- intervals[1]
+mcmc_results_table[10,4] <- intervals[2]
+mcmc_results_table[11,2] <- mean(mcmc_pop50_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[11,3] <- intervals[1]
+mcmc_results_table[11,4] <- intervals[2]
+mcmc_results_table[12,2] <- mean(mcmc_pop50_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop50_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[12,3] <- intervals[1]
+mcmc_results_table[12,4] <- intervals[2]
+# Pop = 200, R0 = 6
+mcmc_results_table[7,5] <- gamma
+mcmc_results_table[8,5] <- mean(mcmc_pop200_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[8,6] <- intervals[1]
+mcmc_results_table[8,7] <- intervals[2]
+mcmc_results_table[9,5] <- mean(mcmc_pop200_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[9,6] <- intervals[1]
+mcmc_results_table[9,7] <- intervals[2]
+mcmc_results_table[10,5] <- mean(mcmc_pop200_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[10,6] <- intervals[1]
+mcmc_results_table[10,7] <- intervals[2]
+mcmc_results_table[11,5] <- mean(mcmc_pop200_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[11,6] <- intervals[1]
+mcmc_results_table[11,7] <- intervals[2]
+mcmc_results_table[12,5] <- mean(mcmc_pop200_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop200_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[12,6] <- intervals[1]
+mcmc_results_table[12,7] <- intervals[2]
+# Pop = 1000, R0 = 6
+mcmc_results_table[7,8] <- gamma
+mcmc_results_table[8,8] <- mean(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[8,9] <- intervals[1]
+mcmc_results_table[8,10] <- intervals[2]
+mcmc_results_table[9,8] <- mean(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[9,9] <- intervals[1]
+mcmc_results_table[9,10] <- intervals[2]
+mcmc_results_table[10,8] <- mean(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[10,9] <- intervals[1]
+mcmc_results_table[10,10] <- intervals[2]
+mcmc_results_table[11,8] <- mean(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[11,9] <- intervals[1]
+mcmc_results_table[11,10] <- intervals[2]
+mcmc_results_table[12,8] <- mean(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_results_table[12,9] <- intervals[1]
+mcmc_results_table[12,10] <- intervals[2]
 
 ##############################
 # Making Residual Error table
@@ -1533,19 +2648,20 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(mcmc_results_table) <- c("1.5", ".","..","...","....","6","-","--","---","----")
+rownames(mcmc_results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & mean & min & max & mean & min & max & mean & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{}  & \\multicolumn{3}{l}{N = 50}  & \\multicolumn{3}{l}{N = 200} & \\multicolumn{3}{l}{N = 1000} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max & mean & min & max \\\\\n")
 
-tab <- xtable(mcmc_results_table, caption = "Gamma values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum value of gamma observed after burn-in during MCMC, max: maximum value of gamma observed after burn-in during MCMC") 
-align(tab) <- "l|lll|lll|lll"
-print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+tab <- xtable(mcmc_results_table, digits = c(1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2), caption = "$\\gamma$ values for the MCMC inference method for each outbreak of a given population size N and $R_{0}$ of 1.5 or 6. min: minimum value of $\\gamma$ observed after burn-in during MCMC, max: maximum value of $\\gamma$ observed after burn-in during MCMC") 
+align(tab) <- "lllllllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
 
-The traces for $\beta$ and $\gamma$ suggest that the MCMC has not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Figure 5, Figure 6). Additionally, the range of log-likelihoods is quite varying for different outbreaks within a given $R_{0}$ and population size (Table 7). This is because the likelihood function was set to return a value of -1000 if the suggested parameters fit the data point with a likelihood of 0, due to the computational difficulties associated with attempting to calculate $log(0)$.
-\begin{figure}
+The traces for $\beta$ and $\gamma$ showing the trace for the first simulation of each population size and $R_{0}$ combination suggest that the MCMC has not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Fig. 7, Fig. 8). The $\beta$ trace for population size 50 and $R_{0}$ of 6 looks the closest to having reached convergence (Fig. 7D), while the traces for the largest population size (Fig 7C,F) look to be the furthest from being converged, which is in concordance with the $\beta$ 95\% credible intervals for population size 1000 often excluding the true $\beta$ value in Table 4. 
+
+\begin{figure}[h]
 \begin{center}
 <<dataplot4, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=19, fig.cap="Data plot", fig=TRUE>>=
 # Beta posterior plots
@@ -1603,7 +2719,9 @@ mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
-\begin{figure}
+A similar situation for the $\gamma$ traces can be seen as for $\beta$ traces. Here again the trace for population size 50 and $R_{0}$ of 6 is looking most converged (Fig. 8D). None of the $\gamma$ traces for population size 200 (Fig. 8B, E) or population size 1000 (Fig. 8C, F) look fully converged. Additionally, in Figure 8 seems that the variance in $\gamma$ values decreases with increasing population size.
+
+\begin{figure}[h]
 \begin{center}
 <<dataplot6, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, fig.pos="H", height=13, width=19, fig.cap="Data plot", fig=TRUE>>=
 # Beta and gamma posterior plots
@@ -1632,7 +2750,7 @@ gamma_yaxis1000 = c(0, 0.15)
 plot(mcmc_R1.5_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis50), "A", cex = letter_size)
-mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+mtext("Gamma value", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
 plot(mcmc_R1.5_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
@@ -1646,7 +2764,7 @@ plot(mcmc_R6_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", yli
   abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis50), "D", cex = letter_size)
 mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
-mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+mtext("Gamma value", 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
 plot(mcmc_R6_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200, cex.axis=number_size)
   abline(v = burnIn, untf = FALSE)
@@ -1702,10 +2820,25 @@ plot(mcmc_R6_pop1000_seed1$loglik, type = "l", main = "", xlab = "Iteration x100
   # smtext("Iteration x1000",side=1,line=2)
 @
 
+The range of log-likelihoods is quite varying for different outbreaks within a given $R_{0}$ and population size (Table 7). This is because the likelihood function was set to return a value of -1000 if the suggested parameters fit the data point with a likelihood of 0, due to the computational difficulties associated with attempting to calculate $log(0)$.
+
 <<MCMC_result_table_loglik, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making Log likelihood table
-mcmc_results_table <- array(NA, dim =c(10,9))
+library("coda")
+mcmc_results_table <- array(NA, dim =c(10,10))
 burnIn = ((3500000/1000)/100)*23 # 23% burn-in
+
+mcmc_results_table[1,1] <- 1
+mcmc_results_table[2,1] <- 2
+mcmc_results_table[3,1] <- 3
+mcmc_results_table[4,1] <- 4
+mcmc_results_table[5,1] <- 5
+
+mcmc_results_table[6,1] <- 1
+mcmc_results_table[7,1] <- 2
+mcmc_results_table[8,1] <- 3
+mcmc_results_table[9,1] <- 4
+mcmc_results_table[10,1] <- 5
 
 # setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
@@ -1727,53 +2860,68 @@ mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_520_loglik.cs
 mcmc_pop1000_seed5 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_784_loglik.csv", sep =""))
 
 # Pop = 50, R0 = 1.5
-mcmc_results_table[1,1] <- mean(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[1,2] <- min(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[1,3] <- max(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[2,1] <- mean(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[2,2] <- min(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[2,3] <- max(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[3,1] <- mean(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[3,2] <- min(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[3,3] <- max(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[4,1] <- mean(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[4,2] <- min(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[4,3] <- max(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[5,1] <- mean(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[5,2] <- min(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[5,3] <- max(mcmc_pop50_seed5$loglik[-(1:burnIn)])
+mcmc_results_table[1,2] <- mean(mcmc_pop50_seed1$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed1$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[1,3] <- intervals[1]
+mcmc_results_table[1,4] <- intervals[2]
+mcmc_results_table[2,2] <- mean(mcmc_pop50_seed2$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed2$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[2,3] <- intervals[1]
+mcmc_results_table[2,4] <- intervals[2]
+mcmc_results_table[3,2] <- mean(mcmc_pop50_seed3$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed3$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[3,3] <- intervals[1]
+mcmc_results_table[3,4] <- intervals[2]
+mcmc_results_table[4,2] <- mean(mcmc_pop50_seed4$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed4$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[4,3] <- intervals[1]
+mcmc_results_table[4,4] <- intervals[2]
+mcmc_results_table[5,2] <- mean(mcmc_pop50_seed5$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed5$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[5,3] <- intervals[1]
+mcmc_results_table[5,4] <- intervals[2]
 # Pop = 200, R0 = 1.5
-mcmc_results_table[1,4] <- mean(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[1,5] <- min(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[1,6] <- max(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[2,4] <- mean(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[2,5] <- min(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[2,6] <- max(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[3,4] <- mean(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[3,5] <- min(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[3,6] <- max(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[4,4] <- mean(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[4,5] <- min(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[4,6] <- max(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[5,4] <- mean(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[5,5] <- min(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[5,6] <- max(mcmc_pop200_seed5$loglik[-(1:burnIn)])
+mcmc_results_table[1,5] <- mean(mcmc_pop200_seed1$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed1$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[1,6] <- intervals[1]
+mcmc_results_table[1,7] <- intervals[2]
+mcmc_results_table[2,5] <- mean(mcmc_pop200_seed2$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed2$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[2,6] <- intervals[1]
+mcmc_results_table[2,7] <- intervals[2]
+mcmc_results_table[3,5] <- mean(mcmc_pop200_seed3$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed3$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[3,6] <- intervals[1]
+mcmc_results_table[3,7] <- intervals[2]
+mcmc_results_table[4,5] <- mean(mcmc_pop200_seed4$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed4$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[4,6] <- intervals[1]
+mcmc_results_table[4,7] <- intervals[2]
+mcmc_results_table[5,5] <- mean(mcmc_pop200_seed5$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed5$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[5,6] <- intervals[1]
+mcmc_results_table[5,7] <- intervals[2]
 # Pop = 1000, R0 = 1.5
-mcmc_results_table[1,7] <- mean(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[1,8] <- min(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[1,9] <- max(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[2,7] <- mean(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[2,8] <- min(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[2,9] <- max(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[3,7] <- mean(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[3,8] <- min(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[3,9] <- max(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[4,7] <- mean(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[4,8] <- min(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[4,9] <- max(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[5,7] <- mean(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[5,8] <- min(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[5,9] <- max(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
+mcmc_results_table[1,8] <- mean(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed1$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[1,9] <- intervals[1]
+mcmc_results_table[1,10] <- intervals[2]
+mcmc_results_table[2,8] <- mean(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed2$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[2,9] <- intervals[1]
+mcmc_results_table[2,10] <- intervals[2]
+mcmc_results_table[3,8] <- mean(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed3$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[3,9] <- intervals[1]
+mcmc_results_table[3,10] <- intervals[2]
+mcmc_results_table[4,8] <- mean(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed4$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[4,9] <- intervals[1]
+mcmc_results_table[4,10] <- intervals[2]
+mcmc_results_table[5,8] <- mean(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed5$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[5,9] <- intervals[1]
+mcmc_results_table[5,10] <- intervals[2]
 
 # R0 = 6 Gamma = 0.15
 mcmc_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_1_loglik.csv", sep =""))
@@ -1792,54 +2940,69 @@ mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_13_loglik.csv",
 mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_14_loglik.csv", sep =""))
 mcmc_pop1000_seed5 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_15_loglik.csv", sep =""))
 
-# Pop = 50, R0 = 1.5
-mcmc_results_table[6,1] <- mean(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[6,2] <- min(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[6,3] <- max(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[7,1] <- mean(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[7,2] <- min(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[7,3] <- max(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[8,1] <- mean(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[8,2] <- min(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[8,3] <- max(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[9,1] <- mean(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[9,2] <- min(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[9,3] <- max(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[10,1] <- mean(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[10,2] <- min(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[10,3] <- max(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-# Pop = 200, R0 = 1.5
-mcmc_results_table[6,4] <- mean(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[6,5] <- min(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[6,6] <- max(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[7,4] <- mean(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[7,5] <- min(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[7,6] <- max(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[8,4] <- mean(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[8,5] <- min(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[8,6] <- max(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[9,4] <- mean(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[9,5] <- min(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[9,6] <- max(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[10,4] <- mean(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[10,5] <- min(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[10,6] <- max(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-# Pop = 1000, R0 = 1.5
-mcmc_results_table[6,7] <- mean(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[6,8] <- min(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[6,9] <- max(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-mcmc_results_table[7,7] <- mean(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[7,8] <- min(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[7,9] <- max(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-mcmc_results_table[8,7] <- mean(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[8,8] <- min(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[8,9] <- max(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-mcmc_results_table[9,7] <- mean(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[9,8] <- min(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[9,9] <- max(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-mcmc_results_table[10,7] <- mean(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[10,8] <- min(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
-mcmc_results_table[10,9] <- max(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
+# Pop = 50, R0 = 6
+mcmc_results_table[6,2] <- mean(mcmc_pop50_seed1$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed1$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[6,3] <- intervals[1]
+mcmc_results_table[6,4] <- intervals[2]
+mcmc_results_table[7,2] <- mean(mcmc_pop50_seed2$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed2$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[7,3] <- intervals[1]
+mcmc_results_table[7,4] <- intervals[2]
+mcmc_results_table[8,2] <- mean(mcmc_pop50_seed3$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed3$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[8,3] <- intervals[1]
+mcmc_results_table[8,4] <- intervals[2]
+mcmc_results_table[9,2] <- mean(mcmc_pop50_seed4$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed4$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[9,3] <- intervals[1]
+mcmc_results_table[9,4] <- intervals[2]
+mcmc_results_table[10,2] <- mean(mcmc_pop50_seed5$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop50_seed5$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[10,3] <- intervals[1]
+mcmc_results_table[10,4] <- intervals[2]
+# Pop = 200, R0 = 6
+mcmc_results_table[6,5] <- mean(mcmc_pop200_seed1$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed1$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[6,6] <- intervals[1]
+mcmc_results_table[6,7] <- intervals[2]
+mcmc_results_table[7,5] <- mean(mcmc_pop200_seed2$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed2$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[7,6] <- intervals[1]
+mcmc_results_table[7,7] <- intervals[2]
+mcmc_results_table[8,5] <- mean(mcmc_pop200_seed3$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed3$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[8,6] <- intervals[1]
+mcmc_results_table[8,7] <- intervals[2]
+mcmc_results_table[9,5] <- mean(mcmc_pop200_seed4$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed4$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[9,6] <- intervals[1]
+mcmc_results_table[9,7] <- intervals[2]
+mcmc_results_table[10,5] <- mean(mcmc_pop200_seed5$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop200_seed5$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[10,6] <- intervals[1]
+mcmc_results_table[10,7] <- intervals[2]
+# Pop = 1000, R0 = 6
+mcmc_results_table[6,8] <- mean(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed1$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[6,9] <- intervals[1]
+mcmc_results_table[6,10] <- intervals[2]
+mcmc_results_table[7,8] <- mean(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed2$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[7,9] <- intervals[1]
+mcmc_results_table[7,10] <- intervals[2]
+mcmc_results_table[8,8] <- mean(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed3$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[8,9] <- intervals[1]
+mcmc_results_table[8,10] <- intervals[2]
+mcmc_results_table[9,8] <- mean(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed4$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[9,9] <- intervals[1]
+mcmc_results_table[9,10] <- intervals[2]
+mcmc_results_table[10,8] <- mean(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
+intervals <- HPDinterval(mcmc(mcmc_pop1000_seed5$loglik[-(1:burnIn)]), 0.95)
+mcmc_results_table[10,9] <- intervals[1]
+mcmc_results_table[10,10] <- intervals[2]
 
 ##############################
 # Making Residual Error table
@@ -1851,18 +3014,18 @@ rownames(mcmc_results_table) <- c("1.5", ".","..","...","....","6","-","--","---
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{3}{c}{N = 50}  & \\multicolumn{3}{c}{N = 200} & \\multicolumn{3}{c}{N = 1000} \\\\\n", "R0 & mean & min & max & mean & min & max & mean & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{}  & \\multicolumn{3}{l}{N = 50}  & \\multicolumn{3}{l}{N = 200} & \\multicolumn{3}{l}{N = 1000} \\\\\n", "R0 & sim & mean & min & max & mean & min & max & mean & min & max \\\\\n")
 
-tab <- xtable(mcmc_results_table, digits = 0, caption = "Log(likelihood) values for the MCMC inference method for each outbreak of a given population size N and R0 of 1.5 or 6. min: minimum log(likelihood) after burn-in during MCMC, max: maximum log(likelihood) observed after burn-in during MCMC") 
-align(tab) <- "l|lll|lll|lll"
-print(tab, hline.after=c(0, 5), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+tab <- xtable(mcmc_results_table, digits = 0, caption = "Log(likelihood) values for the MCMC inference method for each outbreak of a given population size N and $R_{0}$ of 1.5 or 6. min: minimum log(likelihood) after burn-in during MCMC, max: maximum log(likelihood) observed after burn-in during MCMC") 
+align(tab) <- "lllllllllll"
+print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
 
-The range of suggested infectious curves after the burn-in period in general overlaps with the true generated infectious curve (Figure 7). An exception for this is one of the unconverged MCMCs in Figure 7F, where the infectious curves made through data augmentation with the MCMC are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Figure 7A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Figure 7A-C and Figure 7D-F).
+The range of suggested infectious curves after the burn-in period in general overlaps with the true generated infectious curve (Figure 7). An exception for this is one of the unconverged MCMCs in Figure 7F, where the MCMC's augmented infectious curves are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Figure 7A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Figure 7A-C and Figure 7D-F).
 
-\begin{figure}
+\begin{figure}[h]
 \begin{center}
-<<dataplot5, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
+<<dataplot5, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
 # Infectious curve plots
 dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
 mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_infectious.csv", sep=""))
@@ -1984,6 +3147,269 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
+For the 17.5 million iteration run for the largest population size, the MCMC did converge.
+
+<<MCMC_result_table_long, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making MCMC table
+
+mcmc_beta_results_table <- array(NA, dim =c(12,7))
+burnIn = ((17500000/1000)/100)*23 # 23% burn-in
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+mcmc_pop1000_seed1 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_177_loglik_long.csv", sep =""))
+mcmc_pop1000_seed2 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_246_loglik_long.csv", sep =""))
+mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_469_loglik_long.csv", sep =""))
+mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_520_loglik_long.csv", sep =""))
+mcmc_pop1000_seed5 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_784_loglik_long.csv", sep =""))
+
+mcmc_beta_results_table[2,1] <- 1
+mcmc_beta_results_table[3,1] <- 2
+mcmc_beta_results_table[4,1] <- 3
+mcmc_beta_results_table[5,1] <- 4
+mcmc_beta_results_table[6,1] <- 5
+
+mcmc_beta_results_table[8,1] <- 1
+mcmc_beta_results_table[9,1] <- 2
+mcmc_beta_results_table[10,1] <- 3
+mcmc_beta_results_table[11,1] <- 4
+mcmc_beta_results_table[12,1] <- 5
+
+# Pop = 1000, R0 = 1.5
+mcmc_beta_results_table[1,2] <- (1.5 * 0.15) / 1000
+mcmc_beta_results_table[2,2] <- mean(mcmc_pop1000_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[2,3] <- intervals[1]
+mcmc_beta_results_table[2,4] <- intervals[2]
+mcmc_beta_results_table[3,2] <- mean(mcmc_pop1000_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[3,3] <- intervals[1]
+mcmc_beta_results_table[3,4] <- intervals[2]
+mcmc_beta_results_table[4,2] <- mean(mcmc_pop1000_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[4,3] <- intervals[1]
+mcmc_beta_results_table[4,4] <- intervals[2]
+mcmc_beta_results_table[5,2] <- mean(mcmc_pop1000_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[5,3] <- intervals[1]
+mcmc_beta_results_table[5,4] <- intervals[2]
+mcmc_beta_results_table[6,2] <- mean(mcmc_pop1000_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[6,3] <- intervals[1]
+mcmc_beta_results_table[6,4] <- intervals[2]
+
+# Pop = 1000, R0 = 1.5
+mcmc_beta_results_table[1,5] <- 0.15
+mcmc_beta_results_table[2,5] <- mean(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[2,6] <- intervals[1]
+mcmc_beta_results_table[2,7] <- intervals[2]
+mcmc_beta_results_table[3,5] <- mean(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[3,6] <- intervals[1]
+mcmc_beta_results_table[3,7] <- intervals[2]
+mcmc_beta_results_table[4,5] <- mean(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[4,6] <- intervals[1]
+mcmc_beta_results_table[4,7] <- intervals[2]
+mcmc_beta_results_table[5,5] <- mean(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[5,6] <- intervals[1]
+mcmc_beta_results_table[5,7] <- intervals[2]
+mcmc_beta_results_table[6,5] <- mean(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[6,6] <- intervals[1]
+mcmc_beta_results_table[6,7] <- intervals[2]
+
+# R0 = 6 Gamma = 0.15
+mcmc_pop1000_seed1 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_11_loglik_long.csv", sep =""))
+mcmc_pop1000_seed2 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_12_loglik_long.csv", sep =""))
+mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_13_loglik_long.csv", sep =""))
+mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_14_loglik_long.csv", sep =""))
+mcmc_pop1000_seed5 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_15_loglik_long.csv", sep =""))
+
+# Pop = 1000, R0 = 6
+mcmc_beta_results_table[7,2] <- (6 * 0.15) / 1000
+mcmc_beta_results_table[8,2] <- mean(mcmc_pop1000_seed1$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[8,3] <- intervals[1]
+mcmc_beta_results_table[8,4] <- intervals[2]
+mcmc_beta_results_table[9,2] <- mean(mcmc_pop1000_seed2$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[9,3] <- intervals[1]
+mcmc_beta_results_table[9,4] <- intervals[2]
+mcmc_beta_results_table[10,2] <- mean(mcmc_pop1000_seed3$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[10,3] <- intervals[1]
+mcmc_beta_results_table[10,4] <- intervals[2]
+mcmc_beta_results_table[11,2] <- mean(mcmc_pop1000_seed4$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[11,3] <- intervals[1]
+mcmc_beta_results_table[11,4] <- intervals[2]
+mcmc_beta_results_table[12,2] <- mean(mcmc_pop1000_seed5$beta[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$beta[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[12,3] <- intervals[1]
+mcmc_beta_results_table[12,4] <- intervals[2]
+
+# Pop = 1000, R0 = 6
+mcmc_beta_results_table[7,5] <- 0.15
+mcmc_beta_results_table[8,5] <- mean(mcmc_pop1000_seed1$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed1$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[8,6] <- intervals[1]
+mcmc_beta_results_table[8,7] <- intervals[2]
+mcmc_beta_results_table[9,5] <- mean(mcmc_pop1000_seed2$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed2$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[9,6] <- intervals[1]
+mcmc_beta_results_table[9,7] <- intervals[2]
+mcmc_beta_results_table[10,5] <- mean(mcmc_pop1000_seed3$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed3$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[10,6] <- intervals[1]
+mcmc_beta_results_table[10,7] <- intervals[2]
+mcmc_beta_results_table[11,5] <- mean(mcmc_pop1000_seed4$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed4$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[11,6] <- intervals[1]
+mcmc_beta_results_table[11,7] <- intervals[2]
+mcmc_beta_results_table[12,5] <- mean(mcmc_pop1000_seed5$gamma[-(1:burnIn)])
+intervals <- quantile(mcmc_pop1000_seed5$gamma[-(1:burnIn)], c(0.025, 0.975))
+mcmc_beta_results_table[12,6] <- intervals[1]
+mcmc_beta_results_table[12,7] <- intervals[2]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(mcmc_beta_results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+
+tab <- xtable(mcmc_beta_results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 17.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% credible interval") 
+align(tab) <- "llllllll"
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+@
+
+\begin{figure}[h]
+\begin{center}
+<<longmcmcplot, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
+# Infectious curve plots
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+mcmc_R1.5_pop1000_seed1 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_177_loglik_long.csv", sep=""))
+mcmc_R6_pop1000_seed1 <- read.csv(paste(dir,"mcmc_pop1000_R6_g0.15_11_loglik_long.csv", sep=""))
+mcmc_R1.5_pop1000_inf <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_177_infectious_long.csv", sep=""))
+mcmc_R6_pop1000_inf <- read.csv(paste(dir,"mcmc_pop1000_R6_g0.15_11_infectious_long.csv", sep=""))
+
+true_R1.5_pop1000_seed1 <- read.csv("data_pop1000_R1.5_g0.15_177.csv")
+true_R6_pop1000_seed1 <- read.csv("data_pop1000_R6_g0.15_11.csv")
+
+burnIn = ((17500000/1000)/100)*23 # 23% burn-in
+burnIn_1.5 = 8000 # ((17500000/1000)/100)*23
+
+letter_size = 3
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
+beta_yaxis1000_1.5 = c(0, 0.0005)
+beta_yaxis1000_6 = c(0, 0.0015)
+gamma_yaxis1000_1.5 = c(0, 0.3)
+gamma_yaxis1000_6 = c(0, 0.2)
+iteration_place = 17500*0.9
+
+par(mfrow = c(2, 3), mar=c(5.5,6.5,1.5,0.2))
+
+# Seed 1, Pop size 1000
+plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_1.5, cex.axis = number_size)
+  abline(v = burnIn_1.5, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis1000_1.5), "A", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+
+# Seed 1, Pop size 1000
+plot(mcmc_R1.5_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_1.5, cex.axis = number_size)
+  abline(v = burnIn_1.5, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis1000_1.5), "B", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+mtext("Gamma value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+
+# Pop size 1000
+N = 1000
+timestep_diff <- nrow(mcmc_R1.5_pop1000_inf) - nrow(true_R1.5_pop1000_seed1)
+zero_array <- array(0, dim = c(timestep_diff, ncol(true_R1.5_pop1000_seed1)))
+colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
+true_R1.5_pop1000_seed1 <- rbind(zero_array, true_R1.5_pop1000_seed1)
+true_R1.5_pop1000_seed1$time <- mcmc_R1.5_pop1000_inf[,1]
+
+plot(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
+for (i in burnIn_1.5:ncol(mcmc_R1.5_pop1000_inf)){
+  lines(mcmc_R1.5_pop1000_inf[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+lines(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+text(160, 0.95*N, "C", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
+
+# Seed 1, Pop size 1000
+plot(mcmc_R6_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_6, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis1000_6), "D", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+
+# Seed 1, Pop size 1000
+plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_6, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis1000_6), "E", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+mtext("Gamma value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+
+# Pop size 1000
+N = 1000
+timestep_diff <- nrow(mcmc_R6_pop1000_inf) - nrow(true_R6_pop1000_seed1)
+zero_array <- array(0, dim = c(timestep_diff, ncol(true_R6_pop1000_seed1)))
+colnames(zero_array) <- c("time","S", "I", "R", "new_I", "new_R")
+true_R6_pop1000_seed1 <- rbind(zero_array, true_R6_pop1000_seed1)
+true_R6_pop1000_seed1$time <- mcmc_R6_pop1000_inf[,1]
+
+plot(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", main = "", cex.axis = number_size)
+for (i in burnIn:ncol(mcmc_R6_pop1000_inf)){
+  lines(mcmc_R6_pop1000_inf[,i], type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+lines(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+text(160, 0.95*N, "F", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
+@
+\caption{Comparing the infectious curves of the MCMC to the true curve. The red line depicts the number of individuals in a population infected in the true dataset. The grey dotted lines refer to the post-burn-in period infectious curves used by the MCMC. Figures A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Figures A and D represent a population size of 50, Figures B and E represent a population size of 200, and figures C and F represent a population size of 1000.}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+<<mcmcdensityplot, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=10, width=14, fig.cap="Data plot", fig=TRUE>>=
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+mcmc_R1.5_pop200 <- read.csv(paste(dir,"mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
+
+burnIn = 3500 * 0.23
+# Plot beta vs. gamma
+par(mfrow = c(1,1))
+library(RColorBrewer)
+library(MASS)
+
+k <- 11
+my.cols <- rev(brewer.pal(k, "RdYlBu"))
+z <- kde2d(mcmc_R1.5_pop200$gamma[-(1:burnIn)], mcmc_R1.5_pop200$beta[-(1:burnIn)], n=50)
+filled.contour(z, nlevels=k, col=my.cols, xlab = "", ylab = "", cex.axis = 1.5)
+mtext("Gamma", 1, line = 4, cex = 1.5)
+mtext("Beta", 2, line = 3, cex = 1.5, outer = FALSE)
+@
+\caption{Density plot for the first simulation of population size 200 and $R_{0}$ of 1.5 showing the densities of different combinations of $\beta$ and $\gamma$.}
+\end{center}
+\end{figure}
+
+% Make histogram comparisons of beta and gamma ranges that compares RE and MCMC for example outbreaks? 
 % Plot: Histograms comparing RE and MCMC beta and gamma for 6 example scenarios
 <<dataplot7, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.width=6, fig.cap="Data plot", fig=TRUE>>=
 # Beta Histogram
@@ -2041,18 +3467,271 @@ abline(v = mean(mcmc_R1.5_pop1000_seed1$beta[-(1:burnIn)]), col = "red")
 box()
 @
 
-\begin{itemize}
-  \item Make histogram comparisons of beta and gamma ranges that compares RE and MCMC for example outbreaks? 
-\end{itemize}
-
-
 %%%%%%%%%%
 
 \subsection{Markov Chain Monte Carlo with a partly deterministic process}
-\begin{itemize}
-  \item Just introduced as a novel method that I did some testing on
-  \item Show beta and gamma output for some runs? Maybe just the ones that I made the figures for the other two methods with? i.e. 6 runs instead of all 30
-\end{itemize}
+
+Running the MCMC with deterministic process for 2.5 million iterations took approximately 20 hours for each outbreak studied.
+
+The $\beta$ posteriors run for the MCMC with a deterministic process show that the $\beta$ estimates did not change much over the course of the 2.5 million iterations for either of the runs with a population size of 1000 or for the outbreak with an $R_{0}$ of 6 and a population size of 50 (Figure 12 C, D, F). The other three outbreaks did see changes in areas of $\beta$ values explored. In addition to this, the stickiness of the $\beta$ posteriors, their tendency to stay in place rather than explore other parameter values, seems to increase with increasing population size.
+
+\begin{figure}[h]
+\begin{center}
+<<detmcmcbeta, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=19, fig.cap="Data plot", fig=TRUE>>=
+# Beta posterior plots
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "det_mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
+mcmc_R1.5_pop200_seed1 <- read.csv(paste(dir,"det_mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
+mcmc_R1.5_pop1000_seed1 <- read.csv(paste(dir,"det_mcmc_pop1000_R1.5_g0.15_177_loglik.csv", sep=""))
+mcmc_R6_pop50_seed1 <- read.csv(paste(dir,"det_mcmc_pop50_R6_g0.15_2_loglik.csv", sep=""))
+mcmc_R6_pop200_seed1 <- read.csv(paste(dir,"det_mcmc_pop200_R6_g0.15_6_loglik.csv", sep=""))
+mcmc_R6_pop1000_seed1 <- read.csv(paste(dir,"det_mcmc_pop1000_R6_g0.15_11_loglik.csv", sep=""))
+
+letter_size = 3
+iteration_place = 3400
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
+
+par(mfrow = c(2,3), mar=c(5,6.5,1.5,1))
+
+burnIn = ((2500000/1000)/100)*23 # 23% burn-in
+beta_yaxis50_1 = c(0.002, 0.005)
+beta_yaxis200_1 = c(0.0005, 0.0015)
+beta_yaxis1000_1 = c(0.00009, 0.00011)
+beta_yaxis50_2 = c(0.013, 0.0145)
+beta_yaxis200_2 = c(0.0025, 0.004)
+beta_yaxis1000_2 = c(0.00105, 0.0012)
+# Seed 1, Pop size 50
+plot(mcmc_R1.5_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50_1, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis50_1), "A", cex = letter_size)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+# Seed 1, Pop size 200
+plot(mcmc_R1.5_pop200_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis200_1, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis200_1), "B", cex = letter_size)
+# Seed 1, Pop size 1000
+plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_1, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis1000_1), "C", cex = letter_size)
+# Seed 1, Pop size 50
+plot(mcmc_R6_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50_2, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis50_2), "D", cex = letter_size)
+mtext("Beta value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+# Seed 1, Pop size 200
+plot(mcmc_R6_pop200_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis200_2, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis200_2), "E", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+# Seed 1, Pop size 1000
+plot(mcmc_R6_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_2, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(beta_yaxis1000_2), "F", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+@
+\caption{Posterior trace of $\beta$ values of deterministic MCMC}
+\end{center}
+\end{figure}
+
+A similar situation is seen for the $\gamma$ posterior traces (Figure 13), the traces stay in place for for the largest population size (Fig. 13 C, F). The other two population sizes saw increases in $\gamma$ over the course of the 2.5 million iterations (Fig. 13 A-B, D-E). Also, as with the $\beta$ posteriors, the $\gamma$ posteriors' stickiness increases with increasing population size.
+
+\begin{figure}[h]
+\begin{center}
+<<detmcmcgamma, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=19, fig.cap="Data plot", fig=TRUE>>=
+# Beta posterior plots
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "det_mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
+mcmc_R1.5_pop200_seed1 <- read.csv(paste(dir,"det_mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
+mcmc_R1.5_pop1000_seed1 <- read.csv(paste(dir,"det_mcmc_pop1000_R1.5_g0.15_177_loglik.csv", sep=""))
+mcmc_R6_pop50_seed1 <- read.csv(paste(dir,"det_mcmc_pop50_R6_g0.15_2_loglik.csv", sep=""))
+mcmc_R6_pop200_seed1 <- read.csv(paste(dir,"det_mcmc_pop200_R6_g0.15_6_loglik.csv", sep=""))
+mcmc_R6_pop1000_seed1 <- read.csv(paste(dir,"det_mcmc_pop1000_R6_g0.15_11_loglik.csv", sep=""))
+
+letter_size = 3
+iteration_place = 3400
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
+
+par(mfrow = c(2,3), mar=c(5,6.5,1.5,1))
+
+burnIn = ((2500000/1000)/100)*23 # 23% burn-in
+gamma_yaxis50_1 = c(0.05, 0.2)
+gamma_yaxis200_1 = c(0.05, 0.2)
+gamma_yaxis1000_1 = c(0.03, 0.07)
+gamma_yaxis50_2 = c(0.35, 0.45)
+gamma_yaxis200_2 = c(0.3, 0.5)
+gamma_yaxis1000_2 = c(0.15, 0.2)
+# Seed 1, Pop size 50
+plot(mcmc_R1.5_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50_1, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis50_1), "A", cex = letter_size)
+mtext("Gamma value", 2, line = 3, cex = yaxis_size, outer = FALSE)
+# Seed 1, Pop size 200
+plot(mcmc_R1.5_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200_1, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis200_1), "B", cex = letter_size)
+# Seed 1, Pop size 1000
+plot(mcmc_R1.5_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_1, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis1000_1), "C", cex = letter_size)
+# Seed 1, Pop size 50
+plot(mcmc_R6_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50_2, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis50_2), "D", cex = letter_size)
+mtext("Gamm avalue", 2, line = 3, cex = yaxis_size, outer = FALSE)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+# Seed 1, Pop size 200
+plot(mcmc_R6_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200_2, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis200_2), "E", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+# Seed 1, Pop size 1000
+plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_2, cex.axis = number_size)
+  abline(v = burnIn, untf = FALSE)
+text(iteration_place, 0.95*max(gamma_yaxis1000_2), "F", cex = letter_size)
+mtext("Iteration (x10^3)", 1, line = 4, cex = yaxis_size)
+@
+\caption{Posterior trace of $\gamma$ values of deterministic MCMC}
+\end{center}
+\end{figure}
+
+When investigating the infectious curves produced by the inferred $\beta$ and $\gamma$ values, it can be seen that the location of the peak is misjudged for population size 50 and 1000 when $R_{0}$ is 1.5 (Fig. 14 A, C), with the height of the peak also being underestimated for population size 50. For population size 200 and $R_{0}$ of 1.5 the height of the peak is underestimated, but its location is more similar to the true simulated peak (Fig 14B). For the outbreaks with an $R_{0}$ of 6, the size of the peak is greatly underestimated for population sizes 50 and 200, though the location of the peak in time is not fully dissimilar from the true peak's location (Fig. 14D-E). For population size 1000, the size of the peak is underestimated, but not as greatly as for the other two population sizes, though the location of the peak in time is estimated to be earlier than for the true curve (Fig. 14F).  
+
+\begin{figure}[h]
+\begin{center}
+<<detmcmc, cache=TRUE, echo=FALSE, eval=FALSE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
+# RE example plots
+library("deSolve")
+
+true_R1.5_pop50_seed1 <- read.csv("data_pop50_R1.5_g0.15_14.csv")
+true_R1.5_pop200_seed1 <- read.csv("data_pop200_R1.5_g0.15_81.csv")
+true_R1.5_pop1000_seed1 <- read.csv("data_pop1000_R1.5_g0.15_177.csv")
+true_R6_pop50_seed1 <- read.csv("data_pop50_R6_g0.15_2.csv")
+true_R6_pop200_seed1 <- read.csv("data_pop200_R6_g0.15_6.csv")
+true_R6_pop1000_seed1 <- read.csv("data_pop1000_R6_g0.15_11.csv")
+
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+re_R1.5_pop50_seed1 <- read.csv(paste(dir, "det_mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
+re_R1.5_pop200_seed1 <- read.csv(paste(dir,"det_mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
+re_R1.5_pop1000_seed1 <- read.csv(paste(dir,"det_mcmc_pop1000_R1.5_g0.15_177_loglik.csv", sep=""))
+re_R6_pop50_seed1 <- read.csv(paste(dir,"det_mcmc_pop50_R6_g0.15_2_loglik.csv", sep=""))
+re_R6_pop200_seed1 <- read.csv(paste(dir,"det_mcmc_pop200_R6_g0.15_6_loglik.csv", sep=""))
+re_R6_pop1000_seed1 <- read.csv(paste(dir,"det_mcmc_pop1000_R6_g0.15_11_loglik.csv", sep=""))
+
+burnIn <- 2500*0.23
+
+sir <- function(time, state, param) {
+  
+  # define model parameters in term of the natural parameters
+  beta <- param[1] 
+  gamma <- param[2]
+  
+  with(as.list(c(state, param)), {
+    
+    dS <- -(beta * S * I) 
+    dI <- (beta * S * I) -(gamma * I)
+    dR <-  gamma * I
+    
+    return(list(c(dS, dI, dR)))
+  })
+}
+
+pre_sir <- function(run_stoch, sse_data){
+# Time
+timestep <- run_stoch$time[2] - run_stoch$time[1]
+end <- max(run_stoch$time)
+times <- seq(0, end, by = timestep)
+
+# Initial population: N-1 susceptible, 1 infectious, 0 recovered
+init.values = c(
+  S = run_stoch$S[1],
+  I = run_stoch$I[1],
+  R = run_stoch$R[1]
+)
+N = sum(init.values)
+
+det_sir <- as.data.frame(ode(y = init.values, times = times, func = sir, parms = sse_data[1:2]))
+}
+
+letter_size = 3
+axis_size = 2.5
+yaxis_size = 2
+number_size = 2.5
+
+par(mfrow = c(2, 3), mar=c(5,6.5,0.4,0.2))
+# R = 1.5, Pop = 50
+N = 50
+plot(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
+  lines(true_R1.5_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+for (i in burnIn:nrow(re_R1.5_pop50_seed1)){
+  sir_data <- pre_sir(true_R1.5_pop50_seed1, re_R1.5_pop50_seed1[i,])
+  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+text(10, 0.95*N, "A", cex = letter_size)
+mtext("Number infected/recovered", 2, line = 4, cex = yaxis_size, outer = FALSE)
+# legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+# R = 1.5, Pop = 200
+N = 200
+plot(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
+lines(true_R1.5_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+for (i in burnIn:nrow(re_R1.5_pop200_seed1)){
+  sir_data <- pre_sir(true_R1.5_pop200_seed1, re_R1.5_pop200_seed1[i,])
+  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+text(10, 0.95*N, "B", cex = letter_size)
+# legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+# R = 1.5, Pop = 1000
+N = 1000
+plot(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
+lines(true_R1.5_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+for (i in burnIn:nrow(re_R1.5_pop1000_seed1)){
+  sir_data <- pre_sir(true_R1.5_pop1000_seed1, re_R1.5_pop1000_seed1[i,])
+  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+text(10, 0.95*N, "C", cex = letter_size)
+# legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+# R = 6, Pop = 50
+N = 50
+plot(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
+lines(true_R6_pop50_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+for (i in 2:nrow(re_R1.5_pop50_seed1)){
+  sir_data <- pre_sir(true_R6_pop50_seed1, re_R6_pop50_seed1[i,])
+  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+text(10, 0.95*N, "D", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+mtext("Number infected/recovered", 2, line = 4, cex = yaxis_size, outer = FALSE)
+# legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+# R = 6, Pop = 200
+N = 200
+plot(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
+lines(true_R6_pop200_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+for (i in 2:nrow(re_R1.5_pop200_seed1)){
+  sir_data <- pre_sir(true_R6_pop200_seed1, re_R6_pop200_seed1[i,])
+  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+text(10, 0.95*N, "E", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+# legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+# R = 6, Pop = 1000
+N = 1000
+plot(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "white", xlab = "", ylab = "", cex.axis = number_size)
+lines(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
+for (i in 2:nrow(re_R6_pop1000_seed1)){
+  sir_data <- pre_sir(true_R6_pop1000_seed1, re_R6_pop1000_seed1[i,])
+  lines(sir_data$I, type = "l", lty = 2, col = "grey", xlab = " ", ylab = " ", lwd = 0.5)
+}
+text(10, 0.95*N, "F", cex = letter_size)
+mtext("Timestep", 1, line = 4, cex = yaxis_size)
+# legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
+@
+\caption{Infectious curves for MCMC with a deterministic process}
+\end{center}
+\end{figure}
 
 %%%%%%%%%%%%%%%%
 %% Discussion %%
@@ -2064,29 +3743,25 @@ box()
 
 %%%%%%%%%%
 \subsection{Summary of findings}
-Comments on differences in $\beta$ and $\gamma$ estimates between RE and MCMC:
-\begin{itemize}
-  \item Larger population size --> less stochasticity in data --> RE should be performing increasingly better. We don't see this for the $R_{0}$ of 1.5, but arguably do for the $R_{0}$ of 6.
-  \item Is $\beta$ being systematically underestimated? Why? What does this mean?
-  \item What does the narrower "confidence interval" of the RE method in comparison to MCMC say about the method?
-  \item Discuss the really negative log-likelihoods: if likelihood of observing the data with the given parameters for a given timepoint is zero, the log-likelihood is set to a very negative number, -1000.
-  \item Discuss the difference in running time: RE - about 20 minutes, MCMC - over 20h
-\end{itemize}
+
+Both RE and MCMC inference methods observe the same positive correlation between $\beta$ and $\gamma$ as was determined by the heatmap for RE (Fig. X) and the density plot for the MCMC (Fig. Y). The positive correlation is likely due to there being less of a difference whether the rates of infection and recovery are both increased or both reduced, as the net number who become infected remains the same. Though both methods observe the same trend, it can be noted that the 95\% intervals obtained through bootstrapping for the RE are narrower than the 95\% credible interval of the MCMC. Possibly relating to this, the 95\% interval of the RE method includes the true $\beta$ and $\gamma$ values less often than the 95\% credible interval of the MCMC method (Reference tables). It could be that if the MCMCs would have been run for more iterations and until convergence looked more likely, the 95\% credible interval would have also narrowed. That being said, it is unlikely that even this narrower credible interval would have been as narrow as the RE interval, as the difference in interval width was still prevalent for a population size of 50 and $R_{0}$ of 6, though the runs seemed seemed to have converged during the 3.5 million iteration runs (Fig. 7D, Fig. 8D).
+
+Though the $\beta$ estimates for the RE method tended to be below the true value when $R_{0}$ was 1.5 and above the true value when $R_{0}$ was 6 (Table 1), the $\gamma$ 95\% intervals included the true value more often for the higher $R_{0}$ than the lower $R_{0}$ and more often as population size increased (Table 2). Therefore, it could be argued that the RE method gave ranges of $\beta$ and $\gamma$ that were closest to their respective true values for outbreaks with the higher $R_{0}$. Within this outbreak severity, the RE method fared better with increasing population size. This could be due to stochasticity being reduced with increasing population size as seen in Figure 3, where outbreaks with a population size of 1000 had smoother epidemic curves than outbreaks in populations of 50.
+
+Compared to the RE method, the MCMC method was more reliable with including the true $\beta$ and $\gamma$ values in its 95\% credible intervals (reference tables), though all runs would likely have benefitted from being run for more than 3.5 million iterations. The running time of the MCMC method was slower than that of the RE inference method. Running 1000 iterations of the RE method took approximately 20 minutes, while running 3.5 million iterations took over 20 hours and 17.5 million iterations over 120 hours with the running time increasing with population size. 
+
+The MCMC with a deterministic process for inference did not perform as well as the RE or normal MCMC method for the cases considered in this project. Based on the posterior traces it could be that with finetuning of the proposal function, the method could provide better estimates for $\beta$ and $\gamma$ than the ones presented in this report, though whether these estimates would exceed those of the RE is not certain.
 
 \subsection{Open questions for discussion}
-When is it OK to use a deterministic compartmental model?
-\begin{itemize}
-  \item RE method's RE is bigger with bigger population sizes because difference between n. recovered in model and n. recovered in data is scaled up
-  \item RE has consistently narrower parameter ranges as estimated through bootstrapping  (though bootstrapping can't really be used for estimating parameter ranges) than MCMC
-  \item RE may be a viable option for larger $R_{0}$?
-\end{itemize}
+Considering that the RE inference method experienced improved $\beta$ and $\gamma$ estimates with increasing population size and higher $R_{0}$, it could be that eventually the RE inference method may consistently include the true $\beta$ and $\gamma$ values if investigated for even higher population sizes and $R_{0}$s. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the narrower 95\% intervals for a much quicker running time might become a reasonable option. Further investigations with larger population sizes and $R_{0}$s could be conducted to gain a better understanding of when this trade-off would become cost effective. The MCMC inference method devised in this project is also not optimised for efficiency, so it is possible that the running time of the MCMC could be shortened in further work.
 
 \subsection{Limitations}
-\begin{itemize}
-  \item Only looked at one type of compartmental model
-  \item The compartmental model I looked at was very simple - no spatial modelling etc. Though at this point I could argue that if the aim is to do something like spatial modelling, one must use stochastic processes so the question of "Which modelling method do I use?" does not need to be asked.
-  \item Could have run MCMCs for longer to reach full convergence but the aim of this project was to compare different methods rather than perfect one method completely. Also, could have run MCMCs from different parameter starting points but again, the same point as before applies. 
-\end{itemize}
+Only one type of compartmental model, a closed SIR model, was considered in this project. Additionally, the model is very simple with no spatial modelling or other complicating matters. It could be argued though that if the aim of a study is to conduct complicated models including spatial aspects, a stochastic process must be used regardless and thus the question of whether or not to use a deterministic inference method becomes obsolete. 
+
+Additionally, as mentioned previously, the MCMCs could have been run for longer than 3.5 million or even 17.5 million iterations to reach full convergence. Additionally, the MCMCs could have been repeated for the different outbreaks from different parameter starting points to investigate if the runs from different starting points converge at similar $\beta$ and $\gamma$ values. That being said, the aim of this project was to compare different inference methods rather than perfect one method completely.
+
+\subsection{Conclusions}
+When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible intervals and 95\% intervals for the MCMC and RE inference methods respecively, the MCMC inference method's ranges included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with higher $R_{0}$. Further work comparing the inference methods for higher $R_{0}$s and population sizes may find that eventually the RE inference method's 95\% interval might also include the true $\beta$ and $\gamma$ values and be quicker to run than a MCMC. 
 
 %%%%%%%%%%%%%%%%
 %% References %%
