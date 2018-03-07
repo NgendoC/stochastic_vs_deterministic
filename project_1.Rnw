@@ -94,6 +94,8 @@
 \section{Statement of Originality}
 
 I certify that this thesis, and the research to which it refers, are the product of my own work, conducted during the current year of the MRes in Biomedical Research at Imperial College London. Any ideas or quotations from the work of other people, published or otherwise, or from my own previous work are fully acknowledged in accordance with the standard referencing practices of the discipline.
+
+I have done all the programming myself, except in situations where stated that I have used a package, for example deSolve for solving differential equations for deterministic models.
 % Also acknowledge work of other researchers if necessary e.g. if you got samples from someone else.
 
 %%%%%%%%%%%%%%
@@ -108,9 +110,10 @@ I certify that this thesis, and the research to which it refers, are the product
 
 \noindent \textbf{Methods} I created a stochastic population based closed compartmental SIR model. With this model, I generated altogether 30 different outbreaks for 6 different scenarios: with an $R_{0}$ of 1.5 or 6 with a population size of 50, 200, and 1000, with five repeats per type of combination. I then built RE and MCMC parameter inference methods and inferred the values that $\beta$ and $\gamma$ may take for each outbreak based on the recovery curve obtained from the generated outbreaks. A MCMC with a deterministic process was also explored.
 
-\noindent \textbf{Results} The RE inference method consistently produced narrower ranges for parameter estimates than the MCMC. When comparing RE estimates between outbreaks with $R_{0}$s of 1.5 and 6, it seemed that the parameter estimates were more consistent for outbreaks with the higher $R_{0}$. 
+\noindent \textbf{Results} The MCMC inference method's 95\% credible intervals included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with higher $R_{0}$. 
 
 \noindent \textbf{Conclusions}
+The MCMC inference method produces 95\% credible intervals that contain the true $\beta$ and $\gamma$ values more often than the RE inference method, though it is computationally more taxing. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the narrower 95\% intervals for a much quicker running time might become a reasonable option. 
 % 0.5 to 1 page
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -624,7 +627,7 @@ text(0.97*1000, 0.92*170, "C", cex = letter_size)
 \newpage
 \subsection{Residual error}
 
-For an $R_{0}$ of 1.5, the difference between the minimum and maximum observed $\beta$ and $\gamma$ values was often wider than the difference for an $R_{0}$ of 6 (Table 1, Table 2). This can also be seen in the exemplifying graphs (Fig. 4), where the infectious and recovery curves for the point estimate and bootstrapped parameter values with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping. It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Figure 4D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level probability of becoming infected (Table 1). 
+For an $R_{0}$ of 1.5, the difference between the minimum and maximum observed $\beta$ and $\gamma$ values was often wider than the difference for an $R_{0}$ of 6 (Table 1, Table 2, Table 3). This can also be seen in the exemplifying graphs (Fig. 4), where the infectious and recovery curves for the point estimate and bootstrapped parameter values for outbreaks with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping. It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Figure 4D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level probability of becoming infected (Table 1, Table 2, Table 3). 
 
 \begin{figure}[!h]
 \begin{center}
@@ -798,6 +801,7 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
+Tables 1, 2, and 3 show that when comparing the output of the residual error method to the parameter values used to generate the simulations that the RE method was being fit to, it can be seen that the residual error method consistently overestimates the values that $\beta$ might take for all population sizes when $R_{0}$ is 1.5 and consistently underestimates $\beta$ values when $R_{0}$ is 6. The inferred values of $\gamma$, on the other hand, include the true value used for the generating the simulations more often than with $\beta$, though levels of success vary with $R_{0}$ and population size (Table 1, 2, 3).
 
 <<RE_result_table_50, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -934,12 +938,16 @@ rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & PE & min & max & PE & min & max \\\\\n")
 
-tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 50. min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Values for $\\beta$, the rate of infection, and $\\gamma$, the recovery rate, for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 50. PE: point estimate, min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
 align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
+
+For population size 50, the 95\% interval overestimates the true $\beta$ value for all five simulations and one out of five simulations when $R_{0}$ is 1.5 and 6 respectively (Table 1). The remaining four simulations for the higher $R_{0}$, on the other hand, overestimate $\beta$. The simulations with an $R_{0}$ of 1.5 overestimate $\gamma$ for simulations 1 and 4, with the remaining three simulations underestimating $\gamma$. $\gamma$ is included in the 95\% intervals for simulations 1 and 4 for the outbreaks with a $R_{0}$ of 6, while simulations 2 and 5 overestimate $\gamma$ and simulation 3 underestimates it.
+
+For outbreaks with a population size of 200, the 95\% interval again overerestimates $\beta$ for four out of five outbreaks where $R_{0}$ is 1.5, though simulation 1 includes the value in its interval (Table 2). For outbreaks with an $R_{0}$ of 6, $\beta$ is underestimated for all five simulations (Table 2). $\gamma$ is underestimated for two simulations, overestimated for one simulation, and is included in the 95\% interval for two simulations for the outbreaks where $R_{0}$ is 1.5. For outbreaks where $R_{0}$ is 6, $\gamma$ is included in the 95\% interval for one simulation and the remaining four simulations' intervals overestimate $\gamma$. 
 
 <<RE_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1076,12 +1084,14 @@ rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & PE & min & max & PE & min & max \\\\\n")
 
-tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 200. min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Values for $\\beta$, the rate of infection, and $\\gamma$, the recovery rate, for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 200. PE: point estimate, sim: simulation, min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
 align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
+
+$\beta$ is also overestimated for most of the outbreaks where $R_{0}$ is 1.5 and the population size is 1000, only simulation 1's 95\% interval includes the true $\beta$ value (Table 3). Three out of the five simulations include the true $\gamma$ value in their 95\% intervals. When $R_{0}$ is 6, $\beta$ is underestimated for all five simulations, though all of them do include the true $\gamma$ value in their 95\% intervals (Table 3).  
 
 <<RE_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1218,9 +1228,9 @@ rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max \\\\\n")
+addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  & \\multicolumn{3}{l}{$\\gamma$} \\\\\n", "$R_{0}$ & sim & PE & min & max & PE & min & max \\\\\n")
 
-tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
+tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Values for $\\beta$, the per capita rate of infection, and $\\gamma$, the recovery rate, for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. PE: point estimate, sim: simulation, min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
 align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
@@ -1630,10 +1640,7 @@ tab <- xtable(RE_results_table, table.placement="H", digits = c(1, 0, 2, 2, 2, 2
 align(tab) <- "lllllllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
-Table 1 shows that when comparing the output of the residual error method to the parameter values used to generate the simulations that the RE method was being fit to, it can be seen that the residual error method consistently overestimates the values that $\beta$ might take for all population sizes when $R_{0}$ is 1.5 and consistently underestimates $\beta$ values when $R_{0}$ is 6.
-
-The inferred values of $\gamma$, on the other hand, include the true value used for the generating the simulations more often than with $\beta$, though levels of success vary with $R_{0}$ and population size (Table 2). When $R_{0}$ is 6, the inferred 95\% interval for $\gamma$ includes the true value of 0.15 for all five simulations for the population size of 1000, and twice respectively for the population sizes of 50 and 200 (Table 2). For the smaller $R_{0}$ of 1.5, the true $\gamma$ value is included in the 95\% interval three times for the population size of 1000, once for the 200 member population, and zero times for the population size of 50 (Table 2). Whether the $\gamma$ ranges that did not include the true $\gamma$ value are over- or underestimating can vary even within a given $R_{0}$ and population size. For the population size of 50 for both $R_{0}$s, the 95\% intervals both over- and underestimate the ranges of values $\gamma$ may take. For the population size of 200, $\gamma$ is always overestimated when $R_{0}$ is 6, but is both over- and underestimated when $R_{0}$ is 1.5. When $R_{0}$ is 1.5 and the population size is 1000, the $\gamma$ values are overestimated.   
+% When $R_{0}$ is 6, the inferred 95\% interval for $\gamma$ includes the true value of 0.15 for all five simulations for the population size of 1000, and twice respectively for the population sizes of 50 and 200 (Table 2). For the smaller $R_{0}$ of 1.5, the true $\gamma$ value is included in the 95\% interval three times for the population size of 1000, once for the 200 member population, and zero times for the population size of 50 (Table 2). Whether the $\gamma$ ranges that did not include the true $\gamma$ value are over- or underestimating can vary even within a given $R_{0}$ and population size. For the population size of 50 for both $R_{0}$s, the 95\% intervals both over- and underestimate the ranges of values $\gamma$ may take. For the population size of 200, $\gamma$ is always overestimated when $R_{0}$ is 6, but is both over- and underestimated when $R_{0}$ is 1.5. When $R_{0}$ is 1.5 and the population size is 1000, the $\gamma$ values are overestimated.   
 
 The heatmap in Figure X shows the REs for different combinations of $\beta$ and $\gamma$ when optimising to the recovery curve of simulation 1 with population size 200 and $R_{0}$ of 1.5. The trend suggests that $\beta$ and $\gamma$ are positively correlated, implying that the REs are remain lower as $\beta$ and $\gamma$. Similar trends in the relationship between $\beta$ and $\gamma$ are observed for the other 29 outbreaks.
 
