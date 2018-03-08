@@ -306,10 +306,13 @@ I set the prior distributions for $\beta$ and $\gamma$ to be uniform between the
 
 Calculating the likelihood using the equation above requires knowledge of the recovery time, $R_{i}$ and infection time, $I_{i}$. However, I considered that only recovery times are observed. I used an MCMC technique called data augmentation to deal with this issue where unknown data, such as $I_{i}$, is treated as an additional parameter \citep{Dyk,ONeill2010}. I adapted the MCMC to perform data augmentation on the infectious curve, meaning that it was to guess the number of infectious individuals at each timestep $i$. I obtained an initial guess of the infectious curve by guessing an initial $\gamma$ value, assuming a constant infectious period, and thus back-calculating the infectious curve from the known recovered curve from the simulated data. This original infectious curve was then changed by proposing the addition or subtraction of one infectious person from a given timepoint $i$ and moving them to a randomly chosen neighbouring timepoint at every iteration of the MCMC.
 
-Whether or not a proposed change in $\beta$, $\gamma$, or the infectious curve is accepted was calculated with the Metropolis-Hastings ratio. 
-Because my proposal distributions for $\beta$ and $\gamma$ were Normally distributed with a mean of the current baseline parameter values and a standard deviation of a quarter of the initial $\beta$ and $\gamma$ estimates, $q(\beta' \gamma' \mid \beta, \gamma) = q(\beta, \gamma \mid \beta', \gamma')$ and the Metropolis-Hastings ratio above is reduced to only the posteriors. 
+Whether or not a proposed change in $\beta$, $\gamma$, or the infectious curve is accepted was calculated with the Metropolis-Hastings ratio:
+\begin{align*}
+min(1, \frac{P(x \mid \theta')}{P(x \mid \theta)} \frac{q(\theta \mid \theta')}{q(\theta' \mid \theta)})
+\end{align*}
+where q refers to the proposal distribution. If the ratio is more than 1, the proposed change is accepted while if the ratio is below 1, the proposed change is rejected.
 
-Therefore, the proposed change is accepted if the ratio of the proposed posterior to the existing posterior is higher than a randomly selected number from a uniform distribution between 0 and 1. This means that the move is always accepted if the proposed posterior is greater than the existing posterior, and that less advantageous moves are also occasionally accepted to allow the exploration of uncertainty in the parameter values. 
+As my proposal distributions for $\beta$ and $\gamma$ were Normally distributed with a mean of the current baseline parameter values and a standard deviation of a quarter of the initial $\beta$ and $\gamma$ estimates, the Metropolis-Hastings ratio above is reduced to only the posteriors because $q(\beta' \gamma' \mid \beta, \gamma) = q(\beta, \gamma \mid \beta', \gamma')$. Therefore, the proposed change is accepted if the ratio of the proposed posterior to the existing posterior is higher than a randomly selected number from a uniform distribution between 0 and 1. This means that the move is always accepted if the proposed posterior is greater than the existing posterior, and that less advantageous moves are also occasionally accepted to allow the exploration of uncertainty in the parameter values. 
 
 For the simulated outbreaks with an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.15, the MCMC starting points were set to 1.2 for $R_{0}$ and 0.10 for $\gamma$. For the outbreaks with underlying $R_{0}$ of 6 and $\gamma$ of 0.15, the MCMC starting points were set to 7.2 for $R_{0}$ and 0.10 for $\gamma$. Each MCMC was run for 3.5 million iterations. I ran an additional 17.5 million iteration MCMC for the outbreaks with a population size of 1000. 
 
@@ -317,18 +320,18 @@ For the simulated outbreaks with an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.
 \newpage
 \subsubsection{Markov Chain Monte Carlo with a partly deterministic process}
 
-I altered the stochastic MCMC I had previously created in the previous section to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ tested. I used the \textit{deSolve} package to construct the deterministic model (Soetaert et al., 2010). The number of infectious individuals from the output of the deterministic model was then rounded to the nearest integer for each time step to avoid partial individuals from being infected. The susceptible curve was devised from the known stochastic recovered curve, $R_{i}$, and the deterministic infectious curve, $I_{i}$, so that
+To create a MCMC with a partly deterministic process, I altered the standard MCMC I had previously created in the previous section to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function for so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ proposed in the MCMC. I used the \textit{deSolve} package to construct the deterministic model (Soetaert et al., 2010). I rounded the number of infectious individuals from the output of the deterministic model to the nearest integer for each time step to avoid partial individuals from being infected. The susceptible curve was devised from the known recovered curve from the simulated dataset, $R_{i}$, and the deterministic infectious curve, $I^{d}_{i}$, so that
 \begin{align*}
-S_{i} &= N - I_{i} - R_{i}
+S_{i} &= N - I^{d}_{i} - R_{i}
 \end{align*}
 where $N$ represents the total population size.
 
-Similarly, the number of newly infected individuals, $b$, for each time step $i$ was also affected by the deterministic infectious curve, $I^{d}$, and the stochastic recovered curve:
+Similarly, the number of newly infected individuals, $b$, for each time step $i$ was also affected by the deterministic infectious curve, $I^{d}$, and the known simulated recovered curve:
 \begin{align*}
 b_{i+1} &= I_{i+1}^{d} - I_{i}^{d} + R_{i+1} - R_{i}
 \end{align*}
 
-The values for $\beta$ and $\gamma$ for the first simulation for each of the six outbreak severity and population size combinations were inferred. The starting points for the MCMC with a partly deterministic process were the same as those for the normal MCMC: for an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.15, the starting points were set to 1.2 and 0.10 for $R_{0}$ and $\gamma$ respectively. For outbreaks with an $R_{0}$ of 6 and $\gamma$ of 0.15, the starting points were set to 7.2 and 0.10 for $R_{0}$ and $\gamma$ respectively. Each MCMC with a partly deterministic process was run for 2.5 million iterations.
+The values for $\beta$ and $\gamma$ for the first simulation for each of the six outbreak severity and population size combinations were inferred. The starting points for the MCMC with a partly deterministic process were the same as those for the standard MCMC: for an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.15, the starting points were 1.2 and 0.10 for $R_{0}$ and $\gamma$ respectively. For outbreaks with an $R_{0}$ of 6 and $\gamma$ of 0.15, the starting points were 7.2 and 0.10 for $R_{0}$ and $\gamma$ respectively. Each MCMC with a partly deterministic process was run for 2.5 million iterations.
 
 %%%%%%%%%%
 
