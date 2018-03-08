@@ -3171,7 +3171,7 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
-For the 17.5 million iteration MCMCs conducted for the outbreaks with a population size 1000 and an $R_{0}$ of 1.5, only simulations 1 and 5 included the true $\beta$, while the other three simulations overestimated the value. For $\gamma$, simulations 1, 4, and 5 include the true $\gamma$ while the other two simulations overestimate it. For outbreaks with and $R_{0}$ of 6, the true $\beta$ is included in the 95\% credible interval for all simulations except simulation 3. The true $\gamma$ is not included in the credible intervals of simulations 3 or 4, but is included in the intervals of the other three.
+For the 17.5 million iteration MCMCs conducted for the outbreaks with a population size 1000 and an $R_{0}$ of 1.5, only simulations 1 and 5 included the true $\beta$, while the other three simulations overestimated the value (Table 8). For $\gamma$, simulations 1, 4, and 5 include the true $\gamma$ while the other two simulations overestimate it (Table 8). For outbreaks with and $R_{0}$ of 6, the true $\beta$ is included in the 95\% credible interval for all simulations except simulation 3 (Table 8). The true $\gamma$ is not included in the credible intervals of simulations 3 or 4, but is included in the intervals of the other three (Table 8).
 
 <<MCMC_result_table_long, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -3499,9 +3499,9 @@ box()
 \newpage
 \subsection{Markov Chain Monte Carlo with a partly deterministic process}
 
-Running the MCMC with deterministic process for 2.5 million iterations took approximately 20 hours for each outbreak studied.
+Running the MCMC with a partly deterministic process for 2.5 million iterations took approximately 20 hours for each of the six studied outbreaks.
 
-The $\beta$ posteriors run for the MCMC with a deterministic process show that the $\beta$ estimates did not change much over the course of the 2.5 million iterations for either of the runs with a population size of 1000 or for the outbreak with an $R_{0}$ of 6 and a population size of 50 (Figure 12 C, D, F). The other three outbreaks did see changes in areas of $\beta$ values explored. In addition to this, the stickiness of the $\beta$ posteriors, their tendency to stay in place rather than explore other parameter values, seems to increase with increasing population size.
+The $\beta$ posterior traces for the MCMC with a deterministic process were increasingly sticky, tending to stay in place rather than explore other parameter values, with increasing population size (Fig. 12) Relating to this, the $\beta$ estimates did not change drastically over the course of the 2.5 million iterations for some outbreaks, such as that with a population size of 50 and $R_{0}$ of 6 or population size of 1000 and $R_{0}$ of 1.5 (Figure 12 C, D).
 
 \begin{figure}[!h]
 \begin{center}
@@ -3564,7 +3564,7 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
-A similar situation is seen for the $\gamma$ posterior traces (Figure 13), the traces stay in place for for the largest population size (Fig. 13 C, F). The other two population sizes saw increases in $\gamma$ over the course of the 2.5 million iterations (Fig. 13 A-B, D-E). Also, as with the $\beta$ posteriors, the $\gamma$ posteriors' stickiness increases with increasing population size.
+A similar situation is seen for the $\gamma$ posterior traces (Figure 13), the traces stayed mostly in place for for the largest population sizes and for the outbreak with an $R_{0}$ of 6 and population size of 50 (Fig. 13 C, D, F). The other two population sizes for outbreaks with an $R_{0}$ of 1.5 and for the outbreak where $R_{0}$ was 6 and population size 200 saw increases in $\gamma$ over the course of the 2.5 million iterations (Fig. 13 A-B, E). Also, as with the $\beta$ posteriors, the $\gamma$ posteriors' stickiness increased with increasing population size.
 
 \begin{figure}[!h]
 \begin{center}
