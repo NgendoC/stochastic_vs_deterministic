@@ -276,7 +276,7 @@ I used the recovery curves from these 30 outbreaks and various inference methods
 
 \subsubsection{Residual error}
 
-I used the residual error method to infer the values of $\beta$ and $\gamma$ given the recovered curve from the simulated data made with the stochastic SIR model. Firstly, I constructed a deterministic SIR model with the aid of \textit{deSolve}, a differential equation solving R package (Soetaert et al., 2010). I then optimised the deterministic model's fit to the recovered curve of the simulated data to receive a point estimate for the $\beta$ and $\gamma$ for each outbreak in addition the best-fit deterministic infectious curve. The fit of the model during the optimisation process was calculated as the sum of the squared differences between the model, $d_{model}^i$, and observation, $d_{observation}^i$, for each timepoint $i$:
+I used the residual error method to infer the values of $\beta$ and $\gamma$ given the recovered curve from the simulated data made with the stochastic SIR model. Firstly, I constructed a deterministic SIR model with the aid of \textit{deSolve}, a differential equation solving R package \citep{Soetaert2010}. I then optimised the deterministic model's fit to the recovered curve of the simulated data to receive a point estimate for the $\beta$ and $\gamma$ for each outbreak in addition the best-fit deterministic infectious curve. The fit of the model during the optimisation process was calculated as the sum of the squared differences between the model, $d_{model}^i$, and observation, $d_{observation}^i$, for each timepoint $i$:
 
 \begin{align*}
 \displaystyle\sum_{i}(d_{model}^i - d_{observation}^i)^2
@@ -320,7 +320,7 @@ For the simulated outbreaks with an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.
 \newpage
 \subsubsection{Markov Chain Monte Carlo with a partly deterministic process}
 
-To create a MCMC with a partly deterministic process, I altered the standard MCMC I had previously created in the previous section to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function for so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ proposed in the MCMC. I used the \textit{deSolve} package to construct the deterministic model (Soetaert et al., 2010). I rounded the number of infectious individuals from the output of the deterministic model to the nearest integer for each time step to avoid partial individuals from being infected. The susceptible curve was devised from the known recovered curve from the simulated dataset, $R_{i}$, and the deterministic infectious curve, $I^{d}_{i}$, so that
+To create a MCMC with a partly deterministic process, I altered the standard MCMC I had previously created in the previous section to only have two unknown parameters, $\beta$ and $\gamma$. I then changed the likelihood function for so that it created a deterministic SIR model for every set of $\beta$ and $\gamma$ proposed in the MCMC. I used the \textit{deSolve} package to construct the deterministic model \citep{Soetaert2010}. I rounded the number of infectious individuals from the output of the deterministic model to the nearest integer for each time step to avoid partial individuals from being infected. The susceptible curve was devised from the known recovered curve from the simulated dataset, $R_{i}$, and the deterministic infectious curve, $I^{d}_{i}$, so that
 \begin{align*}
 S_{i} &= N - I^{d}_{i} - R_{i}
 \end{align*}
@@ -347,7 +347,7 @@ The values for $\beta$ and $\gamma$ for the first simulation for each of the six
 
 \subsection{The simulated outbreaks}
 
-Six different outbreak scenarios were created: an outbreak with an $R_{0}$ of 1.5 and 6 for population sizes of 50, 200, and 1000 individuals. The initial proportion of infectious individuals at the beginning of each outbreak was the same for each population size. Five different outbreaks were constructed for each of the six scenarios. Figures 2 and 3 show the shapes for each generated outbreak.
+Six different outbreak scenarios were created: an outbreak with an $R_{0}$ of 1.5 and 6 for population sizes of 50, 200, and 1000 individuals. The initial proportion of infectious individuals at the beginning of each outbreak was the same for each population size. Five different outbreaks were simulated for each of the six scenarios. Figures 2 and 3 show the shapes for each simulated outbreak.
 \newline
 
 \begin{figure}[h]
@@ -471,11 +471,11 @@ lines(true_R1.5_pop1000_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # re
 text(letter_place, 0.95*N, "O", cex = letter_size)
 mtext("Time", 1, line = 3, cex = yaxis_size)
 @
-\caption{Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak simulated with a stochastic SIR model with an $R_{0}$ of 1.5 and $\gamma$, recovery rate of 0.15. Plots A-E depict a population size of 50, plots F-J depict a population size of 200, and plots K-O depict a population size of 1000.}
+\caption{Panels showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak simulated with a stochastic SIR model with an $R_{0}$ of 1.5 and $\gamma$, recovery rate of 0.15. Panels A-E depict a population size of 50, panels F-J depict a population size of 200, and panels K-O depict a population size of 1000.}
 \end{center}
 \end{figure}
 
-The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most outbreaks reaching their peak number of infected individuals at around 20 days (Figure 2). Outbreaks with an $R_{0}$ of 6 had a higher peak in the infectious curve than outbreaks with an $R_{0}$ of 1.5 though the peak is also at around 20 days (Figure 3). The variability in outbreak shape reduces with increasing population size for both outbreak severity.
+The shapes of all the outbreaks with an $R_{0}$ of 1.5 are similar, with most outbreaks reaching their peak number of infected individuals at around 20 days (Fig. 2). Outbreaks with an $R_{0}$ of 6 had a higher peak in the infectious curve than outbreaks with an $R_{0}$ of 1.5 though the peak is also at around 20 days (Fig. 3). The variability in outbreak shape reduces with increasing population size for both outbreak severity.
 \newline
 
 \begin{figure}[h]
@@ -598,7 +598,7 @@ lines(true_R6_pop1000_seed5$R, type = "l", col = "orange", ylim = c(0,N)) # reco
 text(letter_place, 0.95*N, "O", cex = letter_size)
 mtext("Time", 1, line = 3, cex = yaxis_size)
 @
-\caption{Plots showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak simulated with a stochastic SIR model with an $R_{0}$ of 6 and $\gamma$, recovery rate, of 0.15. Plots A-E depict a population size of 50, plots F-J depict a population size of 200, and plots K-O depict a population size of 1000.}
+\caption{Panels showing how the number of susceptible (black), infectious (red), and recovered (orange) individuals changes with time during an outbreak simulated with a stochastic SIR model with an $R_{0}$ of 6 and $\gamma$, recovery rate, of 0.15. Panels A-E depict a population size of 50, panels F-J depict a population size of 200, and panels K-O depict a population size of 1000.}
 \end{center}
 \end{figure}
 
