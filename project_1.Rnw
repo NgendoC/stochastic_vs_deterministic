@@ -195,7 +195,7 @@ Stochastic models can be used in continuous time, but it is often convenient to 
 \begin{align*}
 S_{i+1} &= S_{i} - b_{i} \\
 I_{i+1} &= I_{i} + b_{i} - c_{i} \\
-R_{i+1} &= R_{i} + c{i}
+R_{i+1} &= R_{i} + c_{i}
 \end{align*}
 
 \noindent Here $S_{i}$, $I_{i}$, and $R_{i}$ refer to the number of individuals in each compartment at timestep $i$, while $S_{i+1}$, $I_{i+1}$, and $R_{i+1}$ refer to the numbers of individuals in the susceptible, infected, and recovered compartments at the next timestep $i+1$. $b_{i}$ and $c_{i}$ refer to the number of newly infected and newly recovered individuals at timestep $i$ respectively.
@@ -228,7 +228,7 @@ Bayesian statistics can also be applied in order to infer ranges of values that 
 \begin{align*}
 P(\theta \mid x) \propto P(x \mid \theta)P(\theta)
 \end{align*}
-\noindent Here the prior distribution is defined as $P(\theta)$, the probability distribution of the values that the parameters in question might take before the data is observed. This is defined by the investigators' best guess for the values that parameters might take before taking into consideration the new data. $P(x \mid \theta)$, the likelihood function, refers to the probability of the observed data, $x$ occurring given the parameter value, $\theta$. The likelihood function can be multiplied by the prior distribution to produce the posterior distribution, $P(x \mid \theta)$, the probability of the parameter value given the data. 
+\noindent Here the prior distribution is defined as $P(\theta)$, the probability distribution of the values that the parameters in question might take before the data is observed. This is defined by the investigators' best guess for the values that parameters might take before taking into consideration the new data. $P(x \mid \theta)$, the likelihood function, refers to the probability of the observed data, $x$ occurring given the parameter value, $\theta$. The likelihood function can be multiplied by the prior distribution to produce the posterior distribution, $P(\theta \mid x)$, the probability of the parameter value given the data. 
 
 The Markov Chain Monte Carlo inference method is rooted in Bayesian statistics. A random walk MCMC works by first setting a starting value for the parameter in question, and then randomly choosing another parameter value from a proposal distribution devised by the investigator. Such a distribution may for example be Normal with a mean of the current parameter value and a predefined standard deviation. It then calculates the posterior distribution for both the current parameter value and the proposed parameter value. The resulting posterior distributions are then compared by dividing the proposed posterior by the current posterior. If the resulting proportion is greater than 1, it implies that the proposed parameter value is more probable given the observed data and will take the place of the starting value as the new baseline parameter value. This will then be compared to a new proposed parameter value in the next iteration of the MCMC. A worse proposed posterior than current posterior is accepted by choosing a random number from a uniform distribution between 0 and 1 and accepting the proposed posterior if it is greater than this random number. This will lead to the proposed posterior to sometimes being accepted even if the proposed to baseline posterior ratio is less than 1. The aim of this is to capture the uncertainty around the values that the inferred parameter might take. MCMC methods can also used for estimating an outbreak curve from a recovery curve \citep{ONeill1999}.
 
@@ -257,16 +257,18 @@ All data generation and analysis presented in this report was conducted on R, a 
 
 \subsection{Simulating data for fitting}
 
-I used a stochastic population-based closed compartmental SIR model, such as the one described in the introduction, to generate outbreaks with various basic reproduction numbers ($R_{0}$) in different-sized populations. 
+I used a stochastic population-based closed compartmental SIR model, such as the one described in the Introduction(Fig. 1), to generate outbreaks with various basic reproduction numbers ($R_{0}$) in different-sized populations. 
 
-I chose two different epidemic outbreak scenarios, one with an underlying $R_{0}$ of 1.5, on the lower end for a disease that could still cause an outbreak, and the other with a higher underlying $R_{0}$ of 6. Here $R_{0}$ refers to the number of susceptible individuals that an infectious individual would successfully infect in a completely susceptible population. Both scenarios had a recovery rate at a given timepoint, $\gamma$, of 0.15. Thus, the underlying the per capita rate of infection, $\beta$, for the outbreaks could be calculated as 
+I chose two different epidemic outbreak scenarios, one with an underlying $R_{0}$ of 1.5, on the lower end for a disease that could still cause an outbreak, and the other with a higher underlying $R_{0}$ of 6. Here $R_{0}$ refers to the number of susceptible individuals that an infectious individual would successfully infect in a completely susceptible population. Both scenarios had a recovery rate, $\gamma$, of 0.15 at a given timepoint. Thus, the underlying per capita rate of infection, $\beta$, for the outbreaks could be calculated as 
 \begin{align*}
 \beta = \frac{R_{0} \times \gamma}{N}
 \end{align*}
 
-\noindent where N is the population size. Three different population sizes were also considered for both of the two outbreak scenarios: a small population size of 50, a medium population size of 200, and a large population size of 1000. The proportion of the population that was infected in each population at the beginning of the simulation was kept constant with 1 infectious individual in the population of 50, 4 infectious individuals in the population of 200, and 20 infectious individuals in the population of 1000. For each of the underlying outbreak strength and population size combinations (six combinations in total), five different epidemics were generated with the devised stochastic model. Thus altogether, the stochastic population-based closed compartmental SIR model described in the introduction was used to devise 30 distinct outbreaks. Each outbreak was set to be observed for 80 days at 0.5-day timesteps.
+\noindent where N is the population size. 
 
-I then created a closed population stochastic SIR model, as outlined in the introduction. From the output of this model, I used the recovery curves and various inference methods to estimate parameter value ranges, such as $\beta$ and $\gamma$, or missing data, such as the infectious curve. The estimates made through these methods could then be compared to the true underlying values, as they are also known.
+I considered three different population sizes for both of the two outbreak scenarios: a small population size of 50, a medium population size of 200, and a large population size of 1000. The proportion of the population that was infected in each population at the beginning of the simulation was constant with 1 infectious individual in the population of 50, 4 infectious individuals in the population of 200, and 20 infectious individuals in the population of 1000. For each of the underlying outbreak strength and population size combinations (six combinations in total), I generated five different outbreaks with the devised stochastic model. Thus altogether, I devised 30 distinct outbreaks. Each outbreak was set to be observed for 80 days at 0.5-day timesteps.
+
+I used the recovery curves from these 30 outbreaks and various inference methods to estimate parameter value ranges for $\beta$ and $\gamma$. The estimates made through these methods can then be compared to the true underlying $\beta$ and $\gamma$, as they are also known.
 
 %%%%%%%%%%
 
@@ -274,13 +276,13 @@ I then created a closed population stochastic SIR model, as outlined in the intr
 
 \subsubsection{Residual error}
 
-I used the residual error method to infer the values of $\beta$ and $\gamma$ given the recovered curve from the generated data made by the stochastic model. Firstly, I constructed a deterministic SIR model with the aid of \textit{deSolve}, a differential equation solving R package (Soetaert et al., 2010). I then optimised the deterministic model's fit to the recovered curve of the generated data to receive a point estimate for the $\beta$ and $\gamma$ for each outbreak in addition the best-fit deterministic infectious curve. The fit of the model during the optimisation process was calculated as the sum of the squared differences between the model, $d_{model}^i$, and observation, $d_{observation}^i$, for each timepoint $i$:
+I used the residual error method to infer the values of $\beta$ and $\gamma$ given the recovered curve from the simulated data made with the stochastic SIR model. Firstly, I constructed a deterministic SIR model with the aid of \textit{deSolve}, a differential equation solving R package (Soetaert et al., 2010). I then optimised the deterministic model's fit to the recovered curve of the simulated data to receive a point estimate for the $\beta$ and $\gamma$ for each outbreak in addition the best-fit deterministic infectious curve. The fit of the model during the optimisation process was calculated as the sum of the squared differences between the model, $d_{model}^i$, and observation, $d_{observation}^i$, for each timepoint $i$:
 
 \begin{align*}
 \displaystyle\sum_{i}(d_{model}^i - d_{observation}^i)^2
 \end{align*}
 
-I gauged the accuracy of the point estimate by bootstrapping. I achieved this by sampling timepoints with replacement from the original generated recovered curve for a given outbreak and optimising the deterministic model on that sampled curve. This would then bring into light whether there were any particular timepoints that might be driving the results of the optimisation process. 
+I gauged the accuracy of the point estimate by bootstrapping. I achieved this by sampling timepoints with replacement from the original generated recovered curve for a given outbreak and optimising the deterministic SIR model on that sampled curve. This would then bring into light whether there were any particular timepoints that might be driving the results of the optimisation process. 
 
 % Use R command citation() to figure out how to cite R packages e.g. citation(package = "deSolve")
 
@@ -288,7 +290,7 @@ I gauged the accuracy of the point estimate by bootstrapping. I achieved this by
 
 \subsubsection{Markov Chain Monte Carlo}
 
-I used a Metropolis-Hastings algorithm to infer the values of $\beta$ and $\gamma$ from an incomplete version of the data generated with the stochastic SIR model I created. 
+I used a Metropolis-Hastings algorithm to infer the values of $\beta$ and $\gamma$ from an incomplete version of the data simulated with the stochastic SIR model I created. 
 
 I calculated the likelihood distribution as follows: 
 \begin{align*}
@@ -300,13 +302,16 @@ I calculated the likelihood distribution as follows:
 p(b_{i}, c_{i} \mid \beta, \gamma) = Bin(b_{i} \mid S_{i}, 1-e^{-\beta I_{i} dt}) \times Bin(c_{i} \mid I_{i}, 1-e^{-\gamma dt})
 \end{align*}
 
-The prior distributions for $\beta$ and $\gamma$ were set to be uniform between the values of 0 and 100, implying that there was no original guess at the value that $\beta$ and $\gamma$ should take. The posterior distribution was then calculated as $likelihood \times prior$. When assembling the MCMC algorithm, the equations above were done in logarithmic form to avoid floating point inaccuracies.
+I set the prior distributions for $\beta$ and $\gamma$ to be uniform between the values of 0 and 100, implying that there was no original guess at the value that $\beta$ and $\gamma$ should take. I then calculated the posterior distribution as $likelihood \times prior$. When assembling the MCMC algorithm, the equations above were written in logarithmic form to avoid floating point inaccuracies.
 
-Calculating the likelihood using the equation above requires knowledge of the recovery time, $R_{i}$ and infection time, $I_{i}$. However, I only considered that only recovery times are observed. I use an MCMC technique called data augmentation to deal with this issue, where unknown data, such as $I_{i}$, is treated as an additional parameter \citep{Dyk,ONeill2010}. I adapted the MCMC to perform data augmentation on the infectious curve, meaning that it was to guess the number of infectious individuals at each timestep $i$. A first guess of the infectious curve was obtained by guessing an initial $\gamma$ value, assuming a constant infectious period, and thus back-calculating the infectious curve from the known recovered curve. This original infectious curve was then changed by proposing the addition or subtraction one infectious person from a given timepoint $i$ and moving them to a randomly chosen neighbouring timepoint at every iteration of the MCMC.
+Calculating the likelihood using the equation above requires knowledge of the recovery time, $R_{i}$ and infection time, $I_{i}$. However, I considered that only recovery times are observed. I used an MCMC technique called data augmentation to deal with this issue where unknown data, such as $I_{i}$, is treated as an additional parameter \citep{Dyk,ONeill2010}. I adapted the MCMC to perform data augmentation on the infectious curve, meaning that it was to guess the number of infectious individuals at each timestep $i$. I obtained an initial guess of the infectious curve by guessing an initial $\gamma$ value, assuming a constant infectious period, and thus back-calculating the infectious curve from the known recovered curve from the simulated data. This original infectious curve was then changed by proposing the addition or subtraction of one infectious person from a given timepoint $i$ and moving them to a randomly chosen neighbouring timepoint at every iteration of the MCMC.
 
-Whether or not a proposed change in $\beta$, $\gamma$ or the infectious curve is accepted was calculated with the Metropolis-Hastings ratio, where the proposed change is accepted if the ratio of the proposed posterior to the existing posterior is higher than a randomly selected number from a uniform distribution between 0 and 1. This means that the move is always accepted if the proposed posterior is greater than the existing posterior, and that less advantageous moves are also occasionally accepted to allow for movement out of possible local maximum. 
+Whether or not a proposed change in $\beta$, $\gamma$, or the infectious curve is accepted was calculated with the Metropolis-Hastings ratio. 
+Because my proposal distributions for $\beta$ and $\gamma$ were Normally distributed with a mean of the current baseline parameter values and a standard deviation of a quarter of the initial $\beta$ and $\gamma$ estimates, $q(\beta' \gamma' \mid \beta, \gamma) = q(\beta, \gamma \mid \beta', \gamma')$ and the Metropolis-Hastings ratio above is reduced to only the posteriors. 
 
-For the simulated outbreaks with an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.15, the MCMC starting points were set to 1.2 for $R_{0}$ and 0.10 for $\gamma$. For the outbreaks with underlying $R_{0}$ of 6 and $\gamma$ of 0.15, the MCMC starting points were set to 7.2 for $R_{0}$ and 0.10 for $\gamma$. Each MCMC was run for 3.5 million iterations. An additional 17.5 million iteration MCMC was run for the outbreaks with a population size of 1000. 
+Therefore, the proposed change is accepted if the ratio of the proposed posterior to the existing posterior is higher than a randomly selected number from a uniform distribution between 0 and 1. This means that the move is always accepted if the proposed posterior is greater than the existing posterior, and that less advantageous moves are also occasionally accepted to allow the exploration of uncertainty in the parameter values. 
+
+For the simulated outbreaks with an underlying $R_{0}$ of 1.5 and $\gamma$ of 0.15, the MCMC starting points were set to 1.2 for $R_{0}$ and 0.10 for $\gamma$. For the outbreaks with underlying $R_{0}$ of 6 and $\gamma$ of 0.15, the MCMC starting points were set to 7.2 for $R_{0}$ and 0.10 for $\gamma$. Each MCMC was run for 3.5 million iterations. I ran an additional 17.5 million iteration MCMC for the outbreaks with a population size of 1000. 
 
 %%%%%%%%%%
 \newpage
