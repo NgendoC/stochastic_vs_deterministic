@@ -16,7 +16,7 @@
 \usepackage{setspace, caption}
 \captionsetup{font=doublespacing} %double-spaced float captions
 \doublespacing %double-spaced document
-\setlength{\parindent}{3em} % 5 space indent
+\setlength{\parindent}{2em} % 5 space indent
 
 % change font to Arial
 \renewcommand{\rmdefault}{phv} % Arial
@@ -3363,7 +3363,8 @@ print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FAL
 \clearpage
 \FloatBarrier
 
-For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
+For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).
+\newline
 
 \begin{figure}[!h]
 \begin{center}
