@@ -97,7 +97,7 @@
 \setcounter{section}{0}
 \renewcommand{\thesection}{\Roman{section}}
 
-\section{Statement of Originality}
+\section*{Statement of Originality}
 
 I certify that this thesis, and the research to which it refers, are the product of my own work, conducted during the current year of the MRes in Biomedical Research at Imperial College London. Any ideas or quotations from the work of other people, published or otherwise, or from my own previous work are fully acknowledged in accordance with the standard referencing practices of the discipline.
 
@@ -109,7 +109,7 @@ I programmed the outbreak-simulating stochastic SIR model myself without the use
 %%%%%%%%%%%%%%
 
 \newpage
-\section{Abstract}
+\section*{Abstract}
 \noindent \textbf{Background} Different methods exist for inferring the ranges of values that a parameter might take in a model. These methods can broadly be categorised into deterministic methods, such as the residual error (RE) method, and stochastic methods, such as the Markov Chain Monte Carlo (MCMC) method.
 
 \noindent \textbf{Aim} The aim of this project is to elucidate the conditions under which the residual error method, might be used just as well as the MCMC, if one is trying to quantify the range of values that a parameter might take.
@@ -126,7 +126,7 @@ The MCMC inference method produces 95\% credible intervals that contain the true
 %% Acknowledgements %%
 %%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\section{Acknowledgements}
+\section*{Acknowledgements}
 
 I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice with this project.
 
@@ -135,7 +135,7 @@ I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice 
 %%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Table of Contents}
+\section*{Table of Contents}
 \vspace{-4em}
 \tableofcontents
 
@@ -144,7 +144,7 @@ I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice 
 %%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Abbreviations}
+\section*{Abbreviations}
 MCMC: Markov Chain Monte Carlo
 
 \noindent $R_{0}$: basic reproduction number
@@ -152,6 +152,10 @@ MCMC: Markov Chain Monte Carlo
 \noindent RE: residual error
 
 \noindent SIR: susceptible, infected, recovered
+
+\noindent $\beta$: per capita rate of infection
+
+\noindent $\gamma$: recovery rate
 
 %%%%%%%%%%%%%%%%%%
 %% Introduction %%
@@ -2001,8 +2005,9 @@ tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\
 align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
-
+\clearpage
 \FloatBarrier
+
 The 95\% credible intervals for $\beta$ and $\gamma$ for outbreaks with a population size of 200 and 3.5 million MCMC iterations all include the true values, except for the interval for $\beta$ in simulation 4, for the outbreaks where $R_{0}$ is 1.5 (Table 6).
 \newline
 <<MCMC_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
@@ -2777,6 +2782,7 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \clearpage
 
 A similar situation for the $\gamma$ traces can be seen as for the $\beta$ traces. Here again the trace for population size 50 and $R_{0}$ of 6 looks the most converged (Fig. 8D). None of the $\gamma$ traces for population size 200 (Fig. 8B, E) or population size 1000 (Fig. 8C, F) look fully converged. Additionally, in Figure 8 seems that the fluctuation in $\gamma$ decreases with increasing population size.
+\newline
 
 \begin{figure}[!h]
 \begin{center}
@@ -3080,6 +3086,7 @@ print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FAL
 \newpage
 \clearpage
 The range of suggested infectious curves after the burn-in period in general overlaps with the true simulated infectious curve (Fig. 9). An exception for this is one of the unconverged MCMCs in Figure 7F, where the MCMC's augmented infectious curves are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Fig. 9A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Fig. 9A-C and Fig. 9D-F).
+\newline
 
 \begin{figure}[!h]
 \begin{center}
@@ -3356,6 +3363,8 @@ print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FAL
 \clearpage
 \FloatBarrier
 
+For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
+
 \begin{figure}[!h]
 \begin{center}
 <<longmcmcplot, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
@@ -3449,8 +3458,6 @@ mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
 \caption{The $\beta$ (per capita rate of infection) and $\gamma$ (recovery rate) posterior traces, and infectious curves for 17.5 million iteration MCMCs with a population size of 1000. Panels A and B show the $\beta$ and $\gamma$ traces respectively of an outbreak with a population size of 1000 and $R_{0}$ of 1.5. Panels D and E show the $\beta$ and $\gamma$ traces for an outbreak with a population size of 1000 and $R_{0}$ of 6. Panels C and F show the infectious curves for the outbreaks with $R_{0}$ of 1.5 and 6, respectively. The red line depicts the number of infectious individuals per timepoint for the true simulated outbreaks, while the grey dotted lines represent the post-burn-in infectious curves for the MCMC.}
 \end{center}
 \end{figure}
-
-For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
 
 \clearpage
 
@@ -3676,7 +3683,8 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \end{figure}
 \FloatBarrier
 \clearpage
-When investigating the infectious curves produced by the inferred $\beta$ and $\gamma$ values, it can be seen that the location of the peak is misjudged for population size 50 and 1000 when $R_{0}$ is 1.5 (Fig. 14 A, C), with the height of the peak also being underestimated for population size 50. For population size 200 and $R_{0}$ of 1.5 the height of the peak is underestimated, but its location is more similar to the true simulated peak (Fig 14B). For the outbreaks with an $R_{0}$ of 6, the size of the peak is greatly underestimated for population sizes 50 and 200, though the location of the peak in time is not fully dissimilar from the true peak's location (Fig. 14D-E). For population size 1000, the size of the peak is underestimated, but not as greatly as for the other two population sizes, though the location of the peak in time is estimated to be earlier than for the true curve (Fig. 14F).  
+When investigating the infectious curves produced by the inferred $\beta$ and $\gamma$ values, it can be seen that the location of the peak is misjudged for population size 50 and 1000 when $R_{0}$ is 1.5 (Fig. 14 A, C), with the height of the peak also being underestimated for population size 50. For population size 200 and $R_{0}$ of 1.5 the height of the peak is underestimated, but its location is more similar to the true simulated peak (Fig 14B). For the outbreaks with an $R_{0}$ of 6, the size of the peak is greatly underestimated for population sizes 50 and 200, though the location of the peak in time is not fully dissimilar from the true peak's location (Fig. 14D-E). For population size 1000, the size of the peak is underestimated, but not as greatly as for the other two population sizes, though the location of the peak in time is estimated to be earlier than for the true curve (Fig. 14F).
+\newline
 
 \begin{figure}[!h]
 \begin{center}
