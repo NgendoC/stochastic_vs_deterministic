@@ -101,7 +101,7 @@
 
 I certify that this thesis, and the research to which it refers, are the product of my own work, conducted during the current year of the MRes in Biomedical Research at Imperial College London. Any ideas or quotations from the work of other people, published or otherwise, or from my own previous work are fully acknowledged in accordance with the standard referencing practices of the discipline.
 
-Personalised paragraph: I have done all the programming myself, except in situations where stated that I have used a package, for example deSolve for solving differential equations for deterministic models.
+I programmed the outbreak-simulating stochastic SIR model myself without the use of any packages made by other individuals or groups. I also programmed the inference methods described in this project myself without the use of packages excepting for the package \textit{deSolve} by Stoetaert et al., which I used for solving the differential equations of my deterministic SIR models. The group is credited in the relevant sections of this document. 
 % Also acknowledge work of other researchers if necessary e.g. if you got samples from someone else.
 
 %%%%%%%%%%%%%%
@@ -974,10 +974,11 @@ tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Va
 align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
-
+\clearpage
 For population size 50, the 95\% interval overestimated the true $\beta$ value for all five simulations and one out of five simulations when $R_{0}$ is 1.5 and 6 respectively (Table 1). The remaining four simulations for the higher $R_{0}$, on the other hand, underestimated $\beta$. Simulations 1 and 4 for the outbreaks where $R_{0}$ of 1.5 overestimated $\gamma$, with the remaining three simulations underestimating $\gamma$. $\gamma$ was included in the 95\% intervals for simulations 1 and 4 for the outbreaks with a $R_{0}$ of 6, while simulations 2 and 5 overestimated $\gamma$ and simulation 3 underestimated it.
 
-For outbreaks with a population size of 200, the 95\% interval again overerestimated $\beta$ for four out of five outbreaks where $R_{0}$ is 1.5, though simulation 1 included the true value in its interval (Table 2). For outbreaks with an $R_{0}$ of 6, $\beta$ was underestimated for all five simulations (Table 2). $\gamma$ was underestimated for two simulations, overestimated for one simulation, and is included in the 95\% interval for two simulations for the outbreaks where $R_{0}$ is 1.5. For outbreaks where $R_{0}$ is 6, $\gamma$ was included in the 95\% interval for one simulation while the remaining four simulations' intervals overestimated $\gamma$. 
+For outbreaks with a population size of 200, the 95\% interval again overerestimated $\beta$ for four out of five outbreaks where $R_{0}$ is 1.5, though simulation 1 included the true value in its interval (Table 2). For outbreaks with an $R_{0}$ of 6, $\beta$ was underestimated for all five simulations (Table 2). $\gamma$ was underestimated for two simulations, overestimated for one simulation, and is included in the 95\% interval for two simulations for the outbreaks where $R_{0}$ is 1.5. For outbreaks where $R_{0}$ is 6, $\gamma$ was included in the 95\% interval for one simulation while the remaining four simulations' intervals overestimated $\gamma$.
+\newline
 
 <<RE_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1121,7 +1122,9 @@ align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
+\newpage
 $\beta$ was also overestimated for most of the outbreaks where $R_{0}$ was 1.5 and the population size was 1000. Only simulation 1's 95\% interval included the true $\beta$ value (Table 3). Three out of the five simulations included the true $\gamma$ value in their 95\% intervals. When $R_{0}$ was 6, $\beta$ was underestimated for all five simulations, though all of them did include the true $\gamma$ value in their 95\% intervals (Table 3).  
+\newline
 
 <<RE_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1265,7 +1268,9 @@ align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
-The sum of squared differences between the model and the true recovery curve increases with population size (Table 4). Additionally, the sum of squared differences for the point estimates tend to be lower for the higher $R_{0}$ than the lower $R_{0}$ for the populations (Table 4). 
+\clearpage
+The sum of squared differences between the model and the true recovery curve increased with population size (Table 4). Additionally, the sum of squared differences for the point estimates tended to be lower for the higher $R_{0}$ than the lower $R_{0}$ for the populations (Table 4). 
+\newline
 
 <<RE_result_table_RE, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making Residual Error table
@@ -1851,6 +1856,7 @@ heatmap_png
 A MCMC approach was also taken to infer the values that $\beta$ and $\gamma$ might take when given the recovery curve from the simulated outbreaks. The MCMC with 3.5 million iterations took between 20 and 25 hours to run to completion while the MCMC with 17.5 iterations took between 120 and 168 hours (5 to 7 days) to run to completion, with outbreaks with an $R_{0}$ of 1.5 taking longer to finish than outbreaks with an $R_{0}$ of 6. The time taken for the MCMC to finish also increased with population size.
 
 For the outbreaks where population size was 50 and the MCMC was run for 3.5 million iterations, though the post-burn-in $\beta$ 95\% credible intervals include the true value for all outbreaks, simulation 5 from the outbreaks with an $R_{0}$ of 1.5 remained below the true $\gamma$ value (Table 5). The 95\% credible intervals for $\beta$ and $\gamma$ for outbreaks where $R_{0}$ is 6 all include the true values. 
+\newline
 
 <<MCMC_result_table_50, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1995,9 +2001,9 @@ tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\
 align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
-
-The 95\% credible intervals for $\beta$ and $\gamma$ for outbreaks with a population size of 200 and 3.5 million MCMC iterations all include the true values, except for the interval for $\beta$ in simulation 4, for the outbreakswhere $R_{0}$ is 1.5 (Table 6).
-
+\clearpage
+The 95\% credible intervals for $\beta$ and $\gamma$ for outbreaks with a population size of 200 and 3.5 million MCMC iterations all include the true values, except for the interval for $\beta$ in simulation 4, for the outbreaks where $R_{0}$ is 1.5 (Table 6).
+\newline
 <<MCMC_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
 burnIn <- 3500 * 0.23
@@ -2143,6 +2149,7 @@ print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FAL
 @
 
 For outbreaks with an $R_{0}$ of 1.5 and a population size of 1000 for the 3.5 million iteration MCMC, the 95\% credible interval for $\beta$ included the true value for all five simulations, but for $\gamma$, simulations 1 and 5 had intervals that were below the true value (Table 7). For outbreaks with an $R_{0}$ of 6, the 95\% credible intervals for $\gamma$ were all below the true value, while the credible intervals for $\beta$ were below the true value for simulations 1, 4, and 5, with the remaining two simulations including the true value in their credible intervals (Table 7).  
+\newline
 
 <<MCMC_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -2700,8 +2707,9 @@ tab <- xtable(mcmc_results_table, digits = c(1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2), c
 align(tab) <- "lllllllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
-The traces for $\beta$ and $\gamma$ for the first simulation of each population size and $R_{0}$ combination suggest that the MCMC had not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Fig. 7, Fig. 8). The $\beta$ trace for population size 50 and $R_{0}$ of 6 looks the closest to having reached convergence (Fig. 7D), while the traces for the largest population size (Fig. 7C, F) look to be the furthest from being converged, which is in concordance with the $\beta$ 95\% credible intervals for population size 1000 often excluding the true $\beta$ value in Table 4. 
+\newpage
+The traces for $\beta$ and $\gamma$ for the first simulation of each population size and $R_{0}$ combination suggest that the MCMC had not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Fig. 7, Fig. 8). The $\beta$ trace for population size 50 and $R_{0}$ of 6 looks the closest to having reached convergence (Fig. 7D), while the traces for the largest population size (Fig. 7C, F) look to be the furthest from being converged, which is in concordance with the $\beta$ 95\% credible intervals for population size 1000 often excluding the true $\beta$ value in Table 7. 
+\newline
 
 \begin{figure}[!h]
 \begin{center}
@@ -3062,7 +3070,7 @@ tab <- xtable(mcmc_results_table, digits = 0, caption = "Log(likelihood) values 
 align(tab) <- "lllllllllll"
 print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
 @
-
+\newpage
 The range of suggested infectious curves after the burn-in period in general overlaps with the true simulated infectious curve (Fig. 9). An exception for this is one of the unconverged MCMCs in Figure 7F, where the MCMC's augmented infectious curves are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Fig. 9A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Fig. 9A-C and Fig. 9D-F).
 
 \begin{figure}[!h]
@@ -3189,7 +3197,10 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
+\FloatBarrier
+\newpage
 For the 17.5 million iteration MCMCs conducted for the outbreaks with a population size 1000 and an $R_{0}$ of 1.5, only simulations 1 and 5 included the true $\beta$, while the other three simulations overestimated the value (Table 8). For $\gamma$, simulations 1, 4, and 5 include the true $\gamma$ while the other two simulations overestimate it (Table 8). For outbreaks with and $R_{0}$ of 6, the true $\beta$ is included in the 95\% credible interval for all simulations except simulation 3 (Table 8). The true $\gamma$ is not included in the credible intervals of simulations 3 or 4, but is included in the intervals of the other three (Table 8).
+\newline
 
 <<MCMC_result_table_long, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -3430,6 +3441,10 @@ mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
 
 For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
 
+\clearpage
+
+The contour plot in Figure 11 shows how $\beta$ and $\gamma$ correlate for the first simulation of population size 200 and $R_{0}$ of 1.5. The most commonly occurring $\beta$ and $\gamma$ combination is approximately 0.0013 and 0.13 respectively. There is a positive correlation between $\beta$ and $\gamma$ as combinations with both a lower $\beta$ and $\gamma$ appear at a similar density as combinations with a higher $\beta$ and $\gamma$ as is the case for, for example, a combination where $\beta$ is 0.0012 and $\gamma$ is 0.12 and a combination where $\beta$ is 0.0015 and $\gamma$ is 0.16. A similar positive correlation is seen for the other 29 outbreaks.
+
 \begin{figure}
 \begin{center}
 <<mcmcdensityplot, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=10, width=14, fig.cap="Data plot", fig=TRUE>>=
@@ -3453,7 +3468,7 @@ mtext(expression(beta), 2, line = 3, cex = 1.5, outer = FALSE)
 \end{center}
 \end{figure}
 
-The contour plot in Figure 11 shows how $\beta$ and $\gamma$ correlate for the first simulation of population size 200 and $R_{0}$ of 1.5. The most commonly occurring $\beta$ and $\gamma$ combination is approximately 0.0013 and 0.13 respectively. There is a positive correlation between $\beta$ and $\gamma$ as combinations with both a lower $\beta$ and $\gamma$ appear at a similar density as combinations with a higher $\beta$ and $\gamma$ as is the case for, for example, a combination where $\beta$ is 0.0012 and $\gamma$ is 0.12 and a combination where $\beta$ is 0.0015 and $\gamma$ is 0.16. A similar positive correlation is seen for the other 29 outbreaks.
+
 % Make histogram comparisons of beta and gamma ranges that compares RE and MCMC for example outbreaks? 
 % Plot: Histograms comparing RE and MCMC beta and gamma for 6 example scenarios
 <<dataplot7, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.width=6, fig.cap="Data plot", fig=TRUE>>=
@@ -3583,6 +3598,7 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
+\clearpage
 A similar situation is seen for the $\gamma$ posterior traces (Figure 13), the traces stayed mostly in place for for the largest population sizes and for the outbreak with an $R_{0}$ of 6 and population size of 50 (Fig. 13 C, D, F). The other two population sizes for outbreaks with an $R_{0}$ of 1.5 and for the outbreak where $R_{0}$ was 6 and population size 200 saw increases in $\gamma$ over the course of the 2.5 million iterations (Fig. 13 A-B, E). Also, as with the $\beta$ posteriors, the $\gamma$ posteriors' stickiness increased with increasing population size.
 
 \begin{figure}[!h]
@@ -3645,7 +3661,8 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \caption{Traces of posterior $\gamma$, recovery rate, values throughout a 2.5 million iteration MCMC with a deterministic process. Panels A-C are for outbreaks with an $R_{0}$ of 1.5, while panels D-F are for outbreaks with an $R_{0}$ of 6. Panels A and D have a population size of 50, panels B and E have a population size of 200, and panels C and F have a population size of 1000.}
 \end{center}
 \end{figure}
-
+\FloatBarrier
+\clearpage
 When investigating the infectious curves produced by the inferred $\beta$ and $\gamma$ values, it can be seen that the location of the peak is misjudged for population size 50 and 1000 when $R_{0}$ is 1.5 (Fig. 14 A, C), with the height of the peak also being underestimated for population size 50. For population size 200 and $R_{0}$ of 1.5 the height of the peak is underestimated, but its location is more similar to the true simulated peak (Fig 14B). For the outbreaks with an $R_{0}$ of 6, the size of the peak is greatly underestimated for population sizes 50 and 200, though the location of the peak in time is not fully dissimilar from the true peak's location (Fig. 14D-E). For population size 1000, the size of the peak is underestimated, but not as greatly as for the other two population sizes, though the location of the peak in time is estimated to be earlier than for the true curve (Fig. 14F).  
 
 \begin{figure}[!h]
@@ -3802,7 +3819,7 @@ The MCMC with a deterministic process for inference did not perform as well as t
 
 \subsection{Open questions for discussion}
 Considering that the RE inference method experienced improved $\beta$ and $\gamma$ estimates with increasing population size and higher $R_{0}$, it could be that eventually the RE inference method may consistently include the true $\beta$ and $\gamma$ values if investigated for even higher population sizes and $R_{0}$s. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the narrower 95\% intervals for a much quicker running time might become a reasonable option. Further investigations with larger population sizes and $R_{0}$s could be conducted to gain a better understanding of when this trade-off would become cost effective. The MCMC inference method devised in this project is also not optimised for efficiency, so it is possible that the running time of the MCMC could be shortened in further work.
-
+\clearpage
 \subsection{Limitations}
 Only one type of compartmental model, a closed SIR model, was considered in this project. Additionally, the model is very simple with no spatial modelling or other complicating matters. It could be argued though that if the aim of a study is to conduct complicated models including spatial aspects, a stochastic process must be used regardless and thus the question of whether or not to use a deterministic inference method becomes obsolete. 
 
