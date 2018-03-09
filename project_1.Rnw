@@ -16,7 +16,7 @@
 \usepackage{setspace, caption}
 \captionsetup{font=doublespacing} %double-spaced float captions
 \doublespacing %double-spaced document
-\setlength{\parindent}{1em} % 5 space indent
+\setlength{\parindent}{3em} % 5 space indent
 
 % change font to Arial
 \renewcommand{\rmdefault}{phv} % Arial
@@ -44,6 +44,8 @@
 \usepackage{float} % for forcing figure placement
 
 \usepackage{fontspec}
+
+\usepackage[section]{placeins}
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Start of document %%
@@ -231,14 +233,21 @@ P(\theta \mid x) \propto P(x \mid \theta)P(\theta)
 \end{align*}
 \noindent Here the prior distribution is defined as $P(\theta)$, the probability distribution of the values that the parameters in question might take before the data is observed. This is defined by the investigators' best guess for the values that parameters might take before taking into consideration the new data. $P(x \mid \theta)$, the likelihood function, refers to the probability of the observed data, $x$ occurring given the parameter value, $\theta$. The likelihood function can be multiplied by the prior distribution to produce the posterior distribution, $P(\theta \mid x)$, the probability of the parameter value given the data. 
 
-The Markov Chain Monte Carlo inference method is rooted in Bayesian statistics. A random walk MCMC works by first setting a starting value for the parameter in question, and then randomly choosing another parameter value from a proposal distribution devised by the investigator. Such a distribution may for example be Normal with a mean of the current parameter value and a predefined standard deviation. It then calculates the posterior distribution for both the current parameter value and the proposed parameter value. The resulting posterior distributions are then compared by dividing the proposed posterior by the current posterior. If the resulting proportion is greater than 1, it implies that the proposed parameter value is more probable given the observed data and will take the place of the starting value as the new baseline parameter value. This will then be compared to a new proposed parameter value in the next iteration of the MCMC. A worse proposed posterior than current posterior is accepted by choosing a random number from a uniform distribution between 0 and 1 and accepting the proposed posterior if it is greater than this random number. This will lead to the proposed posterior to sometimes being accepted even if the proposed to baseline posterior ratio is less than 1. The aim of this is to capture the uncertainty around the values that the inferred parameter might take. MCMC methods can also used for estimating an outbreak curve from a recovery curve \citep{ONeill1999}.
+The Markov Chain Monte Carlo inference method is rooted in Bayesian statistics. The uses of MCMC for parameter inference were first discovered in the late 20th century by Gibson and Renshaw \citep{Gibson1998}. The method was quickly picked up by the infectious disease epidemiology community and its potential for infectious disease modelling was explored for multiple diseases and datasets, such as influenza and smallpox \citep{ONeill2002}. A random walk MCMC works by first setting a starting value for the parameter in question, and then randomly choosing another parameter value from a proposal distribution devised by the investigator. Such a distribution may for example be Normal with a mean of the current parameter value and a predefined standard deviation. It then calculates the posterior distribution for both the current parameter value and the proposed parameter value. 
+
+The resulting posterior distributions are then compared by the usage of the Metropolis-Hastings ratio:
+\begin{align*}
+min \Big(1, \frac{p(\theta' \mid x)}{p(\theta \mid x)} \frac{q(\thata \mid \theta')}{q(\theta' \mid \theta)}\Big)
+\end{align*}
+Here p refers to the posterior distribution and q to the proposal distribution, $\theta$ refers to the current parameter value, $\theta'$ refers to the proposed parameter value, and $x$ refers to the observed data. If the resulting proportion is greater than 1, it implies that the proposed parameter value is more probable given the observed data and will take the place of the starting value as the new baseline parameter value. This will then be compared to a new proposed parameter value in the next iteration of the MCMC. To capture the uncertainty around the values that the inferred parameter might take, a worse proposed posterior than current posterior is accepted by choosing a random number from a uniform distribution between 0 and 1 and accepting the proposed posterior if it is greater than this random number. This will lead to the proposed posterior to sometimes being accepted even if the proposed to baseline posterior ratio is less than 1. 
+
+If working with incomplete datasets, MCMC methods can be adjusted to still estimate the ranges of values a parameter might take, for example in a case where the dates of infection are not known but the dates of recovery are. Firstly, the infectious period can be assumed to be constant and thus an infectious curve can be calculated for each proposed change in the rates of infection and recovery \citep{Finkenstadt2000,Finkenstadt2002}. Alternatively, the unknown infection data can be included as an additional parameter in the MCMC \citep{ONeill1999}. A more abstract method where the whole discrete stochastic SIR model is approximated throught a diffusion process can also be embarked upon to estimate the values of unknown parameters \citep{Cauchemez2008}.
 
 Stochastic methods, such as the MCMC, can be more difficult to implement than deterministic ones, such as the RE method. In order to have an optimally working MCMC, it may for example take multiple attempts to calibrate the proposal function to result in a sufficient acceptance rate of proposed parameters. Additionally, running a MCMC to completion often takes longer than for a RE. Also, constructing a MCMC from scratch is more demanding than constructing a RE, due to there being many distributions, the prior, likelihood, and proposal, to consider for each parameter of interest.  Also, the quality and quantity of the data available for model parameter inference should be considered, though the effects of data quality on inference will not be explored in this project. 
 % If many factors are unknown, a complex stochastic modelling method making a multitude of assumptions may perform worse than a simpler deterministic model (mention HIV modelling or FMD example? - May 2003). 
 % Find a couple of examples where the model used for the task may not have been the best?
 % May (2003) Uses and abuses of mathematics in biology : Complex HIV model lost to a less complex model because the assumptions it made were wrong 
 
-\newpage
 \subsection{Aims of this project}
 In this project, I compare the parameter estimates of stochastic and deterministic models under different outbreak settings with varying population sizes and basic reproduction numbers($R_{0}$). The aim of this is to elucidate the conditions under which a deterministic inference method, such as the residual error method, might be used just as well as a stochastic one, such as the MCMC, if one is trying to quantify the range of values that a parameter might take.
 
@@ -638,12 +647,13 @@ text(0.97*1000, 0.92*170, "C", cex = letter_size)
 \end{center}
 \end{figure}
 
+\FloatBarrier
 %%%%%%%%%%
+\clearpage
 \newpage
 \subsection{Residual error}
 The RE inference method was used to infer the values that $\beta$ and $\gamma$ might take when given the the recovery curves from the 30 simulated outbreaks. Calculating the point estimate and bootstrapping 1000 times took approximately 20 minutes for each outbreak scenario.
-
-For an $R_{0}$ of 1.5, the difference between the lower and upper bounds of the 95\% interval observed for $\beta$ and $\gamma$ were often wider than the differences for outbreaks with an $R_{0}$ of 6 (Table 1, Table 2, Table 3). This can also be seen in the exemplifying graphs (Fig. 5), where the infectious and recovery curves for the point estimate and bootstrapped parameter values for outbreaks with the larger $R_{0}$ are more consistent with each other with less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping. It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Fig. 5D-F). The $\beta$ estimates lower with increasing population size due to $\beta$ referring to the individual-level rate of infection (Table 1, Table 2, Table 3). 
+\newline
 
 \begin{figure}[!h]
 \begin{center}
@@ -816,8 +826,12 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 \caption{Comparing the true simulated infected (red line) and recovered curves (orange line) to those constructed from the point estimates and bootstrapped per capita rate of infection ($\beta$) and recovery rate ($\gamma$) of the RE method. The black lines refer to the deterministic infectious (dashed) and recovered (dotted) curves based on the $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic infectious (dark grey) and recovered (light grey) curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Panels A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Panels A and D represent a population size of 50, panels B and E represent a population size of 200, and panels C and F represent a population size of 1000.}
 \end{center}
 \end{figure}
+\clearpage
 
-Tables 1, 2, and 3 show that when comparing the output of the residual error method to the parameter values used to generate the simulations that the RE method was being fit to, the RE inference method consistently overestimates the values that $\beta$ might take for all population sizes when $R_{0}$ is 1.5 and consistently underestimates $\beta$ values when $R_{0}$ is 6. The inferred values of $\gamma$, on the other hand, include the true value used for the generating the simulations more often than for $\beta$, though levels of success vary with $R_{0}$ and population size (Table 1, 2, 3).
+The exemplifying graphs visualising the estimated numbers of infected and recovered individuals over time from the point estimates and results of bootstrapping for the first simulation of every outbrek (Fig. 5), show that the infectious and recovery curves for outbreaks with the larger $R_{0}$ are more consistent with each other and exhibit less variation in the curves amongst $\beta$ and $\gamma$ values obtained through bootstrapping  than outbreaks with an $R_{0}$ of 1.5. It also seems that the deterministic infectious curves resulting from the point estimate values of $\beta$ and $\gamma$ consistently result in an underestimation of the peak of the outbreak for the scenarios where $R_{0}$ is 6 (Fig. 5D-F). 
+
+Tables 1, 2, and 3 show that when comparing the output of the residual error method to the parameter values used to generate the simulations that the RE method was being fit to, the RE inference method consistently overestimated the values that $\beta$ might take for all population sizes when $R_{0}$ is 1.5 and consistently underestimated $\beta$ when $R_{0}$ is 6. The true $\beta$ lowers with increasing population size due to $\beta$ referring to the individual-level rate of infection (Tables 1-3). The inferred values of $\gamma$, on the other hand, include the true value used for the generating the simulations more often than for $\beta$, though levels of success vary with $R_{0}$ and population size (Tables 1-3). The difference between the lower and upper bounds of the 95\% interval observed for $\beta$ and $\gamma$ were often wider than the differences for outbreaks with an $R_{0}$ of 6 (Tables 1-3).
+\newline
 
 <<RE_result_table_50, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -961,9 +975,9 @@ align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
-For population size 50, the 95\% interval overestimates the true $\beta$ value for all five simulations and one out of five simulations when $R_{0}$ is 1.5 and 6 respectively (Table 1). The remaining four simulations for the higher $R_{0}$, on the other hand, underestimate $\beta$. Simulations 1 and 4 for the outbreaks where $R_{0}$ of 1.5 overestimate $\gamma$, with the remaining three simulations underestimating $\gamma$. $\gamma$ is included in the 95\% intervals for simulations 1 and 4 for the outbreaks with a $R_{0}$ of 6, while simulations 2 and 5 overestimate $\gamma$ and simulation 3 underestimates it.
+For population size 50, the 95\% interval overestimated the true $\beta$ value for all five simulations and one out of five simulations when $R_{0}$ is 1.5 and 6 respectively (Table 1). The remaining four simulations for the higher $R_{0}$, on the other hand, underestimated $\beta$. Simulations 1 and 4 for the outbreaks where $R_{0}$ of 1.5 overestimated $\gamma$, with the remaining three simulations underestimating $\gamma$. $\gamma$ was included in the 95\% intervals for simulations 1 and 4 for the outbreaks with a $R_{0}$ of 6, while simulations 2 and 5 overestimated $\gamma$ and simulation 3 underestimated it.
 
-For outbreaks with a population size of 200, the 95\% interval again overerestimates $\beta$ for four out of five outbreaks where $R_{0}$ is 1.5, though simulation 1 includes the true value in its interval (Table 2). For outbreaks with an $R_{0}$ of 6, $\beta$ is underestimated for all five simulations (Table 2). $\gamma$ is underestimated for two simulations, overestimated for one simulation, and is included in the 95\% interval for two simulations for the outbreaks where $R_{0}$ is 1.5. For outbreaks where $R_{0}$ is 6, $\gamma$ is included in the 95\% interval for one simulation while the remaining four simulations' intervals overestimate $\gamma$. 
+For outbreaks with a population size of 200, the 95\% interval again overerestimated $\beta$ for four out of five outbreaks where $R_{0}$ is 1.5, though simulation 1 included the true value in its interval (Table 2). For outbreaks with an $R_{0}$ of 6, $\beta$ was underestimated for all five simulations (Table 2). $\gamma$ was underestimated for two simulations, overestimated for one simulation, and is included in the 95\% interval for two simulations for the outbreaks where $R_{0}$ is 1.5. For outbreaks where $R_{0}$ is 6, $\gamma$ was included in the 95\% interval for one simulation while the remaining four simulations' intervals overestimated $\gamma$. 
 
 <<RE_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1107,7 +1121,7 @@ align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
-$\beta$ is also overestimated for most of the outbreaks where $R_{0}$ is 1.5 and the population size is 1000, only simulation 1's 95\% interval includes the true $\beta$ value (Table 3). Three out of the five simulations include the true $\gamma$ value in their 95\% intervals. When $R_{0}$ is 6, $\beta$ is underestimated for all five simulations, though all of them do include the true $\gamma$ value in their 95\% intervals (Table 3).  
+$\beta$ was also overestimated for most of the outbreaks where $R_{0}$ was 1.5 and the population size was 1000. Only simulation 1's 95\% interval included the true $\beta$ value (Table 3). Three out of the five simulations included the true $\gamma$ value in their 95\% intervals. When $R_{0}$ was 6, $\beta$ was underestimated for all five simulations, though all of them did include the true $\gamma$ value in their 95\% intervals (Table 3).  
 
 <<RE_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -1251,6 +1265,115 @@ align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
+The sum of squared differences between the model and the true recovery curve increases with population size (Table 4). Additionally, the sum of squared differences for the point estimates tend to be lower for the higher $R_{0}$ than the lower $R_{0}$ for the populations (Table 4). 
+
+<<RE_result_table_RE, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
+# Making Residual Error table
+RE_results_table <- array(NA, dim =c(10,5))
+
+# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
+dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
+
+re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_14.csv", sep=""))
+re_pop50_seed2 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_22.csv", sep=""))
+re_pop50_seed3 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_40.csv", sep=""))
+re_pop50_seed4 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_43.csv", sep=""))
+re_pop50_seed5 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_95.csv", sep=""))
+re_pop200_seed1 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_81.csv", sep=""))
+re_pop200_seed2 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_93.csv", sep=""))
+re_pop200_seed3 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_102.csv", sep=""))
+re_pop200_seed4 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_202.csv", sep =""))
+re_pop200_seed5 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_246.csv", sep =""))
+re_pop1000_seed1 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_177.csv", sep =""))
+re_pop1000_seed2 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_246.csv", sep =""))
+re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_469.csv", sep =""))
+re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_520.csv", sep =""))
+re_pop1000_seed5 <- read.csv(paste(dir,"re_pop1000_R1.5_g0.15_784.csv", sep =""))
+
+# Pop = 50, R0 = 1.5
+RE_results_table[1,1] <- 1
+RE_results_table[2,1] <- 2
+RE_results_table[3,1] <- 3
+RE_results_table[4,1] <- 4
+RE_results_table[5,1] <- 5
+RE_results_table[1,2] <- re_pop50_seed1$RE[1]
+RE_results_table[2,2] <- re_pop50_seed2$RE[1]
+RE_results_table[3,2] <- re_pop50_seed3$RE[1]
+RE_results_table[4,2] <- re_pop50_seed4$RE[1]
+RE_results_table[5,2] <- re_pop50_seed5$RE[1]
+# Pop = 200, R0 = 1.5
+RE_results_table[1,3] <- re_pop200_seed1$RE[1]
+RE_results_table[2,3] <- re_pop200_seed2$RE[1]
+RE_results_table[3,3] <- re_pop200_seed3$RE[1]
+RE_results_table[4,3] <- re_pop200_seed4$RE[1]
+RE_results_table[5,3] <- re_pop200_seed5$RE[1]
+# Pop = 1000, R0 = 1.5
+RE_results_table[1,4] <- re_pop1000_seed1$RE[1]
+RE_results_table[2,4] <- re_pop1000_seed2$RE[1]
+RE_results_table[3,4] <- re_pop1000_seed3$RE[1]
+RE_results_table[4,4] <- re_pop1000_seed4$RE[1]
+RE_results_table[5,4] <- re_pop1000_seed5$RE[1]
+
+# R0 = 6 Gamma = 0.15
+re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R6_g0.15_1.csv", sep =""))
+re_pop50_seed2 <- read.csv(paste(dir, "re_pop50_R6_g0.15_2.csv", sep =""))
+re_pop50_seed3 <- read.csv(paste(dir, "re_pop50_R6_g0.15_3.csv", sep =""))
+re_pop50_seed4 <- read.csv(paste(dir, "re_pop50_R6_g0.15_4.csv", sep =""))
+re_pop50_seed5 <- read.csv(paste(dir, "re_pop50_R6_g0.15_5.csv", sep =""))
+re_pop200_seed1 <- read.csv(paste(dir, "re_pop200_R6_g0.15_6.csv", sep =""))
+re_pop200_seed2 <- read.csv(paste(dir, "re_pop200_R6_g0.15_7.csv", sep =""))
+re_pop200_seed3 <- read.csv(paste(dir, "re_pop200_R6_g0.15_8.csv", sep =""))
+re_pop200_seed4 <- read.csv(paste(dir, "re_pop200_R6_g0.15_9.csv", sep =""))
+re_pop200_seed5 <- read.csv(paste(dir, "re_pop200_R6_g0.15_10.csv", sep =""))
+re_pop1000_seed1 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_11.csv", sep =""))
+re_pop1000_seed2 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_12.csv", sep =""))
+re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_13.csv", sep =""))
+re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_14.csv", sep =""))
+re_pop1000_seed5 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_15.csv", sep =""))
+
+RE_results_table[6,1] <- 1
+RE_results_table[7,1] <- 2
+RE_results_table[8,1] <- 3
+RE_results_table[9,1] <- 4
+RE_results_table[10,1] <- 5
+# Pop = 50, R0 = 1.5
+RE_results_table[6,2] <- re_pop50_seed1$RE[1]
+RE_results_table[7,2] <- re_pop50_seed2$RE[1]
+RE_results_table[8,2] <- re_pop50_seed3$RE[1]
+RE_results_table[9,2] <- re_pop50_seed4$RE[1]
+RE_results_table[10,2] <- re_pop50_seed5$RE[1]
+# Pop = 200, R0 = 1.5
+RE_results_table[6,3] <- re_pop200_seed1$RE[1]
+RE_results_table[7,3] <- re_pop200_seed2$RE[1]
+RE_results_table[8,3] <- re_pop200_seed3$RE[1]
+RE_results_table[9,3] <- re_pop200_seed4$RE[1]
+RE_results_table[10,3] <- re_pop200_seed5$RE[1]
+# Pop = 1000, R0 = 1.5
+RE_results_table[6,4] <- re_pop1000_seed1$RE[1]
+RE_results_table[7,4] <- re_pop1000_seed2$RE[1]
+RE_results_table[8,4] <- re_pop1000_seed3$RE[1]
+RE_results_table[9,4] <- re_pop1000_seed4$RE[1]
+RE_results_table[10,4] <- re_pop1000_seed5$RE[1]
+
+##############################
+# Making Residual Error table
+library('xtable')
+# options(xtable.floating = FALSE)
+# options(xtable.timestamp = "")
+
+rownames(RE_results_table) <- c("1.5","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
+
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& \\multicolumn{1}{c}{}  & \\multicolumn{1}{c}{N = 50}  & \\multicolumn{1}{c}{N = 200} & \\multicolumn{1}{c}{N = 1000} \\\\\n", "$R_{0}$ & sim & PE & PE & PE \\\\\n")
+
+tab <- xtable(RE_results_table, digits = 0, caption = "Residual error values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
+align(tab) <- "llllll"
+print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
+@
+
+\FloatBarrier
+\clearpage
 % Discarded beta and gamma tables
 <<RE_result_table_beta, cache=FALSE, echo=FALSE, eval=FALSE, results=tex>>=
 # Making Residual Error table
@@ -1658,12 +1781,12 @@ print(tab, hline.after=c(-1, 0, 12), comment = FALSE, caption.placement = "top",
 @
 % When $R_{0}$ is 6, the inferred 95\% interval for $\gamma$ includes the true value of 0.15 for all five simulations for the population size of 1000, and twice respectively for the population sizes of 50 and 200 (Table 2). For the smaller $R_{0}$ of 1.5, the true $\gamma$ value is included in the 95\% interval three times for the population size of 1000, once for the 200 member population, and zero times for the population size of 50 (Table 2). Whether the $\gamma$ ranges that did not include the true $\gamma$ value are over- or underestimating can vary even within a given $R_{0}$ and population size. For the population size of 50 for both $R_{0}$s, the 95\% intervals both over- and underestimate the ranges of values $\gamma$ may take. For the population size of 200, $\gamma$ is always overestimated when $R_{0}$ is 6, but is both over- and underestimated when $R_{0}$ is 1.5. When $R_{0}$ is 1.5 and the population size is 1000, the $\gamma$ values are overestimated.   
 
-The heatmap in Figure 6 shows the REs for different combinations of $\beta$ and $\gamma$ when optimising to the recovery curve of simulation 1 with population size 200 and $R_{0}$ of 1.5. The trend suggests that $\beta$ and $\gamma$ are positively correlated, implying that the REs remain lower when both $\beta$ and $\gamma$ values are either lowered or increased. Similar trends in the relationship between $\beta$ and $\gamma$ are observed for the other 29 outbreaks.
+The heatmap in Figure 6 shows the REs for different combinations of $\beta$ and $\gamma$ when optimising to the recovery curve of simulation 1 with population size 200 and $R_{0}$ of 1.5. The trend suggests that $\beta$ and $\gamma$ are positively correlated, implying that the REs remain lower when both $\beta$ and $\gamma$ values are either lowered or increased. Similar trends in the relationship between $\beta$ and $\gamma$ were observed for the other 29 outbreaks.
 
 \begin{figure}[!h]
 \begin{center}
 \includegraphics[width=0.4\textwidth]{RE_pop200_R1.5_81_heatmap}
-\caption{Heatmap showing squared error for different $\beta$, per capita rate of infection, and $\gamma$, recovery rate, combinations for simulation 1 with a population size of 200 and an $R_{0}$ of 1.5.}
+\caption{Heatmap showing residual error for different $\beta$, per capita rate of infection, and $\gamma$, recovery rate, combinations for simulation 1 with a population size of 200 and an $R_{0}$ of 1.5.}
 \end{center}
 \end{figure}
 <<heatmap, cache=TRUE, echo=FALSE, eval=FALSE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
@@ -1719,115 +1842,9 @@ heatmap_png <- export(plot_heatmap, file = "plot_heatmap.png")
 heatmap_png
 @
 
-The sum of squared differences between the model and the true recovery curve increases with population size (Table 4). Additionally, the sum of squared differences for the point estimates tend to be lower for the higher $R_{0}$ than the lower $R_{0}$ for the populations (Table 4). 
-
-<<RE_result_table_RE, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
-# Making Residual Error table
-RE_results_table <- array(NA, dim =c(10,5))
-
-# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
-dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
-
-re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_14.csv", sep=""))
-re_pop50_seed2 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_22.csv", sep=""))
-re_pop50_seed3 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_40.csv", sep=""))
-re_pop50_seed4 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_43.csv", sep=""))
-re_pop50_seed5 <- read.csv(paste(dir, "re_pop50_R1.5_g0.15_95.csv", sep=""))
-re_pop200_seed1 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_81.csv", sep=""))
-re_pop200_seed2 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_93.csv", sep=""))
-re_pop200_seed3 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_102.csv", sep=""))
-re_pop200_seed4 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_202.csv", sep =""))
-re_pop200_seed5 <- read.csv(paste(dir, "re_pop200_R1.5_g0.15_246.csv", sep =""))
-re_pop1000_seed1 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_177.csv", sep =""))
-re_pop1000_seed2 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_246.csv", sep =""))
-re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_469.csv", sep =""))
-re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R1.5_g0.15_520.csv", sep =""))
-re_pop1000_seed5 <- read.csv(paste(dir,"re_pop1000_R1.5_g0.15_784.csv", sep =""))
-
-# Pop = 50, R0 = 1.5
-RE_results_table[1,1] <- 1
-RE_results_table[2,1] <- 2
-RE_results_table[3,1] <- 3
-RE_results_table[4,1] <- 4
-RE_results_table[5,1] <- 5
-RE_results_table[1,2] <- re_pop50_seed1$RE[1]
-RE_results_table[2,2] <- re_pop50_seed2$RE[1]
-RE_results_table[3,2] <- re_pop50_seed3$RE[1]
-RE_results_table[4,2] <- re_pop50_seed4$RE[1]
-RE_results_table[5,2] <- re_pop50_seed5$RE[1]
-# Pop = 200, R0 = 1.5
-RE_results_table[1,3] <- re_pop200_seed1$RE[1]
-RE_results_table[2,3] <- re_pop200_seed2$RE[1]
-RE_results_table[3,3] <- re_pop200_seed3$RE[1]
-RE_results_table[4,3] <- re_pop200_seed4$RE[1]
-RE_results_table[5,3] <- re_pop200_seed5$RE[1]
-# Pop = 1000, R0 = 1.5
-RE_results_table[1,4] <- re_pop1000_seed1$RE[1]
-RE_results_table[2,4] <- re_pop1000_seed2$RE[1]
-RE_results_table[3,4] <- re_pop1000_seed3$RE[1]
-RE_results_table[4,4] <- re_pop1000_seed4$RE[1]
-RE_results_table[5,4] <- re_pop1000_seed5$RE[1]
-
-# R0 = 6 Gamma = 0.15
-re_pop50_seed1 <- read.csv(paste(dir, "re_pop50_R6_g0.15_1.csv", sep =""))
-re_pop50_seed2 <- read.csv(paste(dir, "re_pop50_R6_g0.15_2.csv", sep =""))
-re_pop50_seed3 <- read.csv(paste(dir, "re_pop50_R6_g0.15_3.csv", sep =""))
-re_pop50_seed4 <- read.csv(paste(dir, "re_pop50_R6_g0.15_4.csv", sep =""))
-re_pop50_seed5 <- read.csv(paste(dir, "re_pop50_R6_g0.15_5.csv", sep =""))
-re_pop200_seed1 <- read.csv(paste(dir, "re_pop200_R6_g0.15_6.csv", sep =""))
-re_pop200_seed2 <- read.csv(paste(dir, "re_pop200_R6_g0.15_7.csv", sep =""))
-re_pop200_seed3 <- read.csv(paste(dir, "re_pop200_R6_g0.15_8.csv", sep =""))
-re_pop200_seed4 <- read.csv(paste(dir, "re_pop200_R6_g0.15_9.csv", sep =""))
-re_pop200_seed5 <- read.csv(paste(dir, "re_pop200_R6_g0.15_10.csv", sep =""))
-re_pop1000_seed1 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_11.csv", sep =""))
-re_pop1000_seed2 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_12.csv", sep =""))
-re_pop1000_seed3 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_13.csv", sep =""))
-re_pop1000_seed4 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_14.csv", sep =""))
-re_pop1000_seed5 <- read.csv(paste(dir, "re_pop1000_R6_g0.15_15.csv", sep =""))
-
-RE_results_table[6,1] <- 1
-RE_results_table[7,1] <- 2
-RE_results_table[8,1] <- 3
-RE_results_table[9,1] <- 4
-RE_results_table[10,1] <- 5
-# Pop = 50, R0 = 1.5
-RE_results_table[6,2] <- re_pop50_seed1$RE[1]
-RE_results_table[7,2] <- re_pop50_seed2$RE[1]
-RE_results_table[8,2] <- re_pop50_seed3$RE[1]
-RE_results_table[9,2] <- re_pop50_seed4$RE[1]
-RE_results_table[10,2] <- re_pop50_seed5$RE[1]
-# Pop = 200, R0 = 1.5
-RE_results_table[6,3] <- re_pop200_seed1$RE[1]
-RE_results_table[7,3] <- re_pop200_seed2$RE[1]
-RE_results_table[8,3] <- re_pop200_seed3$RE[1]
-RE_results_table[9,3] <- re_pop200_seed4$RE[1]
-RE_results_table[10,3] <- re_pop200_seed5$RE[1]
-# Pop = 1000, R0 = 1.5
-RE_results_table[6,4] <- re_pop1000_seed1$RE[1]
-RE_results_table[7,4] <- re_pop1000_seed2$RE[1]
-RE_results_table[8,4] <- re_pop1000_seed3$RE[1]
-RE_results_table[9,4] <- re_pop1000_seed4$RE[1]
-RE_results_table[10,4] <- re_pop1000_seed5$RE[1]
-
-##############################
-# Making Residual Error table
-library('xtable')
-# options(xtable.floating = FALSE)
-# options(xtable.timestamp = "")
-
-rownames(RE_results_table) <- c("1.5","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
-
-addtorow <- list()
-addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{1}{c}{}  & \\multicolumn{1}{c}{N = 50}  & \\multicolumn{1}{c}{N = 200} & \\multicolumn{1}{c}{N = 1000} \\\\\n", "$R_{0}$ & sim & PE & PE & PE \\\\\n")
-
-tab <- xtable(RE_results_table, digits = 0, caption = "Residual error values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
-align(tab) <- "llllll"
-print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
-@
-
+\FloatBarrier
 %%%%%%%%%%
-
+\clearpage
 \newpage
 \subsection{Markov Chain Monte Carlo}
 
@@ -3317,8 +3334,6 @@ align(tab) <- "llllllll"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
-For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
-
 \begin{figure}[!h]
 \begin{center}
 <<longmcmcplot, cache=FALSE, echo=FALSE, eval=TRUE, dpi=100, height=13, width=17, fig.cap="Data plot", fig=TRUE>>=
@@ -3413,7 +3428,7 @@ mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
 \end{center}
 \end{figure}
 
-The contour plot in Figure 11 shows how $\beta$ and $\gamma$ correlate for the first simulation of population size 200 and $R_{0}$ of 1.5. The most commonly occurring $\beta$ and $\gamma$ combination is approximately 0.0013 and 0.13 respectively. There is a positive correlation between $\beta$ and $\gamma$ as combinations with both a lower $\beta$ and $\gamma$ appear at a similar density as combinations with a higher $\beta$ and $\gamma$ as is the case for, for example, a combination where $\beta$ is 0.0012 and $\gamma$ is 0.12 and a combination where $\beta$ is 0.0015 and $\gamma$ is 0.16. A similar positive correlation is seen for the other 29 outbreaks.
+For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
 
 \begin{figure}
 \begin{center}
@@ -3438,6 +3453,7 @@ mtext(expression(beta), 2, line = 3, cex = 1.5, outer = FALSE)
 \end{center}
 \end{figure}
 
+The contour plot in Figure 11 shows how $\beta$ and $\gamma$ correlate for the first simulation of population size 200 and $R_{0}$ of 1.5. The most commonly occurring $\beta$ and $\gamma$ combination is approximately 0.0013 and 0.13 respectively. There is a positive correlation between $\beta$ and $\gamma$ as combinations with both a lower $\beta$ and $\gamma$ appear at a similar density as combinations with a higher $\beta$ and $\gamma$ as is the case for, for example, a combination where $\beta$ is 0.0012 and $\gamma$ is 0.12 and a combination where $\beta$ is 0.0015 and $\gamma$ is 0.16. A similar positive correlation is seen for the other 29 outbreaks.
 % Make histogram comparisons of beta and gamma ranges that compares RE and MCMC for example outbreaks? 
 % Plot: Histograms comparing RE and MCMC beta and gamma for 6 example scenarios
 <<dataplot7, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.width=6, fig.cap="Data plot", fig=TRUE>>=
@@ -3496,7 +3512,9 @@ abline(v = mean(mcmc_R1.5_pop1000_seed1$beta[-(1:burnIn)]), col = "red")
 box()
 @
 
+\FloatBarrier
 %%%%%%%%%%
+\clearpage
 \newpage
 \subsection{Markov Chain Monte Carlo with a partly deterministic process}
 
@@ -3762,10 +3780,11 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 \end{center}
 \end{figure}
 
+\FloatBarrier
 %%%%%%%%%%%%%%%%
 %% Discussion %%
 %%%%%%%%%%%%%%%%
-
+\clearpage
 \newpage
 \section{Discussion}
 % 5-10 pages
