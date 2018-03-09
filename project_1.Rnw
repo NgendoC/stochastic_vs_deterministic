@@ -16,6 +16,7 @@
 \usepackage{setspace, caption}
 \captionsetup{font=doublespacing} %double-spaced float captions
 \doublespacing %double-spaced document
+\setlength{\parindent}{1em} % 5 space indent
 
 % change font to Arial
 \renewcommand{\rmdefault}{phv} % Arial
@@ -132,8 +133,8 @@ I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice 
 %%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-
 \section{Table of Contents}
+\vspace{-4em}
 \tableofcontents
 
 %%%%%%%%%%%%%%%%%%%
@@ -287,7 +288,7 @@ I gauged the accuracy of the point estimate by bootstrapping. I achieved this by
 % Use R command citation() to figure out how to cite R packages e.g. citation(package = "deSolve")
 
 %%%%%%%%%%
-
+\newpage
 \subsubsection{Markov Chain Monte Carlo}
 
 I used a Metropolis-Hastings algorithm to infer the values of $\beta$ and $\gamma$ from an incomplete version of the data simulated with the stochastic SIR model I created. 
@@ -308,9 +309,9 @@ Calculating the likelihood using the equation above requires knowledge of the re
 
 Whether or not a proposed change in $\beta$, $\gamma$, or the infectious curve is accepted was calculated with the Metropolis-Hastings ratio:
 \begin{align*}
-min(1, \frac{P(x \mid \theta')}{P(x \mid \theta)} \frac{q(\theta \mid \theta')}{q(\theta' \mid \theta)})
+min \Big(1, \frac{p(\beta', \gamma' \mid b, c)}{p(\beta, \gamma \mid b, c)} \frac{q(\beta, \gamma \mid \beta', \gamma')}{q(\beta', \gamma' \mid \beta, \gamma)}\Big)
 \end{align*}
-where q refers to the proposal distribution. If the ratio is more than 1, the proposed change is accepted while if the ratio is below 1, the proposed change is rejected.
+where p refers to the posterior distribution and q refers to the proposal distribution. If the ratio is more than 1, the proposed change is accepted while if the ratio is below 1, the proposed change is rejected.
 
 As my proposal distributions for $\beta$ and $\gamma$ were Normally distributed with a mean of the current baseline parameter values and a standard deviation of a quarter of the initial $\beta$ and $\gamma$ estimates, the Metropolis-Hastings ratio above is reduced to only the posteriors because $q(\beta' \gamma' \mid \beta, \gamma) = q(\beta, \gamma \mid \beta', \gamma')$. Therefore, the proposed change is accepted if the ratio of the proposed posterior to the existing posterior is higher than a randomly selected number from a uniform distribution between 0 and 1. This means that the move is always accepted if the proposed posterior is greater than the existing posterior, and that less advantageous moves are also occasionally accepted to allow the exploration of uncertainty in the parameter values. 
 
@@ -949,7 +950,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -957,7 +958,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Values for $\\beta$, the rate of infection, and $\\gamma$, the recovery rate, for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 50. PE: point estimate, min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 For population size 50, the 95\% interval overestimates the true $\beta$ value for all five simulations and one out of five simulations when $R_{0}$ is 1.5 and 6 respectively (Table 1). The remaining four simulations for the higher $R_{0}$, on the other hand, underestimate $\beta$. Simulations 1 and 4 for the outbreaks where $R_{0}$ of 1.5 overestimate $\gamma$, with the remaining three simulations underestimating $\gamma$. $\gamma$ is included in the 95\% intervals for simulations 1 and 4 for the outbreaks with a $R_{0}$ of 6, while simulations 2 and 5 overestimate $\gamma$ and simulation 3 underestimates it.
@@ -1095,7 +1096,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -1103,7 +1104,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Values for $\\beta$, the rate of infection, and $\\gamma$, the recovery rate, for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 200. PE: point estimate, sim: simulation, min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 $\beta$ is also overestimated for most of the outbreaks where $R_{0}$ is 1.5 and the population size is 1000, only simulation 1's 95\% interval includes the true $\beta$ value (Table 3). Three out of the five simulations include the true $\gamma$ value in their 95\% intervals. When $R_{0}$ is 6, $\beta$ is underestimated for all five simulations, though all of them do include the true $\gamma$ value in their 95\% intervals (Table 3).  
@@ -1239,7 +1240,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -1247,7 +1248,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "Values for $\\beta$, the per capita rate of infection, and $\\gamma$, the recovery rate, for the RE inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. PE: point estimate, sim: simulation, min: lower bound of 95\\% interval, max: upper bound of 95\\% interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 % Discarded beta and gamma tables
@@ -1661,7 +1662,7 @@ The heatmap in Figure 6 shows the REs for different combinations of $\beta$ and 
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics{heatmap_writeup}
+\includegraphics[width=0.4\textwidth]{RE_pop200_R1.5_81_heatmap}
 \caption{Heatmap showing squared error for different $\beta$, per capita rate of infection, and $\gamma$, recovery rate, combinations for simulation 1 with a population size of 200 and an $R_{0}$ of 1.5.}
 \end{center}
 \end{figure}
@@ -1814,7 +1815,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(RE_results_table) <- c("1.5", ".","..","...","....","6","-","--","---","----")
+rownames(RE_results_table) <- c("1.5","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -1822,7 +1823,7 @@ addtorow$command <- c("& \\multicolumn{1}{c}{}  & \\multicolumn{1}{c}{N = 50}  &
 
 tab <- xtable(RE_results_table, digits = 0, caption = "Residual error values for the RE inference method for each outbreak of a given population size N and R0 of 1.5 or 6. P.E.: point estimate; min: minimum value obtained through bootstrapping, max: maximum obtained through bootstrapping") 
 align(tab) <- "llllll"
-print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 %%%%%%%%%%
@@ -1967,7 +1968,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -1975,7 +1976,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 3.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 50. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% cedible interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 The 95\% credible intervals for $\beta$ and $\gamma$ for outbreaks with a population size of 200 and 3.5 million MCMC iterations all include the true values, except for the interval for $\beta$ in simulation 4, for the outbreakswhere $R_{0}$ is 1.5 (Table 6).
@@ -2113,7 +2114,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -2121,7 +2122,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 3.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 200. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% credible interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 For outbreaks with an $R_{0}$ of 1.5 and a population size of 1000 for the 3.5 million iteration MCMC, the 95\% credible interval for $\beta$ included the true value for all five simulations, but for $\gamma$, simulations 1 and 5 had intervals that were below the true value (Table 7). For outbreaks with an $R_{0}$ of 6, the 95\% credible intervals for $\gamma$ were all below the true value, while the credible intervals for $\beta$ were below the true value for simulations 1, 4, and 5, with the remaining two simulations including the true value in their credible intervals (Table 7).  
@@ -2259,7 +2260,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -2267,7 +2268,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 3.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% credible interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 % Retired beta and gamma tables
@@ -3305,7 +3306,7 @@ library('xtable')
 # options(xtable.floating = FALSE)
 # options(xtable.timestamp = "")
 
-rownames(mcmc_beta_results_table) <- c("1.5", ".","..","...","....",".....","6","-","--","---","----","-----")
+rownames(mcmc_beta_results_table) <- c("1.5", "\\textcolor{white}{a}","\\textcolor{white}{b}","\\textcolor{white}{c}","\\textcolor{white}{d}","\\textcolor{white}{e}","6","\\textcolor{white}{f}","\\textcolor{white}{g}","\\textcolor{white}{h}","\\textcolor{white}{i}","\\textcolor{white}{j}")
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
@@ -3313,7 +3314,7 @@ addtorow$command <- c("& \\multicolumn{1}{l}{} & \\multicolumn{3}{l}{$\\beta$}  
 
 tab <- xtable(mcmc_beta_results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\\beta$ and $\\gamma$ values for the 17.5 million iteration MCMC inference method  $R_{0}$ of 1.5 or 6 for a population size of 1000. min: lower bound of 95\\% credible interval, max: upper bound of 95\\% credible interval") 
 align(tab) <- "llllllll"
-print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
+print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity)
 @
 
 For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. 10D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. 10A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. 10C, F).  
@@ -3772,13 +3773,13 @@ mtext("Timestep", 1, line = 4, cex = yaxis_size)
 %%%%%%%%%%
 \subsection{Summary of findings}
 
-Both RE and MCMC inference methods observe the same positive correlation between $\beta$ and $\gamma$ as was determined by the heatmap for RE (Fig. 6) and the contour plot for the MCMC (Fig. 11). The positive correlation is likely due to there being less of a difference whether the rates of infection and recovery are both increased or both reduced, as the net number who become infected remains the same. Though both methods observe the same trend, it can be noted that the 95\% intervals obtained through bootstrapping for the RE are narrower than the 95\% credible interval of the MCMC. Possibly relating to this, the 95\% interval of the RE method includes the true $\beta$ and $\gamma$ values less often than the 95\% credible interval of the MCMC method (Table 1-3, Table 5-7). It could be that if the MCMCs would have been run for more iterations and until convergence looked more likely, the 95\% credible interval would have also narrowed. That being said, it is unlikely that even this narrower credible interval would have been as narrow as the RE interval, as the difference in interval width was still prevalent for a population size of 50 and $R_{0}$ of 6, though the runs seemed seemed to have converged during the 3.5 million iteration runs (Fig. 7D, Fig. 8D).
+Both RE and MCMC inference methods observe the same positive correlation between $\beta$ and $\gamma$ as was determined by the heatmap for RE (Fig. 6) and the contour plot for the MCMC (Fig. 11). The positive correlation is likely due to there being less of a difference whether the rates of infection and recovery are both increased or both reduced, as the net number of infected individuals remains the same. Though both methods observe the same trend, it can be noted that the 95\% intervals obtained through bootstrapping for the RE are narrower than the 95\% credible interval of the MCMC. Possibly relating to this, the 95\% interval of the RE method includes the true $\beta$ and $\gamma$ values less often than the 95\% credible interval of the MCMC method (Table 1-3, Table 5-7). It could be that if the MCMCs would have been run for more iterations and until convergence looked more likely, the 95\% credible interval would have also narrowed. That being said, it is unlikely that even this narrower credible interval would have been as narrow as the RE interval, as the difference in interval width was still prevalent for a population size of 50 and $R_{0}$ of 6, though the runs seemed seemed to have converged during the 3.5 million iteration runs (Fig. 7D, Fig. 8D).
 
-While the $\beta$ 95\% intervals for the RE method tended to be above the true value when $R_{0}$ was 1.5 and below the true value when $R_{0}$ was 6 (Table 1), the $\gamma$ 95\% intervals included the true value more often for the higher $R_{0}$ than the lower $R_{0}$ and more often as population size increased (Table 2). Therefore, it could be argued that the RE method gave ranges of $\beta$ and $\gamma$ that were closest to their respective true values for outbreaks with the higher $R_{0}$. Within this outbreak severity, the RE method fared better with increasing population size. This could be due to stochasticity being reduced with increasing population size as seen in Figure 3, where outbreaks with a population size of 1000 had smoother epidemic curves than outbreaks in populations of 50.
+While the $\beta$ 95\% intervals for the RE method tended to be above the true value when $R_{0}$ was 1.5 and below the true value when $R_{0}$ was 6 (Table 1), the $\gamma$ 95\% intervals included the true value more often for the higher $R_{0}$ than the lower $R_{0}$ and more often as population size increased (Table 2). It is possible that the RE inference method's overestimations of $\beta$ for outbreaks with an $R_{0}$ of 1.5 are due to the exclusion of non-starting outbreaks. This would affect smaller population sizes more than larger ones due to there being fewer non-starting outbreaks with increasing population size (Fig. 4). The RE method gave ranges of $\beta$ and $\gamma$ that were closer to their respective true values for outbreaks with an $R_{0}$ of 6. Within this outbreak severity, the RE method fared even better with increasing population size (Tables 1-3). This could be due to stochasticity being reduced with increasing population size as seen in Figure 3, where outbreaks with a population size of 1000 had smoother epidemic curves than outbreaks in populations of 50.
 
-Compared to the RE method, the MCMC method was more reliable with including the true $\beta$ and $\gamma$ values in its 95\% credible intervals (Table 5-7), though most runs would likely have benefitted from being run for more than 3.5 million iterations. The running time of the MCMC method was slower than that of the RE inference method. Running 1000 iterations of the RE method took approximately 20 minutes, while running 3.5 million iterations took over 20 hours and 17.5 million iterations over 120 hours with the running time increasing with population size. 
+Compared to the RE method, the MCMC method was more reliable with including the true $\beta$ and $\gamma$ values in its 95\% credible intervals (Table 5-7), though most runs would likely have benefitted from being run for more than 3.5 million or even 17.5 million iterations. The running time of the MCMC method was slower than that of the RE inference method. Running 1000 iterations of the RE method took approximately 20 minutes, while running 3.5 million iterations took over 20 hours and 17.5 million iterations over 120 hours with the running time increasing with population size. 
 
-The MCMC with a deterministic process for inference did not perform as well as the RE or normal MCMC method for the cases considered in this project. Based on the posterior traces it could be that with finetuning of the proposal function, the method could provide better estimates for $\beta$ and $\gamma$ than the ones presented in this report, though whether these estimates would exceed those of the RE is not certain.
+The MCMC with a deterministic process for inference did not perform as well as the RE or standard MCMC method for the cases considered in this project. Based on the posterior traces (Fig. 12, Fig. 13), it could be that with finetuning of the proposal function, the method could provide better estimates for $\beta$ and $\gamma$ than the ones presented in this report, though whether these estimates would exceed those of the RE is not certain.
 
 \subsection{Open questions for discussion}
 Considering that the RE inference method experienced improved $\beta$ and $\gamma$ estimates with increasing population size and higher $R_{0}$, it could be that eventually the RE inference method may consistently include the true $\beta$ and $\gamma$ values if investigated for even higher population sizes and $R_{0}$s. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the narrower 95\% intervals for a much quicker running time might become a reasonable option. Further investigations with larger population sizes and $R_{0}$s could be conducted to gain a better understanding of when this trade-off would become cost effective. The MCMC inference method devised in this project is also not optimised for efficiency, so it is possible that the running time of the MCMC could be shortened in further work.
@@ -3786,7 +3787,7 @@ Considering that the RE inference method experienced improved $\beta$ and $\gamm
 \subsection{Limitations}
 Only one type of compartmental model, a closed SIR model, was considered in this project. Additionally, the model is very simple with no spatial modelling or other complicating matters. It could be argued though that if the aim of a study is to conduct complicated models including spatial aspects, a stochastic process must be used regardless and thus the question of whether or not to use a deterministic inference method becomes obsolete. 
 
-Additionally, as mentioned previously, the MCMCs could have been run for longer than 3.5 million or even 17.5 million iterations to reach full convergence. Additionally, the MCMCs could have been repeated for the different outbreaks from different parameter starting points to investigate if the runs from different starting points converge at similar $\beta$ and $\gamma$ values. That being said, the aim of this project was to compare different inference methods rather than perfect one method completely.
+Additionally, as mentioned previously, the MCMCs could have been run for longer than 3.5 million or even 17.5 million iterations to reach full convergence. Furthermore, the MCMCs could have been repeated for the different outbreaks from different parameter starting points to investigate if the runs from different starting points converge at similar $\beta$ and $\gamma$ values. That being said, the aim of this project was to compare different inference methods rather than perfect one method completely.
 
 \subsection{Conclusions}
 When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible intervals and 95\% intervals for the MCMC and RE inference methods respecively, the MCMC inference method's ranges included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with higher $R_{0}$. Further work comparing the inference methods for higher $R_{0}$s and population sizes may find that eventually the RE inference method's 95\% interval might also include the true $\beta$ and $\gamma$ values and be quicker to run than a MCMC. 
@@ -3796,12 +3797,14 @@ When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible interva
 %%%%%%%%%%%%%%%%
 
 \newpage
-\section{References}
+% \section{References}
+\phantomsection
 
+\addcontentsline{toc}{chapter}{5 References}
+% \bibliographystyle{ieeetr}
 \bibliography{/home/evelina/Documents/Mendeley/MRes_stochastic_deterministic.bib}
 
 % citation()
-Karline Soetaert, Thomas Petzoldt, R. Woodrow Setzer (2010). Solving Differential Equations in R: Package deSolve. Journal of Statistical Software, 33(9), 1--25. URL http://www.jstatsoft.org/v33/i09/ DOI 10.18637/jss.v033.i09
 % citation("deSolve")
 
 % 5 pages
