@@ -112,16 +112,7 @@ I implemented my own outbreak-simulating stochastic SIR model and inference meth
 \newpage
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-\noindent \textbf{Background} Different methods exist for inferring the ranges of values that a parameter might take in a model. These methods can broadly be categorised into deterministic methods, such as the residual error (RE) method, and stochastic methods, such as the Markov Chain Monte Carlo (MCMC) method.
-
-\noindent \textbf{Aim} The aim of this project is to elucidate the conditions under which the residual error method, might be used just as well as the MCMC, if one is trying to quantify the range of values that a parameter might take.
-
-\noindent \textbf{Methods} I created a stochastic population based closed compartmental SIR model. With this model, I generated altogether 30 different outbreaks for 6 different scenarios: with an $R_{0}$ of 1.5 or 6 with a population size of 50, 200, and 1000, with five repeats per type of combination. I then built RE and MCMC parameter inference methods and inferred the values that $\beta$ and $\gamma$ may take for each outbreak based on the recovery curve obtained from the generated outbreaks. A MCMC with a deterministic process was also explored.
-
-\noindent \textbf{Results} The MCMC inference method's 95\% credible intervals included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with higher $R_{0}$. 
-
-\noindent \textbf{Conclusions}
-The MCMC inference method produces 95\% credible intervals that contain the true $\beta$ and $\gamma$ values more often than the RE inference method, though it is computationally more taxing. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the narrower 95\% intervals for a much quicker running time might become a reasonable option. 
+Different methods exist for inferring the ranges of values that a parameter might take in a model. These methods can broadly be categorised into deterministic methods, such as the residual error (RE) method, and stochastic methods, such as the Markov Chain Monte Carlo (MCMC) method. The aim of this project is to elucidate the conditions under which the RE method, might be used just as well as the MCMC, if one is trying to quantify the range of values that a parameter might take. I created a stochastic population-based closed compartmental SIR model. With this model, I simulated altogether 30 different outbreaks for 6 different scenarios: with an $R_{0}$ of 1.5 or 6 with a population size of 50, 200, and 1000, with five repeats per type of combination. I then implemented RE and MCMC parameter inference methods and inferred the values that $\beta$ and $\gamma$ may take for each outbreak based on the removed curve obtained from the simulated outbreaks. A MCMC with a deterministic process was also explored. The MCMC inference method's 95\% credible intervals included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with a higher $R_{0}$. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the RE method's narrower 95\% intervals for a much quicker running time might become a reasonable option. 
 % 0.5 to 1 page
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -838,7 +829,7 @@ text(10, 0.95*N, "F", cex = letter_size)
 mtext("Timestep", 1, line = 4, cex = yaxis_size)
 # legend(100, 0.8*N, c("True infected", "Deterministic infected"), pch = 1, col = c("red", "black"), bty = "n")
 @
-\caption{Comparing the true simulated infected (red line) and removed curves (orange line) to those constructed from the point estimates and bootstrapped per capita rate of infection ($\beta$) and recovery rate ($\gamma$) of the RE method. The black lines refer to the deterministic infectious (dashed) and removed (dotted) curves based on the $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic infectious (dark grey) and removed (light grey) curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Panels A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Panels A and D represent a population size of 50, panels B and E represent a population size of 200, and panels C and F represent a population size of 1000.}
+\caption{Comparing the true simulated infected (red line) and removed curves (orange line) to those constructed from the point estimates and bootstrapped per capita rate of infection ($\beta$) and recovery rate ($\gamma$) of the RE method for the first simulation of each population size and $R_{0}$. The black lines refer to the deterministic infectious (dashed) and removed (dotted) curves based on the $\beta$ and $\gamma$ point estimates. The grey lines represent the deterministic infectious (dark grey) and removed (light grey) curves based on the optimised $\beta$ and $\gamma$ values during the bootstrapping process. Panels A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Panels A and D represent a population size of 50, panels B and E represent a population size of 200, and panels C and F represent a population size of 1000.}
 \label{re_inference}
 \end{center}
 \end{figure}
@@ -2019,11 +2010,11 @@ tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\
 align(tab) <- "lXXXXXXX"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity, tabular.environment = "tabularx", width = "\\textwidth")
 @
-\clearpage
 \FloatBarrier
-
+\clearpage
 The 95\% credible intervals for $\beta$ and $\gamma$ for outbreaks with a population size of 200 and 3.5 million MCMC iterations all include the true values, except for the interval for $\beta$ in simulation 4, for the outbreaks where $R_{0}$ is 1.5 (Table \ref{mcmc_pop200}).
 \newline
+
 <<MCMC_result_table_200, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
 burnIn <- 3500 * 0.23
@@ -2167,6 +2158,12 @@ tab <- xtable(results_table, digits= c(1, 0, -1, -1, -1, 2, 2, 2), caption = "$\
 align(tab) <- "lXXXXXXX"
 print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex", sanitize.rownames.function = identity, tabular.environment = "tabularx", width = "\\textwidth")
 @
+
+\FloatBarrier
+\clearpage
+
+For outbreaks with an $R_{0}$ of 1.5 and a population size of 1000 for the 3.5 million iteration MCMC, the 95\% credible interval for $\beta$ included the true value for all five simulations, but for $\gamma$, simulations 1 and 5 had intervals that were below the true value (Table \ref{mcmc_pop1000}). For outbreaks with an $R_{0}$ of 6, the 95\% credible intervals for $\gamma$ were all below the true value, while the credible intervals for $\beta$ were below the true value for simulations 1, 4, and 5, with the remaining two simulations including the true value in their credible intervals (Table \ref{mcmc_pop1000}).
+\newline
 
 <<MCMC_result_table_1000, cache=FALSE, echo=FALSE, eval=TRUE, results=tex>>=
 # Making MCMC table
@@ -2314,7 +2311,6 @@ print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FAL
 
 \FloatBarrier
 \clearpage
-For outbreaks with an $R_{0}$ of 1.5 and a population size of 1000 for the 3.5 million iteration MCMC, the 95\% credible interval for $\beta$ included the true value for all five simulations, but for $\gamma$, simulations 1 and 5 had intervals that were below the true value (Table \ref{mcmc_pop1000}). For outbreaks with an $R_{0}$ of 6, the 95\% credible intervals for $\gamma$ were all below the true value, while the credible intervals for $\beta$ were below the true value for simulations 1, 4, and 5, with the remaining two simulations including the true value in their credible intervals (Table \ref{mcmc_pop1000}).
 
 The traces for $\beta$ and $\gamma$ for the first simulation of each population size and $R_{0}$ combination suggest that the MCMC had not always fully converged during the 3.5 million iterations, epecially for the larger population sizes (Fig. \ref{mcmc_beta_trace}, Fig. \ref{mcmc_gamma_trace}). The $\beta$ trace for population size 50 and $R_{0}$ of 6 looks the closest to having reached convergence (Fig. \ref{mcmc_beta_trace}D), while the traces for the largest population size (Fig. \ref{mcmc_beta_trace}C, F) look to be the furthest from being converged, which is in concordance with the $\beta$ 95\% credible intervals for population size 1000 often excluding the true $\beta$ value in Table \ref{mcmc_pop1000}. 
 \newline
@@ -2348,41 +2344,40 @@ beta_yaxis200_2 = c(0, 0.007)
 beta_yaxis1000_2 = c(0, 0.001)
 # Seed 1, Pop size 50
 plot(mcmc_R1.5_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50_1, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(beta_yaxis50_1)+(0.95*max(beta_yaxis50_1)-min(beta_yaxis50_1)), "A", cex = letter_size)
 mtext(expression(beta), 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
 plot(mcmc_R1.5_pop200_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis200_1, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(beta_yaxis200_1)+(0.95*max(beta_yaxis200_1)-min(beta_yaxis200_1)), "B", cex = letter_size)
 # Seed 1, Pop size 1000
 plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_1, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(beta_yaxis1000_1)+(0.95*max(beta_yaxis1000_1)-min(beta_yaxis1000_1)), "C", cex = letter_size)
 # Seed 1, Pop size 50
 plot(mcmc_R6_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50_2, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(beta_yaxis50_2)+(0.95*max(beta_yaxis50_2)-min(beta_yaxis50_2)), "D", cex = letter_size)
 mtext(expression(beta), 2, line = 3, cex = yaxis_size, outer = FALSE)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 200
 plot(mcmc_R6_pop200_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis200_2, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(beta_yaxis200_2)+(0.95*max(beta_yaxis200_2)-min(beta_yaxis200_2)), "E", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 1000
 plot(mcmc_R6_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_2, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(beta_yaxis1000_2)+(0.95*max(beta_yaxis1000_2)-min(beta_yaxis1000_2)), "F", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 @
-\caption{Traces of posterior $\beta$, per capita rate of infection, values throughout a 3.5 million iteration MCMC. Panels A-C are for outbreaks with an $R_{0}$ of 1.5, while panels D-F are for outbreaks with an $R_{0}$ of 6. Panels A and D have a population size of 50, panels B and E have a population size of 200, and panels C and F have a population size of 1000.}
+\caption{Traces of posterior $\beta$, per capita rate of infection, values throughout a 3.5 million iteration MCMC for the first simulation of each population size and $R_{0}$. Panels A-C are for outbreaks with an $R_{0}$ of 1.5, while panels D-F are for outbreaks with an $R_{0}$ of 6. Panels A and D have a population size of 50, panels B and E have a population size of 200, and panels C and F have a population size of 1000.}
 \label{mcmc_beta_trace}
 \end{center}
 \end{figure}
 
 \clearpage
-
 A similar situation for the $\gamma$ traces can be seen as for the $\beta$ traces. Here again the trace for population size 50 and $R_{0}$ of 6 looks the most converged (Fig. \ref{mcmc_gamma_trace}D). None of the $\gamma$ traces for population size 200 (Fig. \ref{mcmc_gamma_trace}B, E) or population size 1000 (Fig. \ref{mcmc_gamma_trace}C, F) look fully converged. Additionally, in Figure \ref{mcmc_gamma_trace} seems that the fluctuation in $\gamma$ decreases with increasing population size.
 \newline
 
@@ -2416,281 +2411,41 @@ gamma_yaxis1000_2 = c(0.05, 0.15)
 
 # Seed 1, Pop size 50
 plot(mcmc_R1.5_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50_1, cex.axis=number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(gamma_yaxis50_1)+(0.95*max(gamma_yaxis50_1)-min(gamma_yaxis50_1)), "A", cex = letter_size)
 mtext(expression(gamma), 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
 plot(mcmc_R1.5_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200_1, cex.axis=number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(gamma_yaxis200_1)+(0.95*max(gamma_yaxis200_1)-min(gamma_yaxis200_1)), "B", cex = letter_size)
 # Seed 1, Pop size 1000
 plot(mcmc_R1.5_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_1, cex.axis=number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(gamma_yaxis1000_1)+(0.95*max(gamma_yaxis1000_1)-min(gamma_yaxis1000_1)), "C", cex = letter_size)
 # Seed 1, Pop size 50
 plot(mcmc_R6_pop50_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis50_2, cex.axis=number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(gamma_yaxis50_2)+(0.95*max(gamma_yaxis50_2)-min(gamma_yaxis50_2)), "D", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 mtext(expression(gamma), 2, line = 3, cex = yaxis_size, outer = FALSE)
 # Seed 1, Pop size 200
 plot(mcmc_R6_pop200_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis200_2, cex.axis=number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(gamma_yaxis200_2)+(0.95*max(gamma_yaxis200_2)-min(gamma_yaxis200_2)), "E", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 1000
 plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_2, cex.axis=number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, min(gamma_yaxis1000_2)+(0.95*max(gamma_yaxis1000_2)-min(gamma_yaxis1000_2)), "F", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 @
-\caption{Traces of posterior $\gamma$, recovery rate, values throughout a 3.5 million MCMC. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000. }
+\caption{Traces of posterior $\gamma$, recovery rate, values throughout a 3.5 million MCMC for the first simulation of each population size and $R_{0}$. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000. }
 \label{mcmc_gamma_trace}
 \end{center}
 \end{figure}
 
-<<dataplot4, cache=FALSE, echo=FALSE, eval=FALSE, dpi=100, fig.pos="H", fig.height=4, fig.cap="Data plot", fig=TRUE>>=
-# Log likelihood plots
-dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
-mcmc_R1.5_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
-mcmc_R1.5_pop200_seed1 <- read.csv(paste(dir,"mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
-mcmc_R1.5_pop1000_seed1 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_177_loglik.csv", sep=""))
-mcmc_R6_pop50_seed1 <- read.csv(paste(dir,"mcmc_pop50_R6_g0.15_2_loglik.csv", sep=""))
-mcmc_R6_pop200_seed1 <- read.csv(paste(dir,"mcmc_pop200_R6_g0.15_6_loglik.csv", sep=""))
-mcmc_R6_pop1000_seed1 <- read.csv(paste(dir,"mcmc_pop1000_R6_g0.15_11_loglik.csv", sep=""))
-
-par(mfrow = c(2,3), mar=c(3.5,4,1.2,0.5))
-
-burnIn = ((3500000/1000)/100)*23 # 23% burn-in
-yaxis = c(-2000, -100)
-# Seed 1, Pop size 50
-plot(mcmc_R1.5_pop50_seed1$loglik, type = "l", main = "", xlab = "Iteration x1000", ylab = "Log(likelihood)", ylim = yaxis)
-  abline(v = burnIn, untf = FALSE)
-  # mtext("Iteration x1000",side=1,line=2)
-# Seed 1, Pop size 200
-plot(mcmc_R1.5_pop200_seed1$loglik, type = "l", main = "", xlab = "Iteration x1000", ylab = "Log(likelihood)", ylim = yaxis)
-  abline(v = burnIn, untf = FALSE)
-  # mtext("Iteration x1000",side=1,line=2)
-# Seed 1, Pop size 1000
-plot(mcmc_R1.5_pop1000_seed1$loglik, type = "l", main = "", xlab = "Iteration x1000", ylab = "Log(likelihood)", ylim = yaxis)
-  abline(v = burnIn, untf = FALSE)
-  # mtext("Iteration x1000",side=1,line=2)
-# Seed 1, Pop size 50
-plot(mcmc_R6_pop50_seed1$loglik, type = "l", main = "", xlab = "Iteration x1000", ylab = "Log(likelihood)", ylim = yaxis)
-  abline(v = burnIn, untf = FALSE)
-  # mtext("Iteration x1000",side=1,line=2)
-# Seed 1, Pop size 200
-plot(mcmc_R6_pop200_seed1$loglik, type = "l", main = "", xlab = "Iteration x1000", ylab = "Log(likelihood)", ylim = yaxis)
-  abline(v = burnIn, untf = FALSE)
-  # mtext("Iteration x1000",side=1,line=2)
-# Seed 1, Pop size 1000
-plot(mcmc_R6_pop1000_seed1$loglik, type = "l", main = "", xlab = "Iteration x1000", ylab = "Log(likelihood)", ylim = yaxis)
-  abline(v = burnIn, untf = FALSE)
-  # smtext("Iteration x1000",side=1,line=2)
-@
-
-%The range of log-likelihoods is quite varying for different outbreaks within a given $R_{0}$ and population size (Table \ref{mcmc_pop1000}). For instance the mean log-likelihood for population size 50 and $R_{0}$ of 1.5 is -135 for simulation 1 and -1139 for simulation 2 (Table \ref{mcmc_pop1000_long}). This is because the likelihood function was set to return a value of -1000 if the suggested parameters fit the data point with a likelihood of 0, due to the computational difficulties associated with attempting to calculate $log(0)$.
-
-<<MCMC_result_table_loglik, cache=FALSE, echo=FALSE, eval=FALSE, results=tex>>=
-# Making Log likelihood table
-library("coda")
-mcmc_results_table <- array(NA, dim =c(10,10))
-burnIn = ((3500000/1000)/100)*23 # 23% burn-in
-
-mcmc_results_table[1,1] <- 1
-mcmc_results_table[2,1] <- 2
-mcmc_results_table[3,1] <- 3
-mcmc_results_table[4,1] <- 4
-mcmc_results_table[5,1] <- 5
-
-mcmc_results_table[6,1] <- 1
-mcmc_results_table[7,1] <- 2
-mcmc_results_table[8,1] <- 3
-mcmc_results_table[9,1] <- 4
-mcmc_results_table[10,1] <- 5
-
-# setwd("/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data")
-dir <- "/home/evelina/OneDrive/MRes_BMR/Project_1/Work_folder/Data/server_data/"
-
-mcmc_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_14_loglik.csv", sep=""))
-mcmc_pop50_seed2 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_22_loglik.csv", sep=""))
-mcmc_pop50_seed3 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_40_loglik.csv", sep=""))
-mcmc_pop50_seed4 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_43_loglik.csv", sep=""))
-mcmc_pop50_seed5 <- read.csv(paste(dir, "mcmc_pop50_R1.5_g0.15_95_loglik.csv", sep=""))
-mcmc_pop200_seed1 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_81_loglik.csv", sep=""))
-mcmc_pop200_seed2 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_93_loglik.csv", sep=""))
-mcmc_pop200_seed3 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_102_loglik.csv", sep=""))
-mcmc_pop200_seed4 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_202_loglik.csv", sep =""))
-mcmc_pop200_seed5 <- read.csv(paste(dir, "mcmc_pop200_R1.5_g0.15_246_loglik.csv", sep =""))
-mcmc_pop1000_seed1 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_177_loglik.csv", sep =""))
-mcmc_pop1000_seed2 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_246_loglik.csv", sep =""))
-mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_469_loglik.csv", sep =""))
-mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R1.5_g0.15_520_loglik.csv", sep =""))
-mcmc_pop1000_seed5 <- read.csv(paste(dir,"mcmc_pop1000_R1.5_g0.15_784_loglik.csv", sep =""))
-
-# Pop = 50, R0 = 1.5
-mcmc_results_table[1,2] <- mean(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed1$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[1,3] <- intervals[1]
-mcmc_results_table[1,4] <- intervals[2]
-mcmc_results_table[2,2] <- mean(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed2$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[2,3] <- intervals[1]
-mcmc_results_table[2,4] <- intervals[2]
-mcmc_results_table[3,2] <- mean(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed3$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[3,3] <- intervals[1]
-mcmc_results_table[3,4] <- intervals[2]
-mcmc_results_table[4,2] <- mean(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed4$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[4,3] <- intervals[1]
-mcmc_results_table[4,4] <- intervals[2]
-mcmc_results_table[5,2] <- mean(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed5$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[5,3] <- intervals[1]
-mcmc_results_table[5,4] <- intervals[2]
-# Pop = 200, R0 = 1.5
-mcmc_results_table[1,5] <- mean(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed1$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[1,6] <- intervals[1]
-mcmc_results_table[1,7] <- intervals[2]
-mcmc_results_table[2,5] <- mean(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed2$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[2,6] <- intervals[1]
-mcmc_results_table[2,7] <- intervals[2]
-mcmc_results_table[3,5] <- mean(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed3$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[3,6] <- intervals[1]
-mcmc_results_table[3,7] <- intervals[2]
-mcmc_results_table[4,5] <- mean(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed4$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[4,6] <- intervals[1]
-mcmc_results_table[4,7] <- intervals[2]
-mcmc_results_table[5,5] <- mean(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed5$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[5,6] <- intervals[1]
-mcmc_results_table[5,7] <- intervals[2]
-# Pop = 1000, R0 = 1.5
-mcmc_results_table[1,8] <- mean(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed1$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[1,9] <- intervals[1]
-mcmc_results_table[1,10] <- intervals[2]
-mcmc_results_table[2,8] <- mean(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed2$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[2,9] <- intervals[1]
-mcmc_results_table[2,10] <- intervals[2]
-mcmc_results_table[3,8] <- mean(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed3$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[3,9] <- intervals[1]
-mcmc_results_table[3,10] <- intervals[2]
-mcmc_results_table[4,8] <- mean(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed4$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[4,9] <- intervals[1]
-mcmc_results_table[4,10] <- intervals[2]
-mcmc_results_table[5,8] <- mean(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed5$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[5,9] <- intervals[1]
-mcmc_results_table[5,10] <- intervals[2]
-
-# R0 = 6 Gamma = 0.15
-mcmc_pop50_seed1 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_1_loglik.csv", sep =""))
-mcmc_pop50_seed2 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_2_loglik.csv", sep =""))
-mcmc_pop50_seed3 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_3_loglik.csv", sep =""))
-mcmc_pop50_seed4 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_4_loglik.csv", sep =""))
-mcmc_pop50_seed5 <- read.csv(paste(dir, "mcmc_pop50_R6_g0.15_5_loglik.csv", sep =""))
-mcmc_pop200_seed1 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_6_loglik.csv", sep =""))
-mcmc_pop200_seed2 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_7_loglik.csv", sep =""))
-mcmc_pop200_seed3 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_8_loglik.csv", sep =""))
-mcmc_pop200_seed4 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_9_loglik.csv", sep =""))
-mcmc_pop200_seed5 <- read.csv(paste(dir, "mcmc_pop200_R6_g0.15_10_loglik.csv", sep =""))
-mcmc_pop1000_seed1 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_11_loglik.csv", sep =""))
-mcmc_pop1000_seed2 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_12_loglik.csv", sep =""))
-mcmc_pop1000_seed3 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_13_loglik.csv", sep =""))
-mcmc_pop1000_seed4 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_14_loglik.csv", sep =""))
-mcmc_pop1000_seed5 <- read.csv(paste(dir, "mcmc_pop1000_R6_g0.15_15_loglik.csv", sep =""))
-
-# Pop = 50, R0 = 6
-mcmc_results_table[6,2] <- mean(mcmc_pop50_seed1$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed1$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[6,3] <- intervals[1]
-mcmc_results_table[6,4] <- intervals[2]
-mcmc_results_table[7,2] <- mean(mcmc_pop50_seed2$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed2$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[7,3] <- intervals[1]
-mcmc_results_table[7,4] <- intervals[2]
-mcmc_results_table[8,2] <- mean(mcmc_pop50_seed3$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed3$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[8,3] <- intervals[1]
-mcmc_results_table[8,4] <- intervals[2]
-mcmc_results_table[9,2] <- mean(mcmc_pop50_seed4$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed4$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[9,3] <- intervals[1]
-mcmc_results_table[9,4] <- intervals[2]
-mcmc_results_table[10,2] <- mean(mcmc_pop50_seed5$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop50_seed5$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[10,3] <- intervals[1]
-mcmc_results_table[10,4] <- intervals[2]
-# Pop = 200, R0 = 6
-mcmc_results_table[6,5] <- mean(mcmc_pop200_seed1$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed1$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[6,6] <- intervals[1]
-mcmc_results_table[6,7] <- intervals[2]
-mcmc_results_table[7,5] <- mean(mcmc_pop200_seed2$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed2$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[7,6] <- intervals[1]
-mcmc_results_table[7,7] <- intervals[2]
-mcmc_results_table[8,5] <- mean(mcmc_pop200_seed3$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed3$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[8,6] <- intervals[1]
-mcmc_results_table[8,7] <- intervals[2]
-mcmc_results_table[9,5] <- mean(mcmc_pop200_seed4$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed4$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[9,6] <- intervals[1]
-mcmc_results_table[9,7] <- intervals[2]
-mcmc_results_table[10,5] <- mean(mcmc_pop200_seed5$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop200_seed5$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[10,6] <- intervals[1]
-mcmc_results_table[10,7] <- intervals[2]
-# Pop = 1000, R0 = 6
-mcmc_results_table[6,8] <- mean(mcmc_pop1000_seed1$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed1$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[6,9] <- intervals[1]
-mcmc_results_table[6,10] <- intervals[2]
-mcmc_results_table[7,8] <- mean(mcmc_pop1000_seed2$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed2$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[7,9] <- intervals[1]
-mcmc_results_table[7,10] <- intervals[2]
-mcmc_results_table[8,8] <- mean(mcmc_pop1000_seed3$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed3$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[8,9] <- intervals[1]
-mcmc_results_table[8,10] <- intervals[2]
-mcmc_results_table[9,8] <- mean(mcmc_pop1000_seed4$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed4$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[9,9] <- intervals[1]
-mcmc_results_table[9,10] <- intervals[2]
-mcmc_results_table[10,8] <- mean(mcmc_pop1000_seed5$loglik[-(1:burnIn)])
-intervals <- HPDinterval(mcmc(mcmc_pop1000_seed5$loglik[-(1:burnIn)]), 0.95)
-mcmc_results_table[10,9] <- intervals[1]
-mcmc_results_table[10,10] <- intervals[2]
-
-##############################
-# Making Residual Error table
-library('xtable')
-# options(xtable.floating = FALSE)
-# options(xtable.timestamp = "")
-
-rownames(mcmc_results_table) <- c("1.5", ".","..","...","....","6","-","--","---","----")
-
-addtorow <- list()
-addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{1}{l}{}  & \\multicolumn{3}{l}{N = 50}  & \\multicolumn{3}{l}{N = 200} & \\multicolumn{3}{l}{N = 1000} \\\\\n", "$R_{0}$ & sim & mean & min & max & mean & min & max & mean & min & max \\\\\n")
-
-tab <- xtable(mcmc_results_table, digits = 0, caption = "Log(likelihood) values for the MCMC inference method for each outbreak of a given population size N and $R_{0}$ of 1.5 or 6. min: minimum log(likelihood) after burn-in during MCMC, max: maximum log(likelihood) observed after burn-in during MCMC") 
-align(tab) <- "lllllllllll"
-print(tab, hline.after=c(-1, 0, 10), comment = FALSE, math.style.exponents = FALSE, caption.placement = "top", add.to.row = addtorow, include.colnames = FALSE, type="latex")
-@
-\newpage
 \clearpage
+
 The range of suggested infectious curves after the burn-in period in general overlaps with the true simulated infectious curve (Fig. \ref{mcmc_infcurve}). An exception for this is one of the unconverged MCMCs in Figure \ref{mcmc_infcurve}F, where the MCMC's augmented infectious curves are not yet overlapping with the true infectious curve. The range of infectious curves produced is widest for the smallest population size and $R_{0}$ (Fig. \ref{mcmc_infcurve}A). For each of the $R_{0}$s, the range of infectious curves produced narrows with an increasing population size (Fig. \ref{mcmc_infcurve}A-C and Fig. \ref{mcmc_infcurve}D-F).
 \newline
 
@@ -2814,7 +2569,7 @@ lines(true_R6_pop1000_seed1$I, ylim = c(0, N), type = "l", col = "red", lwd = 3)
 text(150, 0.95*N, "F", cex = letter_size)
 mtext("Timestep", 1, line = 4, cex = yaxis_size)
 @
-\caption{Comparing the infectious curves of the 3.5 million MCMC to each outbreak's true simulated infectious curve. The red line depicts the number of individuals in a population infected at a given timepoint in the true dataset. The grey dotted lines refer to the post-burn-in period infectious curves used by the MCMC. Panels A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Panels A and D represent a population size of 50, panels B and E represent a population size of 200, and panels C and F represent a population size of 1000.}
+\caption{Comparing the infectious curves of the 3.5 million MCMC to each outbreak's true simulated infectious curve for the first simulation of each population size and $R_{0}$. The red line depicts the number of individuals in a population infected at a given timepoint in the true dataset. The grey dotted lines refer to the post-burn-in period infectious curves used by the MCMC. Panels A-C and D-F represent outbreaks with an $R_{0}$ of 1.5 and 6, respectively. Panels A and D represent a population size of 50, panels B and E represent a population size of 200, and panels C and F represent a population size of 1000.}
 \label{mcmc_infcurve}
 \end{center}
 \end{figure}
@@ -2969,7 +2724,6 @@ print(tab, hline.after=c(-1, 0, 12), comment = FALSE, math.style.exponents = FAL
 
 \clearpage
 \FloatBarrier
-
 For the 17.5 million iteration run for the largest population size, the MCMC did converge for the outbreak with an $R_{0}$ of 6 and population size of 1000 (Fig. \ref{mcmc_long}D-E). The outbreak with an $R_{0}$ of 1.5 though has not converged (Fig. \ref{mcmc_long}A-B). The infectious curves estimated during the post-burn-in period of the MCMC now do coincide with the true simulated infectious curves (Fig. \ref{mcmc_long}C, F).
 \newline
 
@@ -3003,14 +2757,14 @@ par(mfrow = c(2, 3), mar=c(5.5,6.5,1.5,0.2))
 
 # Seed 1, Pop size 1000
 plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_1.5, cex.axis = number_size)
-  abline(v = burnIn_1.5, untf = FALSE)
+  # abline(v = burnIn_1.5, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis1000_1.5), "A", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 mtext(expression(beta), 2, line = 3, cex = yaxis_size, outer = FALSE)
 
 # Seed 1, Pop size 1000
 plot(mcmc_R1.5_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_1.5, cex.axis = number_size)
-  abline(v = burnIn_1.5, untf = FALSE)
+  # abline(v = burnIn_1.5, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis1000_1.5), "B", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 mtext(expression(gamma), 2, line = 3, cex = yaxis_size, outer = FALSE)
@@ -3034,14 +2788,14 @@ mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
 
 # Seed 1, Pop size 1000
 plot(mcmc_R6_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_6, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(beta_yaxis1000_6), "D", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 mtext(expression(beta), 2, line = 3, cex = yaxis_size, outer = FALSE)
 
 # Seed 1, Pop size 1000
 plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_6, cex.axis = number_size)
-  abline(v = burnIn, untf = FALSE)
+  # abline(v = burnIn, untf = FALSE)
 text(iteration_place, 0.95*max(gamma_yaxis1000_6), "E", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 mtext(expression(gamma), 2, line = 3, cex = yaxis_size, outer = FALSE)
@@ -3063,7 +2817,7 @@ text(160, 0.95*N, "F", cex = letter_size)
 mtext("Timestep", 1, line = 4, cex = yaxis_size)
 mtext("Number infected", 2, line = 3, cex = yaxis_size, outer = FALSE)
 @
-\caption{The $\beta$ (per capita rate of infection) and $\gamma$ (recovery rate) posterior traces, and infectious curves for 17.5 million iteration MCMCs with a population size of 1000. Panels A and B show the $\beta$ and $\gamma$ traces respectively of an outbreak with a population size of 1000 and $R_{0}$ of 1.5. Panels D and E show the $\beta$ and $\gamma$ traces for an outbreak with a population size of 1000 and $R_{0}$ of 6. Panels C and F show the infectious curves for the outbreaks with $R_{0}$ of 1.5 and 6, respectively. The red line depicts the number of infectious individuals per timepoint for the true simulated outbreaks, while the grey dotted lines represent the post-burn-in infectious curves for the MCMC.}
+\caption{The $\beta$ (per capita rate of infection) and $\gamma$ (recovery rate) posterior traces, and infectious curves for 17.5 million iteration MCMCs for the first simulation of each $R_{0}$ with a population size of 1000. Panels A and B show the $\beta$ and $\gamma$ traces respectively of an outbreak with a population size of 1000 and $R_{0}$ of 1.5. Panels D and E show the $\beta$ and $\gamma$ traces for an outbreak with a population size of 1000 and $R_{0}$ of 6. Panels C and F show the infectious curves for the outbreaks with $R_{0}$ of 1.5 and 6, respectively. The red line depicts the number of infectious individuals per timepoint for the true simulated outbreaks, while the grey dotted lines represent the post-burn-in infectious curves for the MCMC.}
 \label{mcmc_long}
 \end{center}
 \end{figure}
@@ -3455,7 +3209,7 @@ In this project a model with only a deterministic infectious curve was explored,
 
 \subsection{Open questions for discussion}
 Considering that the RE inference method experienced improved $\beta$ and $\gamma$ estimates with increasing population size and higher $R_{0}$, it could be that eventually the RE inference method may consistently include the true $\beta$ and $\gamma$ values if investigated for even higher population sizes and $R_{0}$s. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the narrower 95\% intervals for a much quicker running time might become a reasonable option. Further investigations with larger population sizes and $R_{0}$s could be conducted to gain a better understanding of when this trade-off would become cost effective. The MCMC inference method devised in this project is also not optimised for efficiency, so it is possible that the running time of the MCMC could be shortened in further work.
-\clearpage
+
 \subsection{Limitations}
 Only one type of compartmental model, a closed SIR model, was considered in this project. Additionally, the model is very simple with no spatial modelling or other complicating matters. It could be argued though that if the aim of a study is to conduct complicated models including spatial aspects, a stochastic process must be used regardless and thus the question of whether or not to use a deterministic inference method becomes obsolete. 
 
