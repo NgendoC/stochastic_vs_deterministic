@@ -47,6 +47,8 @@
 
 \usepackage[section]{placeins}
 
+\usepackage{libertine} % for Reference spacing
+
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Start of document %%
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -94,11 +96,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Originality statement %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
-\setcounter{section}{0}
-\renewcommand{\thesection}{\Roman{section}}
-
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\Roman{section}}
 \section*{Statement of Originality}
-
+\addcontentsline{toc}{section}{Statement of Originality}
 I certify that this thesis, and the research to which it refers, are the product of my own work, conducted during the current year of the MRes in Biomedical Research at Imperial College London. Any ideas or quotations from the work of other people, published or otherwise, or from my own previous work are fully acknowledged in accordance with the standard referencing practices of the discipline.
 
 I programmed the outbreak-simulating stochastic SIR model myself without the use of any packages made by other individuals or groups. I also programmed the inference methods described in this project myself without the use of packages excepting for the package \textit{deSolve} by Stoetaert et al., which I used for solving the differential equations of my deterministic SIR models. The group is credited in the relevant sections of this document. 
@@ -110,6 +111,7 @@ I programmed the outbreak-simulating stochastic SIR model myself without the use
 
 \newpage
 \section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
 \noindent \textbf{Background} Different methods exist for inferring the ranges of values that a parameter might take in a model. These methods can broadly be categorised into deterministic methods, such as the residual error (RE) method, and stochastic methods, such as the Markov Chain Monte Carlo (MCMC) method.
 
 \noindent \textbf{Aim} The aim of this project is to elucidate the conditions under which the residual error method, might be used just as well as the MCMC, if one is trying to quantify the range of values that a parameter might take.
@@ -127,6 +129,7 @@ The MCMC inference method produces 95\% credible intervals that contain the true
 %%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
 
 I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice with this project.
 
@@ -136,6 +139,7 @@ I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice 
 
 \newpage
 \section*{Table of Contents}
+\addcontentsline{toc}{section}{Table of Contents}
 \vspace{-4em}
 \tableofcontents
 
@@ -145,7 +149,12 @@ I would like to thank my supervisor, Dr Xavier Didelot, for his help and advice 
 
 \newpage
 \section*{Abbreviations}
-MCMC: Markov Chain Monte Carlo
+\addcontentsline{toc}{section}{Abbreviations}
+\noindent $\beta$: per capita rate of infection
+
+\noindent $\gamma$: recovery rate
+
+\noindent MCMC: Markov Chain Monte Carlo
 
 \noindent $R_{0}$: basic reproduction number
 
@@ -153,9 +162,7 @@ MCMC: Markov Chain Monte Carlo
 
 \noindent SIR: susceptible, infected, recovered
 
-\noindent $\beta$: per capita rate of infection
 
-\noindent $\gamma$: recovery rate
 
 %%%%%%%%%%%%%%%%%%
 %% Introduction %%
@@ -3858,7 +3865,7 @@ When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible interva
 % \section{References}
 \phantomsection
 
-\addcontentsline{toc}{chapter}{5 References}
+\addcontentsline{toc}{section}{5~~~~References}
 % \bibliographystyle{ieeetr}
 \bibliography{/home/evelina/Documents/Mendeley/MRes_stochastic_deterministic.bib}
 
