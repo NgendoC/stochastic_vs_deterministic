@@ -31,9 +31,7 @@
 
 % \usepackage{natbib}
 % \usepackage[numbers]{natbib}
-\usepackage[numbers,round]{natbib}
-%\bibliographystyle{unsrtnat} 
-% \bibliographystyle{vancouver}
+\usepackage[numbers]{natbib}
 %\setcitestyle{round}
 
 % for creating a flow chart
@@ -115,7 +113,7 @@ I implemented my own outbreak-simulating stochastic SIR model and inference meth
 \newpage
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-Different methods exist for inferring the ranges of values that a parameter might take in a model. These methods can broadly be categorised into deterministic methods, such as the residual error (RE) method, and stochastic methods, such as the Markov Chain Monte Carlo (MCMC) method. The aim of this project is to elucidate the conditions under which the RE method, might be used just as well as the MCMC, if one is trying to quantify the range of values that a parameter might take. I created a stochastic population-based closed compartmental SIR model. With this model, I simulated altogether 30 different outbreaks for 6 different scenarios: with an $R_{0}$ of 1.5 or 6 with a population size of 50, 200, and 1000, with five repeats per type of combination. I then implemented RE and MCMC parameter inference methods and inferred the values that $\beta$ and $\gamma$ may take for each outbreak based on the removed curve obtained from the simulated outbreaks. A MCMC with a deterministic process was also explored. The MCMC inference method's 95\% credible intervals included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with a higher $R_{0}$. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the RE method's narrower 95\% intervals for a much quicker running time might become a reasonable option. 
+Different methods exist for inferring the ranges of values that a parameter might take in a model. These methods can broadly be categorised into deterministic methods, such as the residual error (RE) method, and stochastic methods, such as the Markov Chain Monte Carlo (MCMC) method. The aim of this project is to elucidate the conditions under which the RE method might be used just as well as the MCMC, if one is trying to quantify the range of values that a parameter might take. I created a stochastic population-based closed compartmental SIR model. With this model, I simulated altogether 30 different outbreaks for 6 different scenarios: with an $R_{0}$ of 1.5 or 6 with a population size of 50, 200, and 1000, with five repeats per type of combination. I then implemented RE and MCMC parameter inference methods and inferred the values that $\beta$ and $\gamma$ may take for each outbreak based on the removed curve obtained from the simulated outbreaks. A MCMC with a deterministic process was also explored. The MCMC inference method's 95\% credible intervals included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with a higher $R_{0}$. As the running time and number of iterations required for convergence for the MCMC increases with increasing population size, eventually a trade-off of the RE method's narrower 95\% intervals for a much quicker running time might become a reasonable option. 
 % 0.5 to 1 page
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -197,7 +195,7 @@ There are two ways to implement an SIR model, the deterministic and stochastic m
 \frac{dI}{dt} &= \beta S I - \gamma I \\
 \frac{dR}{dt} &= \gamma I
 \end{align*}
-
+\newpage
 \noindent As susceptibles need to come into contact with infected individuals in order to become infected themselves, $\beta$ is multiplied by the number of contacts made between members of the susceptible and infected compartments, which then results in the number of people who become newly infected \citep[p. 122-126]{Anderson1991}. Given that $\beta$ refers to the rate at which individuals become infected, the number of contacts is calculated by taking the product of the number of individuals susceptible and the number of individuals infected \citep[p. 122-126]{Anderson1991}. In order to calculate the number of infected individuals moving to the removed compartment, $\gamma$ is multiplied by the number of infected individuals.
 
 Stochastic models can be used in continuous time, but it is often convenient to discretise time. Differences between timesteps are larger for discrete than continuous time. Therefore, the number of individuals in a given compartment at a given timestep is calculated from the previous timestep:
@@ -245,11 +243,11 @@ The resulting posterior distributions are then compared by the usage of the Metr
 \begin{align*}
 min \Big(1, \frac{p(\theta' \mid x)}{p(\theta \mid x)} \frac{q(\thata \mid \theta')}{q(\theta' \mid \theta)}\Big)
 \end{align*}
-Here p refers to the posterior distribution and q to the proposal distribution, $\theta$ refers to the current parameter value, $\theta'$ refers to the proposed parameter value, and $x$ refers to the observed data. If the resulting proportion is greater than 1, it implies that the proposed parameter value is more probable given the observed data and will take the place of the starting value as the new baseline parameter value. This will then be compared to a new proposed parameter value in the next iteration of the MCMC. To capture the uncertainty around the values that the inferred parameter might take, a worse proposed parameter value than the current one can be occasionally accepted by choosing a random number from a uniform distribution between 0 and 1 and accepting the proposed posterior if it is greater than this random number. This will lead to the proposed posterior to sometimes being accepted even if the proposed to baseline posterior ratio is less than 1. 
+Here $p$ refers to the posterior distribution and $q$ to the proposal distribution, $\theta$ refers to the current parameter value, $\theta'$ refers to the proposed parameter value, and $x$ refers to the observed data. If the resulting proportion is greater than 1, it implies that the proposed parameter value is more probable given the observed data and will take the place of the starting value as the new baseline parameter value. This will then be compared to a new proposed parameter value in the next iteration of the MCMC. To capture the uncertainty around the values that the inferred parameter might take, a worse proposed parameter value than the current one can be occasionally accepted by choosing a random number from a uniform distribution between 0 and 1 and accepting the proposed posterior if it is greater than this random number. This will lead to the proposed posterior to sometimes being accepted even if the proposed to baseline posterior ratio is less than 1. 
 
 It can happen that the datasets that one wishes to use for parameter inference are incomplete. An example of this would be an outbreak where the dates of infection are not known but the dates of recovery are. MCMC methods can be adjusted to still estimate the ranges of values a parameter might take despite the unknown data. The infectious period could be assumed to be constant and thus an infectious curve can be calculated for each proposed change in the rates of infection and recovery \citep{Finkenstadt2000,Finkenstadt2002}. Alternatively, the unknown infection data can be included as an additional parameter in the MCMC \citep{ONeill1999}. A more abstract method can also be embarked upon, where the whole discrete stochastic SIR model is approximated through a diffusion process to estimate the values of unknown parameters \citep{Cauchemez2008}.
 
-Stochastic methods, such as the MCMC, can be more difficult to implement than deterministic ones, such as the RE method. In order to have an optimally working MCMC, it may for example take multiple attempts to calibrate the proposal function to result in a sufficient acceptance rate of proposed parameters. Additionally, running a MCMC to completion often takes longer than for a RE. Also, constructing a MCMC from scratch is more demanding than constructing a RE due to there being many distributions, the prior, likelihood, and proposal, to consider for each parameter of interest.  Also, the quality and quantity of the data available for model parameter inference should be considered, though the effects of data quality on inference will not be explored in this project. 
+Stochastic methods, such as the MCMC, can be more difficult to implement than deterministic ones, such as the RE method. In order to have an optimally working MCMC, it may for example take multiple attempts to calibrate the proposal function to result in a sufficient acceptance rate of proposed parameters. Additionally, running a MCMC to completion often takes longer than for a RE. Furthermore, constructing a MCMC from scratch is more demanding than constructing a RE due to there being many distributions, the prior, likelihood, and proposal, to consider for each parameter of interest.  Also, the quality and quantity of the data available for model parameter inference should be considered, though the effects of data quality on inference will not be explored in this project. 
 % If many factors are unknown, a complex stochastic modelling method making a multitude of assumptions may perform worse than a simpler deterministic model (mention HIV modelling or FMD example? - May 2003). 
 % Find a couple of examples where the model used for the task may not have been the best?
 % May (2003) Uses and abuses of mathematics in biology : Complex HIV model lost to a less complex model because the assumptions it made were wrong 
@@ -2360,7 +2358,7 @@ text(iteration_place, min(beta_yaxis200_1)+(0.95*max(beta_yaxis200_1)-min(beta_y
 # Seed 1, Pop size 1000
 plot(mcmc_R1.5_pop1000_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis1000_1, cex.axis = number_size)
   # abline(v = burnIn, untf = FALSE)
-text(iteration_place, min(beta_yaxis1000_1)+(0.95*max(beta_yaxis1000_1)-min(beta_yaxis1000_1)), "C", cex = letter_size)
+text(iteration_place, min(beta_yaxis1000_1)+(0.96*max(beta_yaxis1000_1)-min(beta_yaxis1000_1)), "C", cex = letter_size)
 # Seed 1, Pop size 50
 plot(mcmc_R6_pop50_seed1$beta, type = "l", main = "", xlab = "", ylab = "", ylim = beta_yaxis50_2, cex.axis = number_size)
   # abline(v = burnIn, untf = FALSE)
@@ -2442,7 +2440,7 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 # Seed 1, Pop size 1000
 plot(mcmc_R6_pop1000_seed1$gamma, type = "l", main = "", xlab = "", ylab = "", ylim = gamma_yaxis1000_2, cex.axis=number_size)
   # abline(v = burnIn, untf = FALSE)
-text(iteration_place, min(gamma_yaxis1000_2)+(0.95*max(gamma_yaxis1000_2)-min(gamma_yaxis1000_2)), "F", cex = letter_size)
+text(iteration_place, min(gamma_yaxis1000_2)+(0.97*max(gamma_yaxis1000_2)-min(gamma_yaxis1000_2)), "F", cex = letter_size)
 mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 @
 \caption{Traces of posterior $\gamma$, recovery rate, values throughout a 3.5 million MCMC for the first simulation of each population size and $R_{0}$. Plots A-C are for outbreaks with an $R_{0}$ of 1.5, while plots D-F are for outbreaks with an $R_{0}$ of 6. Plots A and D have a population size of 50, plots B and E have a population size of 200, and plots C and F have a population size of 1000. }
@@ -2923,7 +2921,7 @@ box()
 
 Running the MCMC with a partly deterministic process for 2.5 million iterations took approximately 20 hours for each of the six studied outbreaks.
 
-The $\beta$ posterior traces for the MCMC with a deterministic process were increasingly sticky with increasing population size, tending to stay in place rather than explore other parameter values, (Fig. \ref{det_mcmc_beta}) Relating to this, the $\beta$ estimates did not change drastically over the course of the 2.5 million iterations for some outbreaks, such as that with a population size of 50 and $R_{0}$ of 6 or population size of 1000 and $R_{0}$ of 1.5 (Figure \ref{det_mcmc_beta} C, D).
+The $\beta$ posterior traces for the MCMC with a deterministic process were increasingly sticky with increasing population size, tending to stay in place rather than explore other parameter values, (Fig. \ref{det_mcmc_beta}). Relating to this, the $\beta$ estimates did not change drastically over the course of the 2.5 million iterations for some outbreaks, such as that with a population size of 50 and $R_{0}$ of 6 or population size of 1000 and $R_{0}$ of 1.5 (Figure \ref{det_mcmc_beta}C, D).
 \newline
 
 \begin{figure}[!h]
@@ -2989,7 +2987,7 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \end{figure}
 
 \clearpage
-A similar situation is seen for the $\gamma$ posterior traces (Fig. \ref{det_mcmc_gamma}), the traces stayed mostly in place for for the largest population sizes and for the outbreak with an $R_{0}$ of 6 and population size of 50 (Fig. \ref{det_mcmc_gamma} C, D, F). The other two population sizes for outbreaks with an $R_{0}$ of 1.5 and for the outbreak where $R_{0}$ was 6 and population size 200 saw increases in $\gamma$ over the course of the 2.5 million iterations (Fig. \ref{det_mcmc_gamma} A-B, E). Also, as with the $\beta$ posteriors, the $\gamma$ posteriors' stickiness increased with increasing population size.
+A similar situation is seen for the $\gamma$ posterior traces (Fig. \ref{det_mcmc_gamma}), the traces stayed mostly in place for for the largest population sizes and for the outbreak with an $R_{0}$ of 6 and population size of 50 (Fig. \ref{det_mcmc_gamma}C, D, F). The other two population sizes for outbreaks with an $R_{0}$ of 1.5 and for the outbreak where $R_{0}$ was 6 and population size 200 saw increases in $\gamma$ over the course of the 2.5 million iterations (Fig. \ref{det_mcmc_gamma}A-B, E). Also, as with the $\beta$ posteriors, the $\gamma$ posteriors' stickiness increased with increasing population size.
 \newline
 
 \begin{figure}[!h]
@@ -3055,7 +3053,7 @@ mtext("Iteration (x1000)", 1, line = 4, cex = yaxis_size)
 \end{figure}
 \FloatBarrier
 \clearpage
-When investigating the infectious curves produced by the inferred $\beta$ and $\gamma$ values, it can be seen that the location of the peak is misjudged for population size 50 and 1000 when $R_{0}$ is 1.5 (Fig. \ref{det_mcmc_infcurve} A, C), with the height of the peak also being underestimated for population size 50. For population size 200 and $R_{0}$ of 1.5 the height of the peak is underestimated, but its location is more similar to the true simulated peak (Fig 14B). For the outbreaks with an $R_{0}$ of 6, the size of the peak is greatly underestimated for population sizes 50 and 200, though the location of the peak in time is not fully dissimilar from the true peak's location (Fig. \ref{det_mcmc_infcurve}D-E). For population size 1000, the size of the peak is underestimated, but not as greatly as for the other two population sizes, though the location of the peak in time is estimated to be earlier than for the true curve (Fig. \ref{det_mcmc_infcurve}F).
+When investigating the infectious curves produced by the inferred $\beta$ and $\gamma$ values, it can be seen that the location of the peak is misjudged for population size 50 and 1000 when $R_{0}$ is 1.5 (Fig. \ref{det_mcmc_infcurve}A, C), with the height of the peak also being underestimated for population size 50. For population size 200 and $R_{0}$ of 1.5 the height of the peak is underestimated, but its location is more similar to the true simulated peak (Fig 14B). For the outbreaks with an $R_{0}$ of 6, the size of the peak is greatly underestimated for population sizes 50 and 200, though the location of the peak in time is not fully dissimilar from the true peak's location (Fig. \ref{det_mcmc_infcurve}D-E). For population size 1000, the size of the peak is underestimated, but not as greatly as for the other two population sizes, though the location of the peak in time is estimated to be earlier than for the true curve (Fig. \ref{det_mcmc_infcurve}F).
 \newline
 
 \begin{figure}[!h]
@@ -3209,7 +3207,7 @@ While the $\beta$ 95\% intervals for the RE method tended to be above the true v
 
 Compared to the RE method, the MCMC method was more reliable with including the true $\beta$ and $\gamma$ values in its 95\% credible intervals (Table \ref{mcmc_pop50}-\ref{mcmc_pop1000}), though most runs would likely have benefitted from being run for more than 3.5 million or even 17.5 million iterations. The running time of the MCMC method was slower than that of the RE inference method. Running 1000 iterations of the RE method took approximately 20 minutes, while running 3.5 million iterations took over 20 hours and 17.5 million iterations over 120 hours with the running time increasing with population size. 
 
-The MCMC with a deterministic process for inference did not perform as well as the RE or standard MCMC method for the cases considered in this project. Based on the posterior traces (Fig. \ref{det_mcmc_beta}, Fig. \ref{det_mcmc_gamma}), it could be that with finetuning of the proposal function, the method could provide better estimates for $\beta$ and $\gamma$ than the ones presented in this report, though whether these estimates would exceed those of the RE is not certain. Alternatively, other methods of applying a deterministic processes within an MCMC could be attempted. 
+The MCMC with a deterministic process for inference did not perform as well as the RE or standard MCMC method for the cases considered in this project. Based on the posterior traces (Fig. \ref{det_mcmc_beta}, Fig. \ref{det_mcmc_gamma}), it could be that with finetuning of the proposal function, the method could provide better estimates for $\beta$ and $\gamma$ than the ones presented in this report, though whether these estimates would exceed those of the RE is not certain. Alternatively, other methods of applying deterministic processes within an MCMC could be attempted. 
 
 In this project a model with only a deterministic infectious curve was explored, with the removed curve remaining stochastic and susceptible curve being calculated from the two other curves. A MCMC method used by Elderd et al. involved a more deterministic process. They used a completely deterministic SEIR model in their likelihood function and used an MCMC algorithm that allowed multidimensional parameter draws to be exchanged with lower-dimensional ones \citep{Elderd2006}. Adjusting my method to incorporate both a deterministic susceptible and infected curve might also help my MCMC with a deterministic process perform better as this could eliminate the issues associated with accounting for negative numbers of susceptible individuals in some suggested outbreaks during the course of the MCMC.
 
@@ -3222,7 +3220,7 @@ Only one type of compartmental model, a closed SIR model, was considered in this
 Additionally, as mentioned previously, the MCMCs could have been run for longer than 3.5 million or even 17.5 million iterations to reach full convergence. Furthermore, the MCMCs could have been repeated for the different outbreaks from different parameter starting points to investigate if the runs from different starting points converge at similar $\beta$ and $\gamma$ values. That being said, the aim of this project was to compare different inference methods rather than perfect one method completely.
 
 \subsection{Conclusions}
-When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible intervals and 95\% intervals for the MCMC and RE inference methods respecively, the MCMC inference method's ranges included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals were more consistent with including the true $\beta$ and $\gamma$ values as population size increased and with higher $R_{0}$. Further work comparing the inference methods for higher $R_{0}$s and population sizes may find a threshold for which the RE inference method's 95\% interval might also consistently include the true $\beta$ and $\gamma$ values while being quicker to run than a MCMC. 
+When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible intervals and 95\% intervals for the MCMC and RE inference methods respecively, the MCMC inference method's ranges included the true $\beta$ and $\gamma$ values more often than the RE method. Within the RE method, the 95\% intervals included the true $\beta$ and $\gamma$ values more consistently as population size increased and with a higher $R_{0}$. Further work comparing the inference methods for higher $R_{0}$s and population sizes may find a threshold for which the RE inference method's 95\% interval might also consistently include the true $\beta$ and $\gamma$ values while being quicker to run than a MCMC. 
 
 %%%%%%%%%%%%%%%%
 %% References %%
@@ -3233,7 +3231,7 @@ When estimating the ranges of $\beta$ and $\gamma$ through 95\% credible interva
 \addcontentsline{toc}{section}{References}
 
 % \bibliographystyle{ieeetr}
-\bibliographystyle{unsrtnat} 
+\bibliographystyle{unsrtnat}
 \bibliography{/home/evelina/Documents/Mendeley/MRes_stochastic_deterministic.bib}
 
 % citation()
